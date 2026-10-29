@@ -114,9 +114,9 @@ Legend
 | H6 | Archives by year | `archives.html` | `GroupByDate` | ⬜ | G4 |
 | H7 | Categories index | `categories.html` | `taxonomy.html` | ⬜ | G4 |
 | H8 | Category page (hierarchical) | `category.html` | `term.html` | ⬜ | G4 |
-| H9 | Tags index | `tags.html` | `taxonomy.html` | ⬜ | G4 |
+| H9 | Tags index | `tags.html` — `sort_natural` | `taxonomy.html` + `sort-natural.html` (Q4) | ⬜ | G4 |
 | H10 | Tag page | `tag.html` | `term.html` | ⬜ | G4 |
-| H11 | Trending tags | `trending-tags.html` | `trending-tags.html` | ⬜ | G4 |
+| H11 | Trending tags | `trending-tags.html` — top 10, ties by `sort_natural` | `trending-tags.html` + `sort-natural.html` (Q4) | ⬜ | G4 |
 | H12 | Category collapse tree | `category-collapse.js` | unchanged JS | ⬜ | G3 |
 | H13 | Recently-updated list | `update-list.html` | `update-list.html` | ⬜ | G4 |
 | H14 | Hidden posts excluded | `home.html` (`hidden != true`) | same | ⬜ | G4 |
@@ -131,13 +131,13 @@ Legend
 | P2 | TOC | `toc.html`, `toc-status.html` | `toc.html` | ⬜ | G3/G4 |
 | P3 | TOC desktop + mobile | `toc-desktop.js`, `toc-mobile.js` | unchanged JS | ⬜ | G5 |
 | P4 | Heading anchors | `refactor-content.html` | `_markup/render-heading.html` | 🟡 D-04 | G4 |
-| P5 | Post navigation | `post-nav.html` | `post-nav.html` | ⬜ | G4 |
+| P5 | Post navigation | `post-nav.html` | `post-nav.html` (`.PrevInSection` / `.NextInSection`, Q3) | ⬜ | G4 |
 | P6 | Related posts | `related-posts.html` — custom score (tag 1, category 0.5, top 3) | `related-posts.html` | ⬜ | G4 |
 | P7 | Share buttons | `post-sharing.html` | `post-sharing.html` | ⬜ | G4 |
 | P8 | Copy-link button | inline JS | unchanged JS | ⬜ | G3 |
 | P9 | License notice | `footer.html` + i18n | `footer.html` | ⬜ | G4 |
 | P10 | Edit-this-post link | `post-edit.html` | `post-edit.html` | ⬜ | G4 |
-| P11 | Read time | `read-time.html` | `read-time.html` | ⬜ | G4 |
+| P11 | Read time | `read-time.html` — 180 wpm, `number_of_words: 'auto'` | `read-time.html` + `word-count.html` (never `.WordCount`, Q1) | ⬜ | G4 |
 | P12 | Pageviews | `pageviews/goatcounter.html` | same path | ⬜ | G4 |
 | P13 | Last-modified label | `datetime.html` | `datetime.html` | ⬜ | G4 |
 
@@ -179,7 +179,7 @@ Legend
 
 | # | Feature | Jekyll | Hugo | Status | Verify |
 |---|---|---|---|---|---|
-| S1 | JSON index | Liquid-rendered `search.json` | output format `JSON` | ⬜ | G4 |
+| S1 | JSON index | Liquid-rendered `search.json` | output format `JSON` + jsonify wrapper (Q2) | ⬜ | G4 |
 | S2 | Index schema | `{title,url,categories,tags,date,content}` | identical, byte-verified | ⬜ | G4 |
 | S3 | Content extraction | `post-summary.html full_text=true` | `plainify` + normalization | ⬜ | G4 |
 | S4 | Result rendering | `search-results.html` + Day.js | unchanged JS | ⬜ | G3 |
@@ -277,8 +277,8 @@ are in [`I18N.md`](I18N.md).
 
 | # | Feature | Jekyll | Hugo | Status | Verify |
 |---|---|---|---|---|---|
-| B1 | JS bundling (9 bundles) | Rollup → `assets/js/dist` (**git-ignored upstream**) | same build, **committed** (D-10) | ⬜ | G8 |
-| B2 | CSS vendor purge | `purgecss.js` → `_sass/vendors/_bootstrap.scss` (**git-ignored upstream**) | globs adapted to `layouts/`, **committed** (D-10) | ⬜ | G8 |
+| B1 | JS bundling (9 bundles) | Rollup → `assets/js/dist` (**git-ignored upstream**) | copied from the published gem, **committed** (D-10) | ⬜ | G8 |
+| B2 | CSS vendor purge | `purgecss.js` → `_sass/vendors/_bootstrap.scss` (**git-ignored upstream**) | copied from the published gem, **committed** (D-10) | ⬜ | G8 |
 | B3 | CDN vendor URLs (no SRI) | `_data/origin` + `jsdelivr-combine` | copied data + partial | ⬜ | G3 |
 | B4 | JS/SCSS lint | ESLint, Stylelint | same configs | ⬜ | G1 |
 | B5 | HTML validation | `html-proofer` | `html-validate` + `html-proofer` | ⬜ | G2 |

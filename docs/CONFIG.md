@@ -146,6 +146,10 @@ Per-post override: front matter `comments: false`.
 | `url` | repository base URL |
 | `static_url` | bool — when `false`, the page path is appended |
 
+Jekyll key: `actions.edit_post.{enabled,url,static_url}`. `scripts/extract-params.mjs`
+reads that root from upstream and fails if this section disappears, so keep the
+word `actions` in it.
+
 ---
 
 ## 8. `params.assets`
@@ -179,14 +183,18 @@ mount). Self-host mode does not work without it.
 
 | File | Purpose |
 |---|---|
-| `data/authors.yaml` | author registry (`name`, `twitter`, `url`) |
-| `data/contact.yaml` | sidebar contact entries (`type`, `icon`, `noblank`, `url`) |
-| `data/share.yaml` | share platforms (`type`, `icon`, `link` with `TITLE`/`URL`) |
-| `data/media.yaml` | extension → MIME type for audio and video embeds |
+| `data/authors.yml` | author registry (`name`, `twitter`, `url`) |
+| `data/contact.yml` | sidebar contact entries (`type`, `icon`, `noblank`, `url`) |
+| `data/share.yml` | share platforms (`type`, `icon`, `link` with `TITLE`/`URL`) |
+| `data/media.yml` | extension → MIME type for audio and video embeds |
 | `data/origin/basic.yml` | self-hosted vendor asset paths (`/assets/lib/...`) |
 | `data/origin/cors.yml` | CDN vendor URLs and resource hints (**no SRI**) |
 
-`data/media.yaml` is required by the audio and video embeds: without it, the
+These four data files are **byte-identical copies** of upstream `_data/*.yml`
+(`mode: copy` in `tests/contract/ports.yml`), extension included: Hugo accepts
+`.yml`, so no transformation is needed and the sha256 check is exact.
+
+`data/media.yml` is required by the audio and video embeds: without it, the
 `<source type="…">` values are wrong.
 
 ---
@@ -241,11 +249,19 @@ snippet when they are missing:
   unsafe = true          # upstream content uses raw HTML
 
 [markup.goldmark.parser.attribute]
-  block = true           # classes on images and code fences
+  block = true           # classes on code fences
+
+[markup.highlight]
+  noClasses = false      # emit classes, styled by _sass/base/_syntax.scss
+                         # (the default emits inline styles and breaks the theme)
 
 [outputs]
   home = ["HTML", "RSS", "JSON"]   # search.json
 ```
+
+`noClasses = false` is mandatory and easy to get wrong: Hugo's default is
+`noClasses = true`, which inlines a Chroma colour scheme and overrides the
+theme's syntax highlighting.
 
 Everything else is optional.
 

@@ -8,7 +8,7 @@
 | Starter | `github.com/cpalau/chirpy-hugo-starter` |
 | License | MIT (original copyright preserved) |
 | Total estimate | ~30 working days |
-| Status | Upstream audit complete; phase F0 next |
+| Status | F0 complete; phase F0.5 next |
 
 Related documents:
 
@@ -107,7 +107,9 @@ Upstream does **not** use `jekyll-feed`: the Atom feed is a hand-written
 template (`assets/feed.xml`). It does not use SRI either.
 
 Build artifacts (`_sass/vendors/`, `assets/js/dist/`) are **git-ignored
-upstream** and must be committed here (D-10).
+upstream** and must be committed here (D-10). They do not have to be rebuilt:
+the published gem ships both, byte-identical to what real sites serve, so they
+are copied and hash-verified instead.
 
 Mapping for each one is in [FEATURES.md](FEATURES.md) §4.1 and §4.13, with the
 full evidence in [AUDIT.md](AUDIT.md).
@@ -167,21 +169,30 @@ extended in F7. They are never deferred, because F8 depends on them.
 ### F0 — Specification and conformance corpus (2 d)
 
 - [x] Audit upstream v7.6.0 file by file — see [AUDIT.md](AUDIT.md).
-- [ ] Pin upstream tag `v7.6.0` and commit sha in `tests/contract/ports.yml`.
-- [ ] Inventory all 10 `_layouts/` files: purpose and Hugo target.
-- [ ] Inventory all 45 `_includes/` files: classify `copy` / `transform` / `manual`.
-- [ ] Inventory 27 JS files (9 entry points + 18 modules) and 30 SCSS partials; confirm all are `copy`.
-- [ ] Extract every parameter read by upstream templates → `CONFIG.md` skeleton.
-- [ ] Write the 12 fixture specifications.
-- [ ] Create `tests/oracle/` with `Gemfile` pinning `jekyll-theme-chirpy = 7.6.0`.
-- [ ] Create the 12 fixtures in Jekyll syntax and in Hugo syntax.
-- [ ] Verify all 12 fixtures build under Jekyll with no Liquid errors.
-- [ ] Draft `COMPATIBILITY.md` with D-01…D-11.
-- [ ] Answer audit questions Q1–Q8 (`AUDIT.md` §9) with a test each.
-- [ ] Gate: any fixture that cannot exist in both worlds is resolved here.
+- [x] Pin upstream tag `v7.6.0` and commit sha in `tests/contract/ports.yml`
+      (`152093879e6319dac342454d8df75a3c3572315f`, plus the gem as the source
+      of the ten generated artifacts — D-10).
+- [x] Inventory all 10 `_layouts/` files: purpose and Hugo target.
+- [x] Inventory all 45 `_includes/` files: classify `copy` / `transform` / `manual`.
+- [x] Inventory 27 JS files (9 entry points + 18 modules) and 30 SCSS partials; confirm all are `copy`.
+- [x] Extract every parameter read by upstream templates →
+      `tests/contract/params.json` (69 `site.*`, 32 `page.*`) and
+      `scripts/extract-params.mjs --check` against `CONFIG.md`.
+- [x] Write the 12 fixture specifications (`tests/fixtures/SPEC.md`).
+- [x] Create `tests/oracle/` with `Gemfile` pinning `jekyll-theme-chirpy = 7.6.0`.
+- [x] Create the 12 fixtures in Jekyll syntax and in Hugo syntax.
+- [x] Verify all 12 fixtures build under Jekyll with no Liquid errors.
+- [x] Draft `COMPATIBILITY.md` with D-01…D-11 (D-11 closed, D-12 added).
+- [x] Answer audit questions Q1–Q4 (`AUDIT.md` §9.1) with a test each
+      (`tests/qa/`; Q5–Q8 belong to F1, F0.5 and F6).
+- [x] Gate: any fixture that cannot exist in both worlds is resolved here.
 
 **Acceptance**: oracle builds; `ports.yml` covers 100 % of upstream templates;
 fixtures documented.
+
+Three findings changed the plan during F0: the gem ships the generated
+artifacts (D-10 becomes a copy, not a build), inline code needs a class the SCSS
+depends on (G-39), and `sort_natural` is reproducible after all (D-11 closed).
 
 | # | Fixture | Covers |
 |---|---|---|
@@ -229,11 +240,14 @@ fixtures documented.
 - [ ] `scripts/sync-upstream.mjs` v1: `copy` and `transform`, hash verification.
 - [ ] Copy `_sass/` → `assets/scss/`, `_javascript/` → `assets/js/`, `_data/origin/` → `data/origin/`.
 - [ ] Generate and **commit** `assets/js/dist/*.min.js` (9 bundles) and
-      `assets/scss/vendors/_bootstrap.scss` (D-10).
+      `assets/scss/vendors/_bootstrap.scss`, copied verbatim from the published
+      gem and verified by sha256 (D-10).
 - [ ] Generate the SCSS entry at build time (`resources.FromString` +
       `toCSS`), reproducing `@use 'abstracts/variables' with ($theme: …)`.
 - [ ] `scripts/i18n.mjs`: 33 locale files → `i18n/*.yaml`.
-- [ ] `package.json`: rollup build (committed `dist`), sass, purgecss.
+- [ ] `package.json`: lint and verification toolchain (eslint, stylelint,
+      rollup, purgecss). The shipped bundles are not rebuilt; the toolchain
+      only proves them against the gem.
 - [ ] Adapt `purgecss.js` globs to `layouts/`, `_shortcodes/`, `assets/js/`.
 - [ ] ESLint and Stylelint with upstream configs.
 - [ ] `commitlint.config.js` + husky `commit-msg` hook; CI validates the PR range.

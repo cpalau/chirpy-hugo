@@ -94,8 +94,8 @@ Checks:
 `tests/contract/ports.yml` declares the selectors each ported template must
 expose. `tests/contract/selectors.mjs`:
 
-1. Parses `tests/oracle/_theme/_javascript/**/*.js` (pinned upstream copy) and
-   extracts:
+1. Parses `assets/js/**/*.js` (the hash-verified copy of upstream
+   `_javascript/`) and extracts:
    - `document.querySelector('…')`, `querySelectorAll('…')`
    - `getElementById('…')`
    - `element.classList.add/remove/toggle('…')`
@@ -116,19 +116,37 @@ silent visual bug.
 
 ```
 tests/oracle/
-├── Gemfile          # gem "jekyll-theme-chirpy", "= 7.6.0"
+├── Gemfile          # jekyll + plugins; the theme comes from the published gem
 ├── Gemfile.lock     # committed
 ├── _config.yml      # same params as the Hugo fixture site
+├── _data/           # authors, contact, media, share (the gem ships only locales/origin)
 ├── _posts/
 ├── _tabs/
-└── assets/
+├── assets/
+└── build.sh
 ```
 
 ```bash
-cd tests/oracle
-bundle install --path vendor/bundle
-bundle exec jekyll build --destination ../../.out/oracle
+bash tests/oracle/build.sh          # → ../../.out/oracle
 ```
+
+`build.sh` runs `bundle exec jekyll build` with `JEKYLL_ENV=production`, `TZ=UTC`
+and the pinned `baseURL`.
+
+Three details matter:
+
+- **Production, not development.** Upstream's CSS entry `@use`s `main.bundle`
+  only when `jekyll.environment == production`, and that is the only path that
+  includes the purged Bootstrap. A development build renders without Bootstrap
+  and would compare against a theme we do not ship.
+- **No `compress_html`.** D-05 (minification) is verified by G1; feeding
+  compressed HTML to G4 only adds noise.
+- **No `jekyll-compress-html` gem.** It is not a gem: it is the Liquid layout
+  `_layouts/compress.html`, which ships inside the theme.
+
+The ten build artifacts (`_sass/vendors/_bootstrap.scss`, nine
+`assets/js/dist` bundles) come from the published gem, byte-identical to what
+real Chirpy sites serve. See D-10.
 
 Ruby 3.4.10 and bundler 4.0.3 are available locally; CI uses `ruby/setup-ruby`.
 
@@ -177,10 +195,19 @@ Hugo build**, not against hand-made mocks.
 
 ### 7.1 Serving
 
+Both builds must use the **same** `baseURL`, because absolute URLs appear in
+`og:url`, canonical links, JSON-LD and share buttons. They are therefore
+captured in two passes, not side by side:
+
 ```bash
-npx http-server .out/oracle -p 4001 &
-npx http-server .out/hugo   -p 4002 &
+npx http-server .out/oracle -p 4001 &   # pass 1 → .out/shots/oracle
+# stop it
+npx http-server .out/hugo   -p 4001 &   # pass 2 → .out/shots/hugo
 ```
+
+`pixelmatch` then compares `shots/oracle/<page>.png` against
+`shots/hugo/<page>.png` offline. This also keeps the comparison independent of
+timing: nothing depends on both servers being alive at once.
 
 ### 7.2 Matrix
 
@@ -285,15 +312,18 @@ See [I18N.md](I18N.md) for the transform contract.
 ## 10. Gate 8 — Upstream drift
 
 ```bash
+node scripts/fetch-upstream.mjs --check
 node scripts/sync-upstream.mjs --check
 ```
 
-- sha256 of every file in `assets/scss/`, `assets/js/`, `data/origin/`,
-  `assets/img/favicons/` equals the upstream file at the pinned tag.
+- sha256 of every file in `assets/scss/`, `assets/js/`, `data/`,
+  `assets/img/favicons/` equals the pinned upstream file (`tag` or `gem`,
+  whichever the contract declares).
 - `i18n/` regenerates byte-identically from `_data/locales/`.
 - `ports.yml` covers 100 % of upstream `_layouts/` and `_includes/`: a new
   upstream file with no mapping fails the gate.
-- `data/origin` vendor URLs still resolve, and the jsDelivr combine step produces the same request set.
+- Once a phase closes, its targets are no longer allowed to be missing: pending
+  counts must reach zero (`--strict-targets`).
 
 ---
 

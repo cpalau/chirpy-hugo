@@ -14,11 +14,16 @@ The rendered HTML is identical; only the authoring syntax changes.
 |---|---|
 | `` `_config.yml`{: .filepath} `` | `{{</* filepath "_config.yml" */>}}` |
 | `> **Tip**: text`<br>`{: .prompt-tip }` | `{{</* prompt tip */>}}`<br>`**Tip**: text`<br>`{{</* /prompt */>}}` |
-| ` ```shell … ``` `<br>`{: .nolineno }` | ` ```shell {.nolineno} … ``` ` |
+| ` ```shell … ``` `<br>`{: .nolineno }` | ` ```shell {.nolineno} … ``` ` — on the fence line |
 | ` ```shell … ``` `<br>`{: file="_config.yml" }` | ` ```shell {file="_config.yml"} … ``` ` |
-| `![alt](/x.png){: .left }` | `![alt](/x.png){.left}` |
-| `![alt](/x.png){: .light }` | `![alt](/x.png){.light}` |
-| `![alt](/x.png){: .shadow }` | `![alt](/x.png){.shadow}` |
+| `![alt](/x.png){: .left }` | `{{</* img src="/x.png" alt="alt" class="left" */>}}` |
+| `![alt](/x.png){: .light }` | `{{</* img src="/x.png" alt="alt" class="light" */>}}` |
+| `![alt](/x.png){: .shadow }` | `{{</* img src="/x.png" alt="alt" class="shadow" */>}}` |
+
+Three of these are not cosmetic choices; they are the only forms that work.
+Goldmark has no inline attributes at all, ignores attributes written after a
+block, and does not render Markdown inside a plain shortcode. See
+`COMPATIBILITY.md` D-01 for the measured evidence.
 
 > The `{{</* … */>}}` notation above is only to keep this document from being
 > rendered by Hugo itself. In real content, write `{{< filepath "_config.yml" >}}`.
@@ -49,8 +54,12 @@ Output:
 
 Rules:
 
-- The inner content is rendered as Markdown (use `{{% %}}` internally if the
-  shortcode must render Markdown; the template decides).
+- The inner content is rendered as Markdown by the shortcode itself:
+  `{{ .Inner | .Page.RenderString (dict "display" "block") }}`. Without
+  `display: block`, Goldmark drops the `<p>` wrapper and the emitted DOM stops
+  matching Jekyll.
+- `{{% %}}` does **not** solve this: the wrapper element blocks the inner
+  Markdown (measured, see D-01). Always use `{{< >}}` plus `RenderString`.
 - Do not nest prompts.
 - The class name must stay `prompt-{type}`: `_sass/base/_typography.scss`
   depends on it.
@@ -59,7 +68,8 @@ Rules:
 
 ## 3. `filepath`
 
-Renders `<code class="filepath">`, matching upstream's `{: .filepath}`.
+Renders an inline code span with the `filepath` class, matching upstream's
+`{: .filepath}`.
 
 ```go-html-template
 Edit {{< filepath "_config.yml" >}} to change the timezone.
@@ -68,8 +78,14 @@ Edit {{< filepath "_config.yml" >}} to change the timezone.
 Output:
 
 ```html
-Edit <code class="filepath">_config.yml</code> to change the timezone.
+Edit <code class="language-plaintext filepath highlighter-rouge">_config.yml</code> to change the timezone.
 ```
+
+All **three** classes are required, in that order. kramdown emits
+`language-plaintext` and `highlighter-rouge` on every inline code span (G-39),
+and `_sass/base/_syntax.scss` keys the inline-code background off
+`code.highlighter-rouge` while `.filepath` cancels it. Emitting only
+`class="filepath"` changes the rendering.
 
 Notes:
 
@@ -95,6 +111,9 @@ command
 ```
 ````
 
+An attribute list on a separate line after the closing fence is silently ignored
+by Goldmark; the only valid place is the info string of the opening fence.
+
 ### 4.2 Filename label
 
 ````markdown
@@ -105,13 +124,15 @@ timezone: Europe/Madrid
 
 Matches upstream's `{: file="_config.yml" }`.
 
-### 4.3 Start line
+### 4.3 Start line — not supported
 
-````markdown
-```js {start_line=10}
-const x = 1;
-```
-````
+Upstream advertises `{: start_line="10" }`, but it is **broken in Jekyll itself**:
+`refactor-content.html` mangles the gutter of any block that carries it
+(`docs/AUDIT.md` G-38). Only the global `syntax_highlighter_opts.block.start_line`
+default works, and it is always `1`.
+
+The port therefore ignores per-block start lines, on purpose. Do not document or
+use the attribute: reproducing a broken gutter is not parity worth having.
 
 ### 4.4 Supported attributes
 
@@ -119,42 +140,51 @@ const x = 1;
 |---|---|
 | `{.nolineno}` | hide line numbers |
 | `{file="…"}` | filename label |
-| `{start_line=N}` | first line number |
-| `{linenos=inline\|table\|false}` | override the global mode |
 | `{hl_lines=[…]}` | highlight specific lines (Chroma) |
 
 The attribute list must be written in Goldmark's **prefixed** form
 (`markup.goldmark.parser.attribute.block = true`), i.e. on the fence line.
+`{linenos=…}` is deliberately absent: line numbers are decided by the render hook
+from the language (`plaintext`, `console`, `terminal` never get them), exactly as
+upstream does, so a per-block override would only create differences.
 
 ---
 
 ## 5. Images
 
-Hugo's built-in syntax supports attribute lists on images when
-`markup.goldmark.parser.attribute.block` is enabled and the image is alone in a
-paragraph:
+Goldmark has **no inline attribute list**, and the block attribute extension does
+not apply to images: `![alt](/x.png){.shadow}` renders the braces as literal
+text inside the paragraph. Images with classes therefore use the `img`
+shortcode.
 
 ```markdown
-![Desktop view](/assets/img/mockup.png){.shadow}
+{{</* img src="/assets/img/mockup.png" alt="Desktop view" class="shadow" */>}}
 ```
 
-Supported classes (identical to upstream):
-
-| Class | Effect |
+| Parameter | Values |
 |---|---|
-| `.light` | visible only in light mode |
-| `.dark` | visible only in dark mode |
-| `.left` | float left |
-| `.right` | float right |
-| `.shadow` | drop shadow |
-| `.normal` | force no float |
+| `src` | local path or URL (goes through `cdn` and `media_subpath`) |
+| `alt` | alternative text (required) |
+| `class` | `left`, `right`, `light`, `dark`, `shadow`, `normal` |
+| `width`, `height` | integers |
+| `lqip` | base64 data URI for the blurred placeholder |
+| `link` | `true` (default on non-home pages), `false` to disable the popup |
 
-The render hook `_markup/render-image.html` handles:
+Supported classes are identical to upstream. The shortcode and the
+`_markup/render-image.html` hook emit the same DOM:
+
+- home: `<div class="preview-img …"><img …></div>`
+- elsewhere: `<a href="src" class="popup img-link …"><img …></a>`
+
+Both handle:
 
 - `media_subpath` resolution,
 - `cdn` prefixing,
-- LQIP blur via the `lqip` attribute,
-- `loading="lazy"` and `decoding="async"`.
+- LQIP blur (`data-src`, `data-lqip`, `.blur`),
+- `loading="lazy"`.
+
+A plain `![alt](src)` still works: it goes through the render hook and gets the
+wrapper, without extra classes.
 
 ---
 

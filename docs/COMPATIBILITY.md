@@ -18,15 +18,32 @@ tested), `retired` (upstream no longer relevant).
 | Status | open |
 | Affects | Markdown authoring; fixtures 2, 3, 7 |
 | Upstream | kramdown IAL: `{: .prompt-tip }`, `` `x`{: .filepath } ``, `{: .nolineno }`, `{: .light }` |
-| This port | Shortcodes (`{{< prompt >}}`, `{{< filepath >}}`) and explicit attributes |
+| This port | Shortcodes (`{{< prompt >}}`, `{{< filepath >}}`, `{{< img >}}`) and fence attributes in the info string |
 | Blast radius | Author syntax only. Rendered HTML is identical |
 
 ### Why it cannot be reproduced
 
 Goldmark has no inline attribute lists. Hugo supports *block* attribute lists
-(`markup.goldmark.parser.attribute.block`) but they are written **before** the
-block, while kramdown writes them **after**. Inline IAL on a `code` span or
-image inside a paragraph has no Goldmark equivalent at all.
+(`markup.goldmark.parser.attribute.block`) but they are written **on the block's
+own opening line** (a fence's info string, a heading's line), while kramdown
+writes them on a separate line **after** the block. Inline IAL on a `code` span
+or on an image inside a paragraph has no Goldmark equivalent at all.
+
+Measured with Hugo 0.168.0 (`markup.goldmark.parser.attribute.block = true`):
+
+| Input | Result |
+|---|---|
+| ```shell {.nolineno}``` on the info string | ✅ `class="highlight nolineno"` |
+| `{.nolineno}` on the line **after** the closing fence | ❌ ignored |
+| `![alt](/x.png){.shadow}` | ❌ emitted as `<img …>{.shadow}` — literal text, no attribute |
+| `{{< prompt >}}**bold**{{< /prompt >}}` | ❌ `**bold**` stays literal |
+| `{{% prompt %}}**bold**{{% /prompt %}}` | ❌ also literal: the HTML wrapper blocks the inner Markdown |
+| `{{< prompt >}}` + `.Inner \| .Page.RenderString (dict "display" "block")` | ✅ `<p><strong>bold</strong></p>` |
+
+The consequences are structural, not cosmetic: the prompt shortcode **must**
+call `RenderString` with `display: block`, images need a shortcode, and code
+attributes belong on the fence.
+
 
 ### Decision
 
@@ -110,28 +127,40 @@ D-02b. It must remain under 20 lines and never touch vendor code.
 
 ### The difference
 
-Jekyll's `truncate: 200`:
+Jekyll's `truncate: 200` (Liquid 4.0.4) is a **character slice**, nothing else:
 
-- counts **characters**,
-- does **not** cut inside a word,
-- appends `...` (three U+002E).
+```ruby
+l = length - truncate_string.length          # 200 - 3 = 197
+input.length > length ? input[0...l] + "..." : input
+```
+
+- counts **characters** (runes),
+- **cuts inside words** — measured: a 201-character body renders as
+  `body[0...197] + "..."`, ending in `…text o...`,
+- appends `...` (three U+002E),
+- returns the input untouched when it is 200 characters or shorter.
 
 Hugo's `truncate`:
 
 - counts characters,
-- cuts on word boundary by default,
+- **breaks on a word boundary** when it can,
 - appends `…` (single U+2026) unless a third argument is given.
+
+The word-boundary behaviour is the trap: it is the "nicer" behaviour, and it is
+wrong here.
 
 ### Decision
 
-`_partials/post-summary.html` implements Jekyll's algorithm explicitly and
-passes `"..."` as the ellipsis. The pipeline also removes Rouge gutter markup
-before stripping HTML, exactly as upstream does.
+`_partials/post-summary.html` implements Jekyll's algorithm literally:
+`strings.RuneCount` for the length test and `substr` (rune-based) for the cut,
+then `"..."`. The pipeline also removes Rouge gutter markup before stripping
+HTML, exactly as upstream does.
 
 ### Verification
 
-- G4 fixture 10 with summaries of 199, 200, 201 and 400 characters, and with
-  accented characters and code blocks.
+- Fixture 10 contains bodies of **199, 200 and 201** characters; the oracle
+  renders them unchanged, unchanged and `body[0...197] + "..."` respectively.
+- G4 compares the three cards.
 - A unit test with the exact upstream algorithm ported line by line.
 
 ---
@@ -308,14 +337,14 @@ string would be misleading.
 
 ---
 
-## D-10 — Generated assets are committed
+## D-10 — Generated assets ship with the theme
 
 | | |
 |---|---|
-| Status | open |
+| Status | closed |
 | Affects | `assets/js/dist/`, `assets/scss/vendors/` |
-| Upstream | Both are **git-ignored**; CI runs `npm run build` before `jekyll build` |
-| This port | Committed to the repository and verified reproducible |
+| Upstream | Both are **git-ignored**; upstream CI runs `npm run build` before `jekyll build` |
+| This port | Committed, copied **verbatim from the published gem** and hash-verified |
 | Blast radius | Repository size (~200 KB) and upgrade discipline |
 
 ### Why
@@ -323,18 +352,76 @@ string would be misleading.
 Hugo consumers install the theme as a module or submodule and **cannot run
 npm**. Shipping the theme without compiled CSS/JS would break every user.
 
+### Where the bytes come from
+
+The published `jekyll-theme-chirpy` gem is not just the tag plus packaging: it
+also ships the ten artifacts that upstream git-ignores.
+
+```
+_sass/vendors/_bootstrap.scss      purgecss output, used in production
+assets/js/dist/*.min.js            nine rollup bundles
+```
+
+Verified at pin time: the gem and the tag share 136 files with **zero**
+differences, and the gem adds exactly those ten. We therefore copy them from the
+gem instead of rebuilding, which is both more faithful (they are the bytes real
+Chirpy sites serve) and reproducible without a Node toolchain.
+
 ### Decision
 
-- `assets/js/dist/*.min.js` (9 bundles) and `assets/scss/vendors/_bootstrap.scss`
-  are committed.
-- `npm run build:assets` regenerates them from the pinned upstream sources.
-- Gate G8 rebuilds and compares hashes; a mismatch fails CI.
-- The build is pinned (Node version, lockfile) so output is deterministic.
+- `_sass/vendors/_bootstrap.scss` and the nine bundles are `mode: copy` with
+  `source: gem` in `tests/contract/ports.yml`.
+- `upstream-hashes.json` records their sha256 and their provenance.
+- Nothing in the release pipeline rebuilds them. `scripts/purgecss.mjs` and
+  `rollup.config.mjs` exist only to **prove** the shipped files, never to
+  produce them.
+- Consumers never need Node.
+
+### Consequence for purgecss
+
+Upstream's purgecss globs are `_includes/`, `_layouts/` and `_javascript/`.
+Because our templates must reproduce upstream's classes exactly, the shipped
+`_bootstrap.scss` remains valid. If a future template introduced a Bootstrap
+class the purge step did not see, Gate G5 would fail — which is the desired
+coupling.
 
 ### Verification
 
-- G8: `npm ci && npm run build:assets` then `git diff --exit-code`.
+- G8: sha256 of every committed artifact equals the gem's copy (`--check`).
+- G8: a new gem-only artifact with no `source: gem` declaration fails coverage.
 - G5: the visual suite consumes the committed artifacts, exactly like a user.
+
+---
+
+## D-12 — Edit link path
+
+| | |
+|---|---|
+| Status | open |
+| Affects | The "Edit this post" link; fixture 1 |
+| Upstream | `page.path`, relative to the Jekyll source root (`_posts/2026-01-01-x.md`) |
+| This port | `.File.Path`, relative to `content/` (`posts/2026-01-01-x.md`) |
+| Blast radius | One URL, and only when `actions.edit_post.static_url` is `false` |
+
+### Why it cannot be identical
+
+Jekyll and Hugo have different content layouts, so the same file has a different
+path. No template can recover the other convention.
+
+### Decision
+
+- `static_url: true` is the documented default for parity: one URL for every
+  post, identical in both worlds.
+- With `static_url: false` the theme appends `.File.Path`. Sites migrating from
+  Jekyll must either accept the new path shape or set `static_url: true`.
+- Fixture 1 uses `static_url: true`, so G4 compares the link normally.
+- A dedicated assertion checks the dynamic form against a fixed expectation.
+
+### Verification
+
+- G4 fixture 1: the link `href` must be identical.
+- A contract test asserts `static_url: false` appends the content-relative path.
+
 
 ---
 
@@ -342,24 +429,45 @@ npm**. Shipping the theme without compiled CSS/JS would break every user.
 
 | | |
 |---|---|
-| Status | open |
+| Status | **closed** — reproducible without a divergence |
 | Affects | Tags index (`tags.html`), trending tags |
-| Upstream | Liquid `sort_natural` — case-insensitive, locale-aware ordering |
-| This port | Hugo `sort` plus a normalisation comparator |
-| Blast radius | Display order of tags when case or accents differ |
+| Upstream | Liquid `sort_natural` |
+| This port | `_partials/sort-natural.html`: stable insertion sort on an ASCII-only fold |
+| Blast radius | None, if the partial is used everywhere a list is sorted by name |
+
+### What `sort_natural` actually is
+
+Not locale-aware, despite its name. Liquid 4.0.4 implements it with
+`String#casecmp`: **ASCII-only** case folding, then byte comparison, and the
+sort is stable. Measured (`tests/qa/q4-sort-natural.mjs`, 21-item corpus):
+
+```
+10  2  42  _x  alpha  ALPHA  apple  Apple  audio  beta  code  design
+diagram  Zebra  zeta  Zzz  Ávila  árbol  äpfel  中文  🚀
+```
+
+Three traps, all measured:
+
+- Hugo's `sort` uses a **Unicode collator**: `_x` and `🚀` sort first, and
+  `äpfel` sorts as `apfel`.
+- Sorting by `lower` is not a substitute: `lower` folds non-ASCII, which swaps
+  `Ávila` (C3 81 in `casecmp`) with `árbol` (C3 A1).
+- `lt` on strings in a Go template **is** a byte comparison, which is the
+  primitive needed.
 
 ### Decision
 
-1. Normalise with `lower` before sorting, then sort by the normalised key while
-   preserving the original label.
-2. If accents still diverge, extend the comparator with a documented
-   transliteration table.
-3. Cover with fixture 11 containing `apple`, `Zebra`, `Ávila`, `árbol`, `Zzz`.
+`_partials/sort-natural.html` folds A–Z to a–z only (26 replacements), then
+insertion-sorts with `lt`. It is stable by construction, because an item is only
+placed before an existing one when its key is strictly smaller. Cost is O(n²)
+with n = number of tags, which is tens, not thousands.
 
 ### Verification
 
-- G4 compares the full tag list order on fixture 11.
-- A golden list of expected order is committed.
+- `tests/qa/q4-sort-natural.mjs`: the ported partial matches Liquid on all 21
+  cases, while `sort` and `sort(lower)` do not.
+- G4 fixture 11 compares the full tag order on the real page.
+
 
 ---
 
