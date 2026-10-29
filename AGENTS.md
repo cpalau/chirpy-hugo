@@ -350,6 +350,11 @@ content layer; every one of them was measured, not assumed.
 | Post neighbours | `.PrevInSection` / `.NextInSection` | `.Prev` / `.Next`: they walk every regular page, so `about` becomes a neighbour (Q3) |
 | Sorting by name | ASCII-only fold + stable insertion sort with `lt` | `sort` (Unicode collator) and `lower` (folds non-ASCII) (Q4) |
 | Summary truncation | rune slice `substr 0 197` + `"..."` | built-in `truncate`: word boundary and a single `…` (D-03) |
+| Code token colours | structure, gutter and header reproduced | token class names: Chroma ≠ Rouge, so some colours differ (D-02, POC §3) |
+| SCSS with `$theme` | `scripts/build-css.sh` (dart-sass, committed) | `resources.FromString` + `toCSS`: no import path, and not every Hugo build ships Dart Sass (D-13) |
+| Pagination URLs | Hugo's `/page/2/` | `[pagination] path` is broken in 0.168; Jekyll emits `/page2/` (D-14) |
+| Taxonomy labels | `_partials/taxonomy-labels.html` | Hugo lowercases taxonomy keys; the front-matter case must be recovered |
+| `lastmod` | front matter only | `enableGitInfo` turns `.Lastmod` into the commit date and leaks into SEO |
 
 Rules derived from it:
 

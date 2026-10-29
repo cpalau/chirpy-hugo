@@ -1,0 +1,16 @@
+# Gate 4 exemptions. Every entry must cite a D-xx and a reason.
+#
+# This list is deliberately tiny: a diff that is a bug must stay visible. When a
+# difference is fixed, delete its entry — the gate will tell you.
+
+# D-06: jekyll-seo-tag emits its own generator meta; we emit Hugo's.
+selectors:
+  - 'meta[name="generator"] | D-06 | generator meta differs by design'
+  - 'link[rel="next"] | D-14 | pagination URL shape /page2/ vs /page/2/'
+  - 'link[rel="prev"] | D-14 | pagination URL shape /page2/ vs /page/2/'
+  - 'footer p:nth-of-type(2) | D-09 | the footer credits Hugo and this project'
+
+# D-02: Chroma classifies tokens differently from Rouge (kd vs kr, s2 vs sb, …).
+# The structure, the gutter, the code header and the spacing are compared; the
+# token class names are not, because they cannot be reproduced in Hugo.
+token_classes: true

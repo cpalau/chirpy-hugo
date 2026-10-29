@@ -267,10 +267,12 @@ files:
     mode: manual
     note: becomes a JS output format with the cache list (F6)
   "assets/css/jekyll-theme-chirpy.scss":
-    target: assets/scss/entry.scss
-    mode: transform
-    script: layouts/_partials/head.html
-    note: contains Liquid (`@use ... with ($theme: ...)`); generated with resources.FromString (G-36)
+    target: null
+    mode: manual
+    note: >
+      Contains Liquid (`@use ... with ($theme: ...)`), so it cannot be copied or
+      hashed. The equivalent is generated at build time in
+      layouts/_partials/head.html with resources.FromString + toCSS (G-36).
   "assets/feed.xml":
     target: layouts/rss.xml
     mode: manual
@@ -287,21 +289,38 @@ files:
 # ---------------------------------------------------------------------------
   "_data/locales/":
     target: i18n/
-    mode: transform
-    script: scripts/i18n.mjs
-    note: 33 YAML files, two with U+2011 in the filename (G-25)
+    mode: copy
+    note: >
+      33 YAML files, copied verbatim: Hugo's i18n reads the same nested shape
+      Hugo expects, so no transformation is needed and the sha256 stays exact.
+      Two filenames use U+2011 (dv‑MV, ps‑AF, G-25); the language key must match
+      the filename exactly. Aliasing them to ASCII is an F1 decision.
+  # Hugo derives a language tag from the i18n filename and rejects U+2011, so the
+  # two locales that upstream names with a non-breaking hyphen are renamed (G-25).
+  "_data/locales/dv‑MV.yml":
+    target: i18n/dv-MV.yml
+    mode: copy
+    note: U+2011 -> ASCII hyphen; content is unchanged
+  "_data/locales/ps‑AF.yml":
+    target: i18n/ps-AF.yml
+    mode: copy
+    note: U+2011 -> ASCII hyphen; content is unchanged
   "_data/authors.yml":
-    target: data/authors.yml
+    target: starter/data/authors.yml
     mode: copy
+    note: site data, not theme data (the gem does not ship it either)
   "_data/contact.yml":
-    target: data/contact.yml
+    target: starter/data/contact.yml
     mode: copy
+    note: site data, not theme data (the gem does not ship it either)
   "_data/media.yml":
-    target: data/media.yml
+    target: starter/data/media.yml
     mode: copy
+    note: site data, not theme data (the gem does not ship it either)
   "_data/share.yml":
-    target: data/share.yml
+    target: starter/data/share.yml
     mode: copy
+    note: site data, not theme data (the gem does not ship it either)
   "_data/origin/":
     target: data/origin/
     mode: copy
@@ -361,9 +380,9 @@ new_files:
   "layouts/_markup/render-heading.html":
     mode: new
     replaces: "_includes/refactor-content.html (R7)"
-  "layouts/_markup/render-table.html":
+  "layouts/_partials/content.html":
     mode: new
-    replaces: "_includes/refactor-content.html (R1)"
+    replaces: "_includes/refactor-content.html (R1, R3, G-39); there is no table render hook API, so the wrapper is applied here"
   "layouts/_markup/render-link.html":
     mode: new
     reason: internal link resolution and external-link attributes

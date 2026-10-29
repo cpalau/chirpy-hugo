@@ -16,24 +16,33 @@ defaultContentLanguage = "en"
 locale = "en"
 timeZone = "UTC"
 
-# Required by the theme for `.Lastmod` (upstream uses a Jekyll plugin).
-enableGitInfo = true
+# Off by default: with it on, Hugo derives `.Lastmod` from the commit date, which
+# upstream only does when a post has more than one commit (Q5, F1).
+enableGitInfo = false
 
 # Same URL shape as Jekyll's `permalink: /posts/:title/`.
 [pagination]
   pagerSize = 3
-  path = "/page/:num/"
+  # Upstream (Jekyll) uses /page2/; Hugo's path option is broken in 0.168, so the
+  # default /page/2/ is used and the difference is recorded as D-13.
 
 [permalinks]
-  posts = "/posts/:slug/"
+  posts = "/posts/:contentbasename/"
 
 [taxonomies]
   category = "categories"
   tag = "tags"
 
-# `search.json` (F6). The output format itself is declared by the theme.
+# `search.json` (F6). The output format itself is declared by the theme, but
+# `outputs` does not merge, so the consumer has to list it.
+[outputFormats.search]
+  mediaType = "application/json"
+  baseName = "search"
+  isPlainText = true
+  notAlternative = true
+
 [outputs]
-  home = ["HTML", "RSS", "JSON"]
+  home = ["HTML", "RSS", "search"]
 
 # Mandatory settings: they do not merge from the theme (D-07).
 [markup.goldmark.renderer]
@@ -44,6 +53,14 @@ enableGitInfo = true
 
 [markup.highlight]
   noClasses = false
+
+# Jekyll's `defaults` for posts: layout, comments and toc.
+[[cascade]]
+  [cascade.params]
+    toc = true
+    comments = true
+  [cascade.target]
+    path = "/posts/**"
 
 [params]
   tagline = "Parity fixtures for chirpy-hugo"

@@ -65,53 +65,65 @@ The converter is idempotent and produces a diff for review.
 
 ---
 
-## D-02 — Rouge markup is rebuilt from Chroma tokens
+## D-02 — Syntax highlighting: structure yes, token palette no
 
 | | |
 |---|---|
-| Status | open |
-| Affects | All code blocks; fixture 2 |
+| Status | open (measured in F0.5, see `docs/POC.md`) |
+| Affects | Every code block; fixture 2 |
 | Upstream | Rouge with `css_class: highlight`, `block.line_numbers: true`, `start_line: 1` |
-| This port | Chroma tokens assembled into Rouge's DOM by `render-codeblock.html` |
-| Blast radius | None if the hook is correct; otherwise every code block |
+| This port | Chroma token stream, Rouge's DOM rebuilt by `render-codeblock.html` |
+| Blast radius | The colour of a few lexemes; **not** layout, spacing or wrapping |
 
-### Why it matters
+### What is reproduced exactly
 
-Upstream `_sass/base/_syntax.scss` targets Rouge's structure:
+`div.language-X.highlighter-rouge` → `div.code-header` (label + copy button) →
+`div.highlight > code > table.rouge-table > td.rouge-gutter.gl > pre.lineno` and
+`td.rouge-code > pre`. Line count, `nolineno`, the `console`/`terminal`/
+`plaintext` rule (gutter emitted, hidden by the SCSS), `file=` and the language
+display name all match, byte for byte after canonicalization.
 
-```
-div.highlight
-  table
-    td.rouge-gutter.gl > pre.lineno
-    td.rouge-code > pre
-```
+Measured: `tests/parity` reports **zero structural differences** inside code
+blocks on fixture 2.
 
-Chroma's default output differs (`table.lntable`, different wrappers). Using
-Chroma's default markup would require editing the SCSS, which violates R1.
+### What cannot be reproduced
+
+Chroma and Rouge classify the same token differently:
+
+| Token | Rouge | Chroma |
+|---|---|---|
+| `const` | `kd` | `kr` |
+| `console` | `nf` | `nx` |
+| `"string"` | `s2` | `sb` |
+| `(` | `p` | `si` |
+| `--flag` (shell) | `nt` | `na` |
+
+`_sass/themes/_light.scss` and `_dark.scss` colour some of those classes
+differently, so a few lexemes render in another colour:
+
+| pair | light | dark |
+|---|---|---|
+| `kd` / `kr` | same | `#d28445` vs `#aa759f` |
+| `s2` / `sb` | `#0a3069` vs `#0550ae` | same |
+| `nf` / `nx` | `#8250df` vs default | same |
+
+Reproducing Rouge would mean running Ruby's Rouge at build time. Hugo cannot
+execute external highlighter binaries, and rewriting the SCSS is forbidden
+(R1).
 
 ### Decision
 
-`layouts/_markup/render-codeblock.html` reconstructs Rouge's exact DOM using
-`transform.Highlight` with `noClasses=false`, then re-wraps:
+- Accept. `tests/parity/ignore.yml` exempts the `class` attribute of `<span>`
+  inside `td.rouge-code`; everything else in the block is compared.
+- Documented here so users know exactly what "not pixel perfect" means: the
+  colour of some tokens, nothing else.
+- A user who needs exact colours can post-process the output with Rouge outside
+  the theme; that path is documented, not shipped.
 
-- Outer: `<div class="highlight"><div class="chroma">…</div></div>` replaced by
-  Rouge's `<div class="highlight"><table>…</table></div>` shape.
-- Line numbers in `td.rouge-gutter.gl > pre.lineno`.
-- Code in `td.rouge-code > pre`.
-- `plaintext`, `console`, `terminal` get no line numbers (upstream behaviour).
-- `start_line` honoured.
+### Fallback (rejected)
 
-### Verification
-
-- G4 fixture 2 compares the entire code block subtree.
-- G5 catches spacing differences (`padding-bottom: .75rem`, line-height 1.4rem).
-- Unit-ish test: a fixture with 12 languages and all option combinations.
-
-### Fallback
-
-If exact DOM parity proves impossible, the contingency is a **minimal,
-documented** addition to the SCSS for Chroma's wrapper only, recorded here as
-D-02b. It must remain under 20 lines and never touch vendor code.
+D-02b ("add Chroma wrapper CSS") was rejected: it patches the symptom for one
+language and breaks the others, and it edits vendor SCSS.
 
 ---
 
@@ -390,6 +402,60 @@ coupling.
 - G8: sha256 of every committed artifact equals the gem's copy (`--check`).
 - G8: a new gem-only artifact with no `source: gem` declaration fails coverage.
 - G5: the visual suite consumes the committed artifacts, exactly like a user.
+
+---
+
+## D-13 — CSS is precompiled and committed
+
+| | |
+|---|---|
+| Status | closed |
+| Affects | `static/assets/css/*.css` |
+| Upstream | Jekyll compiles `assets/css/jekyll-theme-chirpy.scss` per site, with Liquid injecting `$theme` |
+| This port | Three files compiled with dart-sass and committed (`jekyll-theme-chirpy.css`, `-light.css`, `-dark.css`) |
+| Blast radius | None for consumers; the CSS must be rebuilt when the SCSS changes |
+
+### Why
+
+Two independent reasons, both measured in F0.5:
+
+1. **Hugo cannot inject `@use … with ($theme: …)` for a theme.** The entry must
+   be a real file, and a theme asset has no include path that dart-sass can use
+   (`resources.FromString` gives `<stream>:1:1: Can't find stylesheet`).
+2. **Not every Hugo build ships Dart Sass.** The Arch package and the official
+   0.168 extended binary both answer "this feature is not available". Requiring
+   it would break consumers for a reason that has nothing to do with the theme.
+
+### Decision
+
+`scripts/build-css.sh` compiles the three entries with a pinned dart-sass
+(1.107.0) into `static/assets/css/`, which Hugo serves verbatim. The template
+picks the file from `params.theme_mode`. The output is committed and verified
+like the JS bundles (D-10).
+
+---
+
+## D-14 — Pagination URL shape
+
+| | |
+|---|---|
+| Status | open |
+| Affects | Home pagination; 6 pages in the fixture set |
+| Upstream | Jekyll `paginate_path` default → `/page2/`, `/page3/` |
+| This port | Hugo → `/page/2/`, `/page/3/` |
+| Blast radius | Bookmarks and external links to page N of the home listing |
+
+### Why
+
+`[pagination] path` is broken in Hugo 0.168: `/page/:num/` produces
+`/num//2/`, `/page/num/` produces `/num/2/`. The default (`/page/2/`) is the
+only sane value, and it is not what Jekyll emits.
+
+### Decision
+
+Keep Hugo's shape, declare it, and exempt `link[rel=next]`/`link[rel=prev]`
+in G4. A site migrating from Jekyll can add server redirects; the theme cannot
+invent them.
 
 ---
 

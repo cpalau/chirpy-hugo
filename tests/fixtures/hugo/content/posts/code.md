@@ -2,7 +2,7 @@
 title: "Fixture 2: code blocks"
 date: 2026-01-02T09:00:00Z
 author: example
-description: "Code blocks in many languages, with and without line numbers and filenames."
+description: "Code blocks in many languages, with and without line numbers, filenames and start lines."
 categories: ["guides"]
 tags: ["alpha", "code"]
 ---

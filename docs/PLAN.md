@@ -213,16 +213,23 @@ depends on (G-39), and `sort_natural` is reproducible after all (D-11 closed).
 
 ### F0.5 — Proof of concept (1 d) — decision gate
 
-- [ ] Port `baseof.html`, `head.html`, `seo.html`.
-- [ ] Port `home.html` and the post layout.
-- [ ] Implement `render-codeblock.html` with Rouge-compatible markup (D-02).
-- [ ] Implement the parse5 canonicalizer and the Playwright comparator.
-- [ ] Run Gate 4 on fixtures 1, 2, 10.
-- [ ] Run Gate 5 on the same fixtures.
-- [ ] Write `reports/poc-findings.md` with the measured diff inventory.
-- [ ] Go/No-Go review against `COMPATIBILITY.md`.
+- [x] Port `baseof.html`, `head.html`, `seo.html`.
+- [x] Port `home.html` and the post layout (plus the whole chrome, listings and
+      render hooks: the fixtures cannot render without them).
+- [x] Implement `render-codeblock.html` with Rouge-compatible markup (D-02).
+- [x] Implement the parse5 canonicalizer (Gate 4).
+- [x] Run Gate 4 on fixtures 1, 2 and the home page: 47 pages measured.
+- [ ] Run Gate 5 (Playwright): browsers are not installed yet.
+- [x] Write the measured diff inventory: [`POC.md`](POC.md).
+- [x] Go/No-Go review against `COMPATIBILITY.md`: **GO**, with D-02 rewritten,
+      D-13 and D-14 added.
 
 **Acceptance**: measured diff report, confirmed divergence list, decision.
+
+Outcome: the architecture holds. 47 pages render warning-free and structurally
+identical except for four identified causes (token colours, pagination URL,
+listing-page metadata, read-time base). See [`POC.md`](POC.md) §5 for the list
+with owners.
 
 ---
 

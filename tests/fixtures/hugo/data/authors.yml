@@ -1,0 +1,12 @@
+# Neutral author registry for the parity fixtures.
+# The theme ships upstream's file as a default; a site overrides it like this.
+
+example:
+  name: Example Author
+  twitter: example
+  url: https://example.com/author
+
+second:
+  name: Second Author
+  twitter: example2
+  url: https://example.com/second

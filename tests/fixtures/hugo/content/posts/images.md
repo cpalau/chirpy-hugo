@@ -10,12 +10,10 @@ media_subpath: /assets/img/fixtures
 
 ## Floats
 
-{{< img src="img-left.png" alt="Floating left" class="left" >}}
-Text that flows next to the image on the left. It needs to be long enough to
+{{< img src="img-left.png" alt="Floating left" class="left" inline=true >}} Text that flows next to the image on the left. It needs to be long enough to
 wrap around it on a wide viewport, otherwise the float has no visible effect.
 
-{{< img src="img-right.png" alt="Floating right" class="right" >}}
-Text that flows next to the image on the right. Same idea, opposite side.
+{{< img src="img-right.png" alt="Floating right" class="right" inline=true >}} Text that flows next to the image on the right. Same idea, opposite side.
 
 ## Theme visibility
 

@@ -186,6 +186,7 @@ async function generate(u, ports) {
     if (isDir) {
       if (!existsSync(sourceRoot)) continue; // e.g. artifacts absent from the tag tree
       for (const rel of await walk(sourceRoot)) {
+        if (ports.files[key + rel]) continue; // explicit override wins
         entries.push({
           path: key + rel,
           source: tree,
