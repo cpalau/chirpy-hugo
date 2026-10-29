@@ -1,0 +1,404 @@
+# Port contract: upstream `jekyll-theme-chirpy` → `chirpy-hugo`.
+#
+# This file is the single source of truth for:
+#   1. the pinned upstream release (tag, commit, gem version),
+#   2. what happens to every upstream file (copy / transform / manual / retired),
+#   3. which Hugo template each upstream template becomes.
+#
+# `scripts/fetch-upstream.mjs --check` enforces it:
+#   - every file of the pinned upstream tree is covered here or under `ignored:`;
+#   - every `copy`/`transform` file matches the sha256 recorded in
+#     `tests/contract/upstream-hashes.json`;
+#   - the pin here and the pin in the manifest are identical.
+#
+# Modes:
+#   copy       upstream bytes are kept verbatim (sha256 verified)
+#   transform  generated from upstream by a script (sha256 of the source verified)
+#   manual     reimplemented by hand for Hugo; divergence measured by G4/G5
+#   retired    absorbed by a Hugo mechanism; no counterpart file
+#   new        no upstream counterpart; required by Hugo or by a divergence
+#
+# Paths are relative to the upstream repository root. Directory keys end in `/`.
+
+upstream:
+  repo: cotes2020/jekyll-theme-chirpy
+  tag: v7.6.0
+  sha: 152093879e6319dac342454d8df75a3c3572315f
+  gem: jekyll-theme-chirpy
+  gem_version: 7.6.0
+  # The published gem is not just the tag plus packaging: it also ships the
+  # build artifacts that upstream git-ignores (`_sass/vendors/`,
+  # `assets/js/dist/`). See docs/AUDIT.md G-23 and docs/COMPATIBILITY.md D-10.
+  artifact_sources:
+    "_sass/vendors/_bootstrap.scss": gem
+    "assets/js/dist/": gem
+
+# ---------------------------------------------------------------------------
+# Layouts (10)
+# ---------------------------------------------------------------------------
+files:
+  "_layouts/default.html":
+    target: layouts/baseof.html
+    mode: manual
+    note: document shell; panel/tail/script includes become explicit blocks
+  "_layouts/home.html":
+    target: layouts/home.html
+    mode: manual
+    note: pinned-first pagination algorithm, G-10
+  "_layouts/post.html":
+    target: layouts/page.html
+    mode: manual
+    note: post kind; panel/tail composition inlined
+  "_layouts/page.html":
+    target: layouts/page.html
+    mode: manual
+    note: plain page kind; tab titles localized
+  "_layouts/archives.html":
+    target: layouts/archives.html
+    mode: manual
+    note: content page with `layout: archives`; upstream has no section listing
+  "_layouts/categories.html":
+    target: layouts/taxonomy.html
+    mode: manual
+    note: taxonomy index for `categories` (replaces the _tabs placeholder)
+  "_layouts/category.html":
+    target: layouts/term.html
+    mode: manual
+    note: term page for `categories`
+  "_layouts/tags.html":
+    target: layouts/taxonomy.html
+    mode: manual
+    note: taxonomy index for `tags` (replaces the _tabs placeholder)
+  "_layouts/tag.html":
+    target: layouts/term.html
+    mode: manual
+    note: term page for `tags`
+  "_layouts/compress.html":
+    target: null
+    mode: retired
+    reason: jekyll-compress-html v3.2.0 Liquid layout; replaced by Hugo minify (D-05)
+
+# ---------------------------------------------------------------------------
+# Includes (45)
+# ---------------------------------------------------------------------------
+  "_includes/head.html":
+    target: layouts/_partials/head.html
+    mode: manual
+  "_includes/sidebar.html":
+    target: layouts/_partials/sidebar.html
+    mode: manual
+  "_includes/topbar.html":
+    target: layouts/_partials/topbar.html
+    mode: manual
+  "_includes/footer.html":
+    target: layouts/_partials/footer.html
+    mode: manual
+  "_includes/favicons.html":
+    target: layouts/_partials/favicons.html
+    mode: manual
+  "_includes/js-selector.html":
+    target: layouts/_partials/js-selector.html
+    mode: manual
+  "_includes/jsdelivr-combine.html":
+    target: layouts/_partials/jsdelivr-combine.html
+    mode: manual
+  "_includes/media-url.html":
+    target: layouts/_partials/media-url.html
+    mode: manual
+    note: returns a URL string (partial with `return`)
+  "_includes/origin-type.html":
+    target: layouts/_partials/origin-type.html
+    mode: manual
+    note: returns `basic` or `cors`
+  "_includes/metadata-hook.html":
+    target: layouts/_partials/metadata-hook.html
+    mode: manual
+    note: empty extension point, overridable by the site
+  "_includes/language-alias.html":
+    target: layouts/_partials/code-language.html
+    mode: manual
+    note: maps code-language ids to display names (G-06), not locales
+  "_includes/lang.html":
+    target: null
+    mode: retired
+    reason: resolves the UI locale; Hugo uses site.Language
+  "_includes/refactor-content.html":
+    target: null
+    mode: retired
+    reason: 287 lines of HTML post-processing; replaced by render hooks (D-01/D-02), see AUDIT §5
+  "_includes/toc.html":
+    target: layouts/_partials/toc.html
+    mode: manual
+  "_includes/toc-status.html":
+    target: layouts/_partials/toc/enabled.html
+    mode: manual
+    note: returns a boolean; site.toc AND page.toc AND an <h2/<h3 in content (G-32)
+  "_includes/datetime.html":
+    target: layouts/_partials/datetime.html
+    mode: manual
+    note: server text + data-ts/data-df for Day.js (G-15)
+  "_includes/read-time.html":
+    target: layouts/_partials/read-time.html
+    mode: manual
+    note: 180 wpm, integer division, minimum 1 (G-12)
+  "_includes/post-summary.html":
+    target: layouts/_partials/post-summary.html
+    mode: manual
+    note: Jekyll truncate semantics (D-03)
+  "_includes/post-nav.html":
+    target: layouts/_partials/post-nav.html
+    mode: manual
+    note: Jekyll previous/next ordering (G-34, Q3)
+  "_includes/post-paginator.html":
+    target: layouts/_partials/post-paginator.html
+    mode: manual
+  "_includes/post-edit.html":
+    target: layouts/_partials/post-edit.html
+    mode: manual
+    note: page.path → .File.Path (G-35, D-12)
+  "_includes/post-sharing.html":
+    target: layouts/_partials/post-sharing.html
+    mode: manual
+  "_includes/related-posts.html":
+    target: layouts/_partials/related-posts.html
+    mode: manual
+    note: custom score, tag 1 / category 0.5, top 3 (G-11)
+  "_includes/trending-tags.html":
+    target: layouts/_partials/trending-tags.html
+    mode: manual
+    note: top 10, ties broken by natural sort (G-14)
+  "_includes/update-list.html":
+    target: layouts/_partials/update-list.html
+    mode: manual
+  "_includes/comment.html":
+    target: layouts/_partials/comment.html
+    mode: manual
+  "_includes/comments/disqus.html":
+    target: layouts/_partials/comments/disqus.html
+    mode: manual
+  "_includes/comments/utterances.html":
+    target: layouts/_partials/comments/utterances.html
+    mode: manual
+  "_includes/comments/giscus.html":
+    target: layouts/_partials/comments/giscus.html
+    mode: manual
+  "_includes/search-results.html":
+    target: layouts/_partials/search-results.html
+    mode: manual
+  "_includes/search-loader.html":
+    target: layouts/_partials/search-loader.html
+    mode: manual
+  "_includes/notification.html":
+    target: layouts/_partials/pwa/notification.html
+    mode: manual
+  "_includes/pageviews/goatcounter.html":
+    target: layouts/_partials/pageviews/goatcounter.html
+    mode: manual
+  "_includes/analytics/google.html":
+    target: layouts/_partials/analytics/google.html
+    mode: manual
+  "_includes/analytics/goatcounter.html":
+    target: layouts/_partials/analytics/goatcounter.html
+    mode: manual
+  "_includes/analytics/umami.html":
+    target: layouts/_partials/analytics/umami.html
+    mode: manual
+  "_includes/analytics/matomo.html":
+    target: layouts/_partials/analytics/matomo.html
+    mode: manual
+  "_includes/analytics/cloudflare.html":
+    target: layouts/_partials/analytics/cloudflare.html
+    mode: manual
+  "_includes/analytics/fathom.html":
+    target: layouts/_partials/analytics/fathom.html
+    mode: manual
+  "_includes/embed/youtube.html":
+    target: layouts/_shortcodes/embed/youtube.html
+    mode: manual
+    note: include → nested shortcode, same parameter names
+  "_includes/embed/bilibili.html":
+    target: layouts/_shortcodes/embed/bilibili.html
+    mode: manual
+  "_includes/embed/spotify.html":
+    target: layouts/_shortcodes/embed/spotify.html
+    mode: manual
+  "_includes/embed/twitch.html":
+    target: layouts/_shortcodes/embed/twitch.html
+    mode: manual
+  "_includes/embed/audio.html":
+    target: layouts/_shortcodes/embed/audio.html
+    mode: manual
+  "_includes/embed/video.html":
+    target: layouts/_shortcodes/embed/video.html
+    mode: manual
+
+# ---------------------------------------------------------------------------
+# Assets
+# ---------------------------------------------------------------------------
+  "_sass/":
+    target: assets/scss/
+    mode: copy
+  "_javascript/":
+    target: assets/js/
+    mode: copy
+    note: merges with assets/js/dist/ and assets/js/data/; no filename clashes
+  "_sass/vendors/_bootstrap.scss":
+    target: assets/scss/vendors/_bootstrap.scss
+    mode: copy
+    source: gem
+    note: generated upstream by purgecss; shipped by the published gem (D-10)
+  "assets/js/dist/":
+    target: assets/js/dist/
+    mode: copy
+    source: gem
+    note: 9 rollup bundles; shipped by the published gem (D-10)
+  "assets/img/favicons/":
+    target: assets/img/favicons/
+    mode: copy
+  "assets/js/data/mathjax.js":
+    target: assets/js/data/mathjax.js
+    mode: copy
+  "assets/js/data/search.json":
+    target: layouts/index.json
+    mode: manual
+    note: becomes a JSON output format for the home page (F6)
+  "assets/js/data/swconf.js":
+    target: layouts/swconf.js
+    mode: manual
+    note: becomes a JS output format with the cache list (F6)
+  "assets/css/jekyll-theme-chirpy.scss":
+    target: assets/scss/entry.scss
+    mode: transform
+    script: layouts/_partials/head.html
+    note: contains Liquid (`@use ... with ($theme: ...)`); generated with resources.FromString (G-36)
+  "assets/feed.xml":
+    target: layouts/rss.xml
+    mode: manual
+    note: hand-written Atom, 5 posts, 400-char summary (G-07)
+  "assets/robots.txt":
+    target: layouts/robots.txt
+    mode: manual
+  "assets/404.html":
+    target: layouts/404.html
+    mode: manual
+
+# ---------------------------------------------------------------------------
+# Data
+# ---------------------------------------------------------------------------
+  "_data/locales/":
+    target: i18n/
+    mode: transform
+    script: scripts/i18n.mjs
+    note: 33 YAML files, two with U+2011 in the filename (G-25)
+  "_data/authors.yml":
+    target: data/authors.yml
+    mode: copy
+  "_data/contact.yml":
+    target: data/contact.yml
+    mode: copy
+  "_data/media.yml":
+    target: data/media.yml
+    mode: copy
+  "_data/share.yml":
+    target: data/share.yml
+    mode: copy
+  "_data/origin/":
+    target: data/origin/
+    mode: copy
+
+# ---------------------------------------------------------------------------
+# Plugins and site configuration
+# ---------------------------------------------------------------------------
+  "_plugins/posts-lastmod-hook.rb":
+    target: null
+    mode: retired
+    reason: replaced by Hugo git info (enableGitInfo); Q5
+  "_config.yml":
+    target: config/_default/
+    mode: manual
+    note: split into hugo.toml, params.toml, markup.toml, menus.toml, module.toml, languages.toml
+  "index.html":
+    target: null
+    mode: retired
+    reason: home page marker; Hugo derives the home page from the page kind (G-37)
+  "package.json":
+    target: package.json
+    mode: manual
+    note: rollup/sass/purgecss/eslint toolchain; purgecss globs adapted to layouts/
+  "purgecss.js":
+    target: scripts/purgecss.mjs
+    mode: manual
+    note: only used to prove the shipped _bootstrap.scss; not part of the asset pipeline
+  "rollup.config.js":
+    target: rollup.config.mjs
+    mode: manual
+    note: only used to prove the shipped bundles; consumers get them from the gem
+  "eslint.config.js":
+    target: eslint.config.mjs
+    mode: manual
+  ".stylelintrc.json":
+    target: .stylelintrc.json
+    mode: manual
+    note: globs retargeted from _sass/ to assets/scss/
+  "jekyll-theme-chirpy.gemspec":
+    target: theme.toml
+    mode: new
+    note: theme metadata, different format
+
+# ---------------------------------------------------------------------------
+# Hugo-only files (no upstream counterpart)
+# ---------------------------------------------------------------------------
+new_files:
+  "layouts/section.html":
+    mode: new
+    reason: Hugo generates section listings; upstream has no such URL (parity handled in F3)
+  "layouts/_markup/render-codeblock.html":
+    mode: new
+    replaces: "_includes/refactor-content.html (R2, R6)"
+  "layouts/_markup/render-image.html":
+    mode: new
+    replaces: "_includes/refactor-content.html (R4, R5)"
+  "layouts/_markup/render-heading.html":
+    mode: new
+    replaces: "_includes/refactor-content.html (R7)"
+  "layouts/_markup/render-table.html":
+    mode: new
+    replaces: "_includes/refactor-content.html (R1)"
+  "layouts/_markup/render-link.html":
+    mode: new
+    reason: internal link resolution and external-link attributes
+  "layouts/_shortcodes/prompt.html":
+    mode: new
+    replaces: kramdown prompt IAL (D-01)
+  "layouts/_shortcodes/filepath.html":
+    mode: new
+    replaces: kramdown `{: .filepath }` (D-01)
+  "layouts/_shortcodes/img.html":
+    mode: new
+    replaces: kramdown image IAL (D-01); Goldmark does not support inline attributes on images
+  "layouts/_partials/task-list.html":
+    mode: new
+    replaces: "_includes/refactor-content.html (R3)"
+
+# ---------------------------------------------------------------------------
+# Not part of the theme runtime
+# ---------------------------------------------------------------------------
+ignored:
+  - "_posts/"
+  - "_tabs/"
+  - "tools/"
+  - "docs/"
+  - ".devcontainer/"
+  - ".github/"
+  - ".husky/"
+  - ".vscode/"
+  - ".editorconfig"
+  - ".gitattributes"
+  - ".gitignore"
+  - ".gitmodules"
+  - ".markdownlint.json"
+  - ".nojekyll"
+  - "Gemfile"
+  - "README.md"
+  - "LICENSE"
+  - "assets/lib/"
