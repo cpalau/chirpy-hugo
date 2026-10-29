@@ -93,23 +93,24 @@ The gate is **zero pixels**, not a ratio (AGENTS.md R3b). The harness records th
 bounding box of the two declared exceptions (D-02 code tokens, D-09 footer) and
 counts every pixel outside them.
 
-| Matrix | Result |
-|---|---|
-| 3 pages × 3 viewports × 2 themes | **18 / 18** pixel-identical outside the boxes |
-| 14 pages × 3 viewports × 2 themes | **58 / 84** pixel-identical outside the boxes |
+| Matrix | Result | Time |
+|---|---|---|
+| 14 fixtures + 3 listings × 3 viewports × 2 themes | **84 / 84** pixel-identical outside the declared boxes | ~66 s |
+| same, repeated | **84 / 84** (stable) | ~66 s |
 
-The 3-page set was the first target and is met. On the full 14-page matrix the
-remaining 26 pairs are five pages, each with a named cause:
+The gate went from "0 of 18" to "84 of 84" by fixing what it exposed. The last
+five pages were:
 
-| Page | Cause |
-|---|---|
-| `/posts/math/` | MathJax renders client-side; the capture does not wait for it to finish (F7: renderer-stabilised pass) |
-| `/posts/mermaid/` | same, Mermaid |
-| `/posts/tables-footnotes/` | the footnote block (D-16) |
-| `/posts/embeds/` | the iframes are blocked by the route allowlist; the placeholder heights differ (F7: local stubs) |
-| `/categories/` | the taxonomy index layout still differs from the tab page |
+| Page | Cause | Fix |
+|---|---|---|
+| `/posts/math/` | `assets/js/data/mathjax.js` was published as raw Liquid, so MathJax never got its delimiters | `build-js.mjs` renders it before publishing |
+| `/posts/mermaid/` | the mermaid source was double-escaped (`--&amp;gt;`) | emit `.Inner` as-is; kramdown also uses a plain `pre/code` |
+| `/posts/tables-footnotes/` | Goldmark's `footnote-ref` class is not kramdown's `.footnote` (margin/padding in the SCSS), and I had replaced the NBSP that decides line breaking | class and NBSP restored |
+| `/posts/embeds/` | 404 media made the controls paint an error state | real one-second media files in both fixtures |
+| `/categories/` | the category cards were sorted with Hugo's collator and the count text lost its spaces | `sort-natural` on the labels, spaces restored |
 
-None of them is a percentage budget: each is a specific, reproducible page.
+The remaining differences are the three declared rectangles (D-02, D-09, D-18);
+there is no page left with a single pixel outside them.
 
 Two real bugs were found *by* Gate 5 and fixed, which is the reason the numbers
 are this low:
@@ -171,6 +172,9 @@ accordingly (see `docs/COMPATIBILITY.md`).
 | P-10 | `hugo.Data` replaces the deprecated `.Site.Data` (0.156) | already applied; AGENTS §13.11 lists it |
 | P-11 | **Hugo does not publish `assets/`**, and Jekyll does. The JS bundles, `app.min.js` and `sw.min.js` live there upstream | `scripts/build-js.mjs` materialises them under `static/` (front matter stripped); without it the entire JS layer 404s |
 | P-12 | Chroma ends the token stream without a trailing newline, Rouge puts it inside the last span | the hook appends it *inside* the span; otherwise every code block grows one empty line |
+| P-13 | `assets/js/data/mathjax.js` is a **Jekyll asset**: front matter plus `{% comment %}` blocks | published raw it is invalid JavaScript and MathJax silently loses `$…$`; `scripts/build-js.mjs` renders it before publishing |
+| P-14 | `refactor-content` also processes the home **cards**, not just the article body | covers go through the same `preview-img` wrapper (LQIP, `blur`, `data-src`), otherwise the card is 168 px off |
+| P-15 | Goldmark's footnote classes are not kramdown's (`footnote-ref` vs `footnote`) | `.footnote` carries margin/padding in the SCSS, so the superscripts render differently; the class is rewritten in `content.html` |
 
 ---
 

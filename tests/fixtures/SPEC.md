@@ -66,9 +66,13 @@ The three non-obvious ones are not style choices; see `AGENTS.md` §5.1 and
 
 ## 4. Invariants
 
-- `tests/fixtures/hugo/static/assets/img/` is a **byte-identical copy** of
-  `tests/oracle/assets/img/`. Hugo does not follow symlinks in `static/`, so
-  the files are duplicated; a fixture run must `diff -r` them and fail on drift.
+- `tests/fixtures/hugo/static/assets/` is a **byte-identical copy** of
+  `tests/oracle/assets/` (images and the media files of fixture 6). Hugo does not
+  follow symlinks in `static/`, so the files are duplicated; a fixture run must
+  `diff -r` them and fail on drift.
+- The media files are real (one second, silent) so the browser's native audio
+  and video controls render the same on both sides. With 404s the controls
+  differ by a few pixels depending on when the error state is painted.
 - `categories` and `tags` have **no content page** on the Hugo side: the
   taxonomy index replaces upstream's `_tabs/categories.md` and `_tabs/tags.md`.
   Creating them would collide with `/categories/` and `/tags/`.

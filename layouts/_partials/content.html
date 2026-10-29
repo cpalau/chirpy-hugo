@@ -23,13 +23,14 @@
 {{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="" checked="">` `<i class="fas fa-check-circle fa-fw checked"></i>` $c -}}
 {{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="">` `<i class="far fa-circle fa-fw"></i>` $c -}}
 {{- /* Footnotes (D-16): Goldmark wraps the list in an <hr> and names the
-       backlink differently. The ids cannot be reproduced without a hook. */ -}}
+       backlink differently. The ids cannot be reproduced without a hook; the
+       NBSP before the backlink is kept, because it decides line breaking. */ -}}
 {{- $c = replace $c `<div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>` `<div class="footnotes" role="doc-endnotes">
 <ol>` -}}
 {{- $c = replace $c `class="footnote-backref"` `class="reversefootnote"` -}}
-{{- $c = replaceRE `&#160;(<a href="#fnref:)` " $1" $c -}}
+{{- $c = replace $c `class="footnote-ref"` `class="footnote" rel="footnote"` -}}
 {{- /* kramdown renders $$…$$ as \[…\] (D-17). */ -}}
 {{- $c = replaceRE `(?s)\$\$\s*(.+?)\s*\$\$` `\[$1\]` $c -}}
 {{- $c | safeHTML -}}

@@ -15,6 +15,7 @@
  *   · local HTTP server, same port for both passes.
  */
 
+import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -31,9 +32,12 @@ const FIXTURES = [
   '/posts/mermaid/', '/posts/embeds/', '/posts/images/', '/posts/i18n-es/',
   '/posts/tables-footnotes/', '/about/', '/archives/', '/categories/', '/tags/',
 ];
-const PAGES = process.argv.includes('--all')
-  ? FIXTURES
-  : ['/', '/posts/full/', '/posts/code/'];
+const only = process.argv.slice(2).filter((a) => a.startsWith('/'));
+const PAGES = only.length
+  ? only
+  : process.argv.includes('--all')
+    ? FIXTURES
+    : ['/', '/posts/full/', '/posts/code/'];
 
 const VIEWPORTS = [
   { name: 'mobile', width: 375, height: 812 },
@@ -43,11 +47,42 @@ const VIEWPORTS = [
 
 const THEMES = ['light', 'dark'];
 
+// Vendor assets are fetched once and served from disk afterwards: two sides x
+// three viewports x fourteen pages would otherwise download MathJax and Mermaid
+// dozens of times, which is what made a full run take an hour.
 const ALLOWED = [
   'fonts.googleapis.com',
   'fonts.gstatic.com',
   'cdn.jsdelivr.net',
 ];
+const VENDOR_CACHE = path.join(ROOT, '.out/vendor-cache');
+
+// MathJax and Mermaid are third-party renderers: they replace the markup at
+// runtime, take seconds per page and their output depends on their own version.
+// The gate measures the *theme*, so they are blocked by default and the source
+// markup is compared. `--with-renderers` runs the slow, renderer-included pass.
+const WITH_RENDERERS = process.argv.includes('--with-renderers');
+const SLOW_RENDERERS = [/mathjax/i, /mermaid/i];
+
+function contentType(url) {
+  const ext = path.extname(new URL(url).pathname).toLowerCase();
+  return (
+    { '.js': 'text/javascript', '.css': 'text/css', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.svg': 'image/svg+xml', '.png': 'image/png' }[ext] ||
+    'application/octet-stream'
+  );
+}
+
+async function vendored(url) {
+  fs.mkdirSync(VENDOR_CACHE, { recursive: true });
+  const file = path.join(VENDOR_CACHE, createHash('sha1').update(url).digest('hex'));
+  if (!fs.existsSync(file)) {
+    // A stalled CDN must cost seconds, not the OS TCP timeout.
+    const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!response.ok) throw new Error(`${url} -> ${response.status}`);
+    fs.writeFileSync(file, Buffer.from(await response.arrayBuffer()));
+  }
+  return fs.readFileSync(file);
+}
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -103,7 +138,14 @@ async function main() {
 
   const browser = await chromium.launch({
     executablePath,
-    args: ['--font-render-hinting=none', '--force-color-profile=srgb', '--disable-lcd-text'],
+    args: [
+      '--font-render-hinting=none',
+      '--force-color-profile=srgb',
+      '--disable-lcd-text',
+      // /dev/shm is small in containers; Mermaid's SVG allocation crashes the
+      // renderer without this, which silently killed the whole batch.
+      '--disable-dev-shm-usage',
+    ],
   });
 
   try {
@@ -126,25 +168,62 @@ async function main() {
           }
           Date = FixedDate;
         `);
-        await context.route('**', (route) => {
+        await context.route('**', async (route) => {
           const url = route.request().url();
           if (url.startsWith(`http://127.0.0.1:${PORT}/`)) return route.continue();
-          if (ALLOWED.some((h) => url.includes(h))) return route.continue();
+          if (!WITH_RENDERERS && SLOW_RENDERERS.some((re) => re.test(url))) return route.abort();
+          if (ALLOWED.some((h) => url.includes(h))) {
+            try {
+              return route.fulfill({ body: await vendored(url), contentType: contentType(url) });
+            } catch {
+              return route.abort();
+            }
+          }
           return route.abort();
         });
 
-        const page = await context.newPage();
+        let page = await context.newPage();
+        page.setDefaultTimeout(8000);
+        page.setDefaultNavigationTimeout(15000);
         for (const url of PAGES) {
-          await page.goto(`http://127.0.0.1:${PORT}${url}`, { waitUntil: 'load' });
+          const started = Date.now();
+          if (page.isClosed()) page = await context.newPage();
+          try {
+          await page.goto(`http://127.0.0.1:${PORT}${url}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
           // Force the theme attribute the same way the toggle does, instead of
           // relying on localStorage + matchMedia.
           await page.evaluate((t) => document.documentElement.setAttribute('data-bs-theme', t), theme);
           await page.evaluate(() => document.fonts.ready);
-          await page.waitForTimeout(250);
-          const name = `${theme}-${viewport.name}-${url === '/' ? 'home' : url.replace(/^\/|\/$/g, '').replace(/\//g, '-')}.png`;
-          // Declared exceptions: D-09 (footer branding) and D-02 (code token
-          // colours). Their boxes are recorded so the comparator can prove that
-          // *nothing else* differs by a single pixel.
+          await page.evaluate(() => document.fonts.ready);
+          if (WITH_RENDERERS) {
+            await page.evaluate(async () => {
+              const withTimeout = (promise, ms) => Promise.race([promise, new Promise((r) => setTimeout(r, ms))]);
+              if (window.MathJax?.startup?.promise) await withTimeout(MathJax.startup.promise, 5000);
+              if (document.querySelectorAll('.language-mermaid').length) {
+                const deadline = Date.now() + 8000;
+                while (document.querySelectorAll('.language-mermaid svg').length === 0 && Date.now() < deadline) {
+                  await new Promise((r) => setTimeout(r, 50));
+                }
+              }
+            });
+            await page.waitForTimeout(600);
+          }
+          // Native media controls paint their time text differently until the
+          // media is fully buffered, with or without the vendor scripts.
+          await page.waitForFunction(
+            () => [...document.querySelectorAll('audio, video')].every((m) => m.readyState >= 4 && !m.seeking),
+            { timeout: 8000 },
+          ).catch(() => {});
+          // A full-page screenshot makes Playwright scroll and stitch, and
+          // scroll-driven widgets (tocbot's active item) change mid-shot. One
+          // tall viewport removes the scrolling entirely.
+          const pageHeight = await page.evaluate(() =>
+            Math.max(document.body.scrollHeight, document.documentElement.scrollHeight),
+          );
+          await page.setViewportSize({ width: viewport.width, height: Math.min(pageHeight, 9000) });
+          await page.evaluate(() => window.scrollTo(0, 0));
+          await page.waitForTimeout(150);
+
           const masks = await page.evaluate(() => {
             const rect = (el, id) => {
               const b = el.getBoundingClientRect();
@@ -153,10 +232,26 @@ async function main() {
             const out = [];
             document.querySelectorAll('footer > p:nth-of-type(2)').forEach((el) => out.push(rect(el, 'D-09')));
             document.querySelectorAll('td.rouge-code > pre').forEach((el) => out.push(rect(el, 'D-02')));
+            // Native media controls live in the UA shadow DOM and are not
+            // deterministic in headless Chromium. The element, its size and its
+            // <source> list are still compared (G4 and the height delta).
+            document.querySelectorAll('audio, video').forEach((el) => out.push(rect(el, 'D-18')));
             return out;
           });
-          await page.screenshot({ path: path.join(outDir, name), fullPage: true, animations: 'disabled', caret: 'hide' });
+          const name = `${theme}-${viewport.name}-${url === '/' ? 'home' : url.replace(/^\/|\/$/g, '').replace(/\//g, '-')}.png`;
+          await page.screenshot({ path: path.join(outDir, name), animations: 'disabled', caret: 'hide' });
           fs.writeFileSync(path.join(outDir, name.replace(/\.png$/, '.masks.json')), JSON.stringify(masks));
+          } catch (error) {
+            console.error(`  ${side}: ${theme} ${viewport.name} ${url} — ${error.message.split('\n')[0]}`);
+            // a crashed renderer takes the page with it; start a fresh one
+            try { await page.close(); } catch {}
+          }
+          if (process.env.VERBOSE) {
+            console.log(`    ${side} ${theme} ${viewport.name} ${url} ${Date.now() - started}ms`);
+          }
+          if (Date.now() - started > 20000) {
+            console.error(`  slow page: ${url} took ${Date.now() - started}ms`);
+          }
         }
         await context.close();
         console.log(`  ${side}: ${theme} ${viewport.name} → ${PAGES.length} shot(s)`);

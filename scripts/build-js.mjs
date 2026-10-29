@@ -49,8 +49,27 @@ async function main() {
     if (hadFrontMatter) console.log(`  ${file}: front matter removed`);
   }
 
+  // `assets/js/data/mathjax.js` configures MathJax. Upstream's copy is a Jekyll
+  // asset: it carries front matter and Liquid comments, so it has to be rendered
+  // before the browser sees it.
+  const dataDir = path.join(SRC, '../data');
+  for (const file of (await fs.readdir(dataDir)).sort()) {
+    if (!file.endsWith('.js')) continue;
+    const target = path.join(OUT, 'assets/js/data', file);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    let content = await fs.readFile(path.join(dataDir, file), 'utf8');
+    content = content
+      .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '')
+      .replace(/\{%-?\s*comment\s*-?%\}[\s\S]*?\{%-?\s*endcomment\s*-?%\}/g, '');
+    const current = existsSync(target) ? await fs.readFile(target, 'utf8') : null;
+    if (current !== content) {
+      await fs.writeFile(target, content);
+      written += 1;
+    }
+  }
+
   console.log(`bundles: ${files.length} source(s), ${written} file(s) written`);
-  const expected = ['assets/js/dist/theme.min.js', 'app.min.js', 'sw.min.js'];
+  const expected = ['assets/js/dist/theme.min.js', 'app.min.js', 'sw.min.js', 'assets/js/data/mathjax.js'];
   for (const rel of expected) {
     if (!existsSync(path.join(OUT, rel))) {
       console.error(`error: ${rel} was not produced`);

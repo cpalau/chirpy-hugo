@@ -406,6 +406,23 @@ coupling.
 
 ---
 
+## D-18 — Native media controls
+
+| | |
+|---|---|
+| Status | open (harness limitation, not a theme difference) |
+| Affects | `post/embeds`, the `audio` and `video` elements |
+| Upstream | the browser draws the controls from the UA shadow DOM |
+| This port | identical element, attributes and `<source>` list |
+| Blast radius | 20–190 pixels inside the control bar, only under headless Chromium |
+
+The control bar's time text paints non-deterministically while the media
+buffers, which produced differences that flipped between runs. Gate G5 masks
+the `audio`/`video` boxes; the element itself, its dimensions and its sources
+are compared by G4, and the page height is compared by the pixel gate.
+
+---
+
 ## D-15 — Taxonomy index metadata
 
 | | |
@@ -434,13 +451,15 @@ Pixel impact: none (proved by G5). Tracked in `docs/POC.md` §5.
 | This port | Goldmark: `id="fn:<n>"`, `class="footnote-ref"`, no `rel` |
 | Blast radius | footnote anchors; the visible text and rules are identical |
 
-Hugo has no footnote render hook, so the ids and classes cannot be rewritten
-without re-implementing the extension. What *is* reproduced: no `<hr>` before
-the list (Goldmark adds one), the backlink class, and the space before the
-backlink.
+Hugo has no footnote render hook, so the ids cannot be rewritten without
+re-implementing the extension. What *is* reproduced: no `<hr>` before the list
+(Goldmark adds one), `class="footnote"` on the reference with `rel="footnote"`,
+`class="reversefootnote"` on the backlink, and the space before it. The classes
+matter visually: `.footnote` carries margins and padding in
+`_sass/base/_typography.scss`.
 
-Pixel impact: none (proved by G5). Internal `#fn:1` anchors differ from
-upstream's `#fn:<label>`.
+Pixel impact: none (proved by G5, six viewport/theme pairs). Internal `#fn:1`
+anchors differ from upstream's `#fn:<label>`.
 
 ---
 

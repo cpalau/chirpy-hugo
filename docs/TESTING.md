@@ -246,10 +246,23 @@ expect(page).toHaveScreenshot(`…png`, {
 
 **The rule is zero pixels, not a ratio** (`AGENTS.md` R3b). The capture step
 records the bounding box of every declared exception (D-02 code tokens, D-09
-footer) in a `.masks.json` next to each screenshot; the comparator counts the
-differing pixels **outside** those boxes and fails if there is a single one.
-Inside the boxes the count is reported, never hidden: a change in the code
-colouring still shows up in the numbers.
+footer, D-18 native media controls) in a `.masks.json` next to each screenshot;
+the comparator counts the differing pixels **outside** those boxes and fails if
+there is a single one. Inside the boxes the count is reported, never hidden.
+
+Implementation notes, learned the hard way:
+
+- **Offline by default.** Every external request is aborted; `--with-vendor`
+  serves fonts and icons from `.out/vendor-cache` for the faithful pass. Without
+  this, MathJax and Mermaid cost 30 s per page.
+- **One tall viewport, not a stitched full-page shot.** Stitching scrolls the
+  page, and scroll-driven widgets (tocbot's active item) change mid-shot.
+- **No blocking waits.** `domcontentloaded`, `document.fonts.ready`, and a
+  150 ms settle. Renderers and media get their own bounded waits behind
+  `--with-renderers`.
+- **Bounded.** `CAPTURE_TIMEOUT_MS` arms a watchdog; a wedged page is skipped
+  instead of killing the batch.
+- **Speed.** The fourteen-page matrix (84 comparisons) takes about 66 s.
 
 A failure writes three artifacts to `test-results/`: expected (Jekyll),
 actual (Hugo), diff (highlighted). The diff image is the review artifact; it is

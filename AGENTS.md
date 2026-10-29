@@ -101,12 +101,20 @@ The only permitted exceptions are the ones declared in
 3. **proved harmless** by a test, and
 4. listed with its `D-xx`.
 
-Today there are exactly two, and both are rectangles measured on every run:
+Today there are exactly three, and all of them are rectangles measured on
+every run:
 
 | D-xx | Box | Why |
 |---|---|---|
 | D-02 | every `td.rouge-code > pre` | Chroma's token classes are not Rouge's, and two pairs are coloured differently |
 | D-09 | `footer > p:nth-of-type(2)` | the footer must credit Hugo, not claim Jekyll |
+| D-18 | every `audio`, `video` | the native controls live in the UA shadow DOM and are not deterministic in headless Chromium; the element, its box and its `<source>` list are still compared |
+
+The visual gate runs **offline** (every external request aborted), captures in
+one tall viewport instead of stitching a full-page shot, and finishes the whole
+fourteen-page matrix in **about one minute**. If a run takes longer, something
+is hanging: `capture.mjs` has a per-page ceiling and a watchdog, and
+`CAPTURE_TIMEOUT_MS` bounds the process.
 
 Anything else — one pixel, one attribute, one text node — is a bug, not a
 divergence. If a page is not at zero, `docs/POC.md` §5 tracks it with an owner;
@@ -382,6 +390,7 @@ content layer; every one of them was measured, not assumed.
 | Taxonomy labels | `_partials/taxonomy-labels.html` | Hugo lowercases taxonomy keys; the front-matter case must be recovered |
 | `lastmod` | front matter only | `enableGitInfo` turns `.Lastmod` into the commit date and leaks into SEO |
 | Publishing `assets/` | `scripts/build-js.mjs` and `scripts/build-css.sh` write to `static/` | Hugo does **not** publish `assets/`; Jekyll does. Every file the browser loads must be under `static/` or reached through a Hugo Pipes resource |
+| Liquid-processed assets | `scripts/build-js.mjs` renders them | `assets/js/data/mathjax.js` carries front matter and `{% comment %}` blocks: copying it raw ships broken JavaScript and MathJax silently loses its delimiters |
 | Code block trailing newline | inside the last token span | after `</span>` it adds an empty line to the `<pre>` (+22 px) |
 
 Rules derived from it:

@@ -258,6 +258,11 @@ files:
   "assets/js/data/mathjax.js":
     target: assets/js/data/mathjax.js
     mode: copy
+    note: >
+      The source is copied verbatim (hash-verified), but it is a Jekyll asset:
+      it carries front matter and Liquid comments. `scripts/build-js.mjs`
+      publishes the rendered file to `static/assets/js/data/mathjax.js`;
+      without that MathJax never receives its delimiters.
   "assets/js/data/search.json":
     target: layouts/index.json
     mode: manual
