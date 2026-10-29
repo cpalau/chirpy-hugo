@@ -1,0 +1,36 @@
+---
+title: "Fixture 8: acentos y puntuación"
+date: 2026-01-08T09:00:00Z
+author: second
+description: "Encabezados en español para comparar la generación de identificadores."
+categories: ["guías", "avanzado"]
+tags: ["Ávila", "árbol"]
+---
+
+## Introducción
+
+Este fixture comprueba que los identificadores de los encabezados coinciden
+entre kramdown y Goldmark cuando el texto lleva acentos.
+
+## ¿Qué es un identificador?
+
+Es el fragmento que aparece detrás de la almohadilla en un enlace interno.
+
+### Niño, añadir y C++ 17
+
+Los signos de puntuación no deberían producir identificadores distintos.
+
+## 1. Primer paso
+
+Un encabezado que empieza por un número.
+
+## Repetido
+
+## Repetido
+
+Dos encabezados iguales tienen que recibir identificadores distintos y
+estables.
+
+## Emoji 🚀 y comillas «tipográficas»
+
+El último caso mezcla caracteres que no son ASCII.

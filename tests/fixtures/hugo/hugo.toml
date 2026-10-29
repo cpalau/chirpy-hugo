@@ -1,0 +1,171 @@
+# Hugo counterpart of `tests/oracle/_config.yml`.
+#
+# Every value here has a counterpart in the oracle. When the two disagree, the
+# diff is a fixture bug, not a theme bug: the Jekyll side is the reference.
+#
+# The theme itself is not configured here on purpose — this site is the
+# *consumer*, so it only declares what a real user would.
+
+baseURL = "http://127.0.0.1:4001/"
+title = "Chirpy Fixtures"
+
+theme = "chirpy-hugo"
+
+defaultContentLanguage = "en"
+# `languageCode` was deprecated in Hugo 0.158; `locale` replaces it.
+locale = "en"
+timeZone = "UTC"
+
+# Required by the theme for `.Lastmod` (upstream uses a Jekyll plugin).
+enableGitInfo = true
+
+# Same URL shape as Jekyll's `permalink: /posts/:title/`.
+[pagination]
+  pagerSize = 3
+  path = "/page/:num/"
+
+[permalinks]
+  posts = "/posts/:slug/"
+
+[taxonomies]
+  category = "categories"
+  tag = "tags"
+
+# `search.json` (F6). The output format itself is declared by the theme.
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+# Mandatory settings: they do not merge from the theme (D-07).
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.goldmark.parser.attribute]
+  block = true
+
+[markup.highlight]
+  noClasses = false
+
+[params]
+  tagline = "Parity fixtures for chirpy-hugo"
+  description = "Neutral fixtures used to compare the Jekyll original with the Hugo port."
+  theme_version = "7.6.0"
+
+  github_username = "example"
+  twitter_username = "example"
+
+  # Empty means "follow the system preference"; keeps the theme toggle.
+  theme_mode = ""
+
+  cdn = ""
+  avatar = "/assets/img/avatar.png"
+  social_preview_image = "/assets/img/social-preview.png"
+
+  toc = true
+
+  [params.social]
+    name = "Example Author"
+    email = "author@example.com"
+    fediverse_handle = "@author@example.com"
+    links = ["https://example.com/author"]
+
+  [params.webmaster_verifications]
+    google = "example-google"
+    bing = "example-bing"
+    alexa = "example-alexa"
+    yandex = "example-yandex"
+    baidu = "example-baidu"
+    facebook = "example-facebook"
+
+  [params.analytics.google]
+    id = "G-EXAMPLE"
+
+  [params.analytics.goatcounter]
+    id = "example"
+
+  [params.analytics.umami]
+    id = ""
+    domain = ""
+
+  [params.analytics.matomo]
+    id = ""
+    domain = ""
+
+  [params.analytics.cloudflare]
+    id = ""
+
+  [params.analytics.fathom]
+    id = ""
+
+  [params.pageviews]
+    provider = "goatcounter"
+
+  [params.edit_post]
+    enabled = true
+    url = "https://example.com/edit"
+    # D-12: static URL so `page.path` never leaks into the comparison.
+    static_url = true
+
+  [params.comments]
+    provider = "giscus"
+
+  [params.comments.disqus]
+    shortname = ""
+
+  [params.comments.utterances]
+    repo = ""
+    issue_term = ""
+
+  [params.comments.giscus]
+    repo = "example/example"
+    repo_id = "R_kgDOexample"
+    category = "Comments"
+    category_id = "DIC_kwDOexample"
+    mapping = "pathname"
+    strict = "0"
+    input_position = "top"
+    lang = "en"
+    reactions_enabled = "1"
+
+  [params.assets.self_host]
+    enabled = false
+
+  [params.pwa]
+    enabled = true
+
+  # Off on purpose: `swconf.js` embeds the build time in `cacheName` (G-21).
+  [params.pwa.cache]
+    enabled = false
+    deny_paths = ["/example"]
+
+# The four tabs, in upstream order (upstream: the `tabs` collection, sorted by
+# `order`). `categories` and `tags` point at the taxonomy indexes: upstream's
+# `_tabs` placeholders have no Hugo counterpart and must not be created, or they
+# would collide with `/categories/` and `/tags/`.
+
+[[menus.main]]
+  name = "Categories"
+  url = "/categories/"
+  weight = 1
+  [menus.main.params]
+    icon = "fas fa-stream"
+
+[[menus.main]]
+  name = "Tags"
+  url = "/tags/"
+  weight = 2
+  [menus.main.params]
+    icon = "fas fa-tags"
+
+[[menus.main]]
+  name = "Archives"
+  url = "/archives/"
+  weight = 3
+  [menus.main.params]
+    icon = "fas fa-archive"
+
+[[menus.main]]
+  name = "About"
+  url = "/about/"
+  weight = 4
+  [menus.main.params]
+    icon = "fas fa-info-circle"

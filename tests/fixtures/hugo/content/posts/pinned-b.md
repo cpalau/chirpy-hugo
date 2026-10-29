@@ -1,0 +1,18 @@
+---
+title: "Pinned post B"
+date: 2026-01-15T09:00:00Z
+author: second
+description: "The second of two pinned posts."
+categories: ["media"]
+tags: ["beta", "Ávila"]
+pin: true
+---
+
+## Also pinned
+
+The home page must show both pinned posts before the regular ones, and must
+exclude them from the normal list.
+
+### Body
+
+The rest of the body only exists so the summary has something to truncate.
