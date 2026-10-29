@@ -1,0 +1,400 @@
+{
+  "upstream": {
+    "tag": "v7.6.0",
+    "sha": "152093879e6319dac342454d8df75a3c3572315f"
+  },
+  "site": {
+    "actions.edit_post.enabled": [
+      "_includes/post-edit.html"
+    ],
+    "actions.edit_post.static_url": [
+      "_includes/post-edit.html"
+    ],
+    "actions.edit_post.url": [
+      "_includes/post-edit.html"
+    ],
+    "alt_lang": [
+      "_layouts/default.html",
+      "assets/feed.xml"
+    ],
+    "analytics": [
+      "_includes/head.html",
+      "_includes/js-selector.html",
+      "_layouts/post.html"
+    ],
+    "analytics.cloudflare.id": [
+      "_includes/analytics/cloudflare.html"
+    ],
+    "analytics.fathom.id": [
+      "_includes/analytics/fathom.html"
+    ],
+    "analytics.goatcounter.id": [
+      "_includes/analytics/goatcounter.html",
+      "_includes/pageviews/goatcounter.html"
+    ],
+    "analytics.google.id": [
+      "_includes/analytics/google.html"
+    ],
+    "analytics.matomo.domain": [
+      "_includes/analytics/matomo.html"
+    ],
+    "analytics.matomo.id": [
+      "_includes/analytics/matomo.html"
+    ],
+    "analytics.umami.domain": [
+      "_includes/analytics/umami.html"
+    ],
+    "analytics.umami.id": [
+      "_includes/analytics/umami.html"
+    ],
+    "assets.self_host.enabled": [
+      "_includes/head.html",
+      "_includes/origin-type.html"
+    ],
+    "assets.self_host.env": [
+      "_includes/origin-type.html"
+    ],
+    "avatar": [
+      "_includes/sidebar.html"
+    ],
+    "baseurl": [
+      "_includes/head.html",
+      "_includes/media-url.html",
+      "_includes/post-nav.html",
+      "_layouts/post.html",
+      "assets/feed.xml"
+    ],
+    "categories": [
+      "_includes/related-posts.html",
+      "_layouts/categories.html"
+    ],
+    "cdn": [
+      "_includes/media-url.html"
+    ],
+    "comments.disqus.shortname": [
+      "_includes/comments/disqus.html"
+    ],
+    "comments.giscus.category": [
+      "_includes/comments/giscus.html"
+    ],
+    "comments.giscus.category_id": [
+      "_includes/comments/giscus.html"
+    ],
+    "comments.giscus.input_position": [
+      "_includes/comments/giscus.html"
+    ],
+    "comments.giscus.lang": [
+      "_includes/comments/giscus.html"
+    ],
+    "comments.giscus.mapping": [
+      "_includes/comments/giscus.html"
+    ],
+    "comments.giscus.reactions_enabled": [
+      "_includes/comments/giscus.html"
+    ],
+    "comments.giscus.repo": [
+      "_includes/comments/giscus.html"
+    ],
+    "comments.giscus.repo_id": [
+      "_includes/comments/giscus.html"
+    ],
+    "comments.giscus.strict": [
+      "_includes/comments/giscus.html"
+    ],
+    "comments.provider": [
+      "_includes/comment.html"
+    ],
+    "comments.utterances.issue_term": [
+      "_includes/comments/utterances.html"
+    ],
+    "comments.utterances.repo": [
+      "_includes/comments/utterances.html"
+    ],
+    "compress_html.blanklines": [
+      "_layouts/compress.html"
+    ],
+    "compress_html.clippings": [
+      "_layouts/compress.html"
+    ],
+    "compress_html.comments": [
+      "_layouts/compress.html"
+    ],
+    "compress_html.endings": [
+      "_layouts/compress.html"
+    ],
+    "compress_html.ignore.envs": [
+      "_layouts/compress.html"
+    ],
+    "compress_html.profile": [
+      "_layouts/compress.html"
+    ],
+    "compress_html.startings": [
+      "_layouts/compress.html"
+    ],
+    "data.authors": [
+      "_layouts/post.html"
+    ],
+    "data.contact": [
+      "_includes/sidebar.html"
+    ],
+    "data.contact.size": [
+      "_includes/sidebar.html"
+    ],
+    "data.locales": [
+      "_includes/datetime.html",
+      "_includes/footer.html",
+      "_includes/head.html",
+      "_includes/lang.html",
+      "_includes/notification.html",
+      "_includes/post-edit.html",
+      "_includes/post-nav.html",
+      "_includes/post-sharing.html",
+      "_includes/read-time.html",
+      "_includes/refactor-content.html",
+      "_includes/related-posts.html",
+      "_includes/search-loader.html",
+      "_includes/sidebar.html",
+      "_includes/toc.html",
+      "_includes/topbar.html",
+      "_includes/trending-tags.html",
+      "_includes/update-list.html",
+      "_layouts/archives.html",
+      "_layouts/categories.html",
+      "_layouts/home.html",
+      "_layouts/page.html",
+      "_layouts/post.html",
+      "assets/404.html"
+    ],
+    "data.media": [
+      "_includes/embed/audio.html",
+      "_includes/embed/video.html"
+    ],
+    "data.origin": [
+      "_includes/head.html",
+      "_includes/js-selector.html"
+    ],
+    "data.origin.cors.bootstrap.css": [
+      "_includes/head.html"
+    ],
+    "data.origin.cors.resource_hints": [
+      "_includes/head.html"
+    ],
+    "data.share.platforms": [
+      "_includes/post-sharing.html"
+    ],
+    "description": [
+      "assets/feed.xml"
+    ],
+    "lang": [
+      "_includes/lang.html",
+      "_layouts/default.html",
+      "assets/feed.xml"
+    ],
+    "pageviews.provider": [
+      "_includes/js-selector.html",
+      "_layouts/post.html"
+    ],
+    "paginate_path": [
+      "_includes/post-paginator.html"
+    ],
+    "posts": [
+      "_includes/update-list.html",
+      "_layouts/archives.html",
+      "_layouts/home.html",
+      "assets/feed.xml"
+    ],
+    "pwa.cache.enabled": [
+      "_includes/head.html"
+    ],
+    "pwa.enabled": [
+      "_includes/favicons.html",
+      "_includes/head.html",
+      "_layouts/default.html"
+    ],
+    "social_preview_image": [
+      "_includes/head.html"
+    ],
+    "social.email": [
+      "_includes/sidebar.html"
+    ],
+    "social.fediverse_handle": [
+      "_includes/head.html"
+    ],
+    "social.links": [
+      "_includes/footer.html",
+      "_layouts/post.html"
+    ],
+    "social.name": [
+      "_includes/footer.html",
+      "_layouts/post.html",
+      "assets/feed.xml"
+    ],
+    "tabs": [
+      "_includes/sidebar.html"
+    ],
+    "tagline": [
+      "_includes/sidebar.html"
+    ],
+    "tags": [
+      "_includes/related-posts.html",
+      "_includes/trending-tags.html",
+      "_layouts/tags.html"
+    ],
+    "theme": [
+      "_includes/head.html"
+    ],
+    "theme_mode": [
+      "_includes/sidebar.html",
+      "_layouts/default.html"
+    ],
+    "time": [
+      "_layouts/compress.html",
+      "assets/feed.xml"
+    ],
+    "title": [
+      "_includes/head.html",
+      "_includes/post-sharing.html",
+      "_includes/sidebar.html",
+      "_includes/topbar.html",
+      "assets/feed.xml"
+    ],
+    "toc": [
+      "_includes/head.html",
+      "_includes/js-selector.html",
+      "_includes/toc-status.html"
+    ],
+    "url": [
+      "_includes/embed/twitch.html",
+      "_includes/media-url.html"
+    ]
+  },
+  "page": {
+    "author": [
+      "_layouts/post.html"
+    ],
+    "authors": [
+      "_layouts/post.html"
+    ],
+    "categories": [
+      "_includes/related-posts.html",
+      "_layouts/post.html"
+    ],
+    "categories.size": [
+      "_layouts/post.html"
+    ],
+    "collection": [
+      "_includes/head.html",
+      "_includes/topbar.html",
+      "_layouts/page.html"
+    ],
+    "comments": [
+      "_includes/comment.html"
+    ],
+    "compress_html": [
+      "_layouts/compress.html"
+    ],
+    "content": [
+      "_includes/js-selector.html",
+      "_includes/toc-status.html"
+    ],
+    "date": [
+      "_layouts/post.html"
+    ],
+    "description": [
+      "_layouts/post.html"
+    ],
+    "image": [
+      "_includes/head.html",
+      "_layouts/post.html"
+    ],
+    "image.alt": [
+      "_layouts/post.html"
+    ],
+    "image.lqip": [
+      "_layouts/post.html"
+    ],
+    "image.no_bg": [
+      "_layouts/post.html"
+    ],
+    "image.path": [
+      "_includes/head.html",
+      "_layouts/post.html"
+    ],
+    "lang": [
+      "_includes/lang.html",
+      "_layouts/default.html"
+    ],
+    "last_modified_at": [
+      "_layouts/post.html"
+    ],
+    "layout": [
+      "_includes/head.html",
+      "_includes/js-selector.html",
+      "_includes/refactor-content.html",
+      "_includes/sidebar.html",
+      "_includes/topbar.html",
+      "_layouts/page.html"
+    ],
+    "math": [
+      "_includes/js-selector.html"
+    ],
+    "media_subpath": [
+      "_includes/embed/audio.html",
+      "_includes/embed/video.html",
+      "_includes/head.html",
+      "_includes/media-url.html",
+      "_includes/refactor-content.html"
+    ],
+    "mermaid": [
+      "_includes/js-selector.html"
+    ],
+    "next.title": [
+      "_includes/post-nav.html"
+    ],
+    "next.url": [
+      "_includes/post-nav.html"
+    ],
+    "path": [
+      "_includes/post-edit.html"
+    ],
+    "posts": [
+      "_layouts/category.html",
+      "_layouts/tag.html"
+    ],
+    "previous.title": [
+      "_includes/post-nav.html"
+    ],
+    "previous.url": [
+      "_includes/post-nav.html"
+    ],
+    "tags": [
+      "_includes/related-posts.html",
+      "_layouts/post.html"
+    ],
+    "tags.size": [
+      "_layouts/post.html"
+    ],
+    "title": [
+      "_includes/head.html",
+      "_includes/post-sharing.html",
+      "_includes/topbar.html",
+      "_layouts/category.html",
+      "_layouts/page.html",
+      "_layouts/post.html",
+      "_layouts/tag.html"
+    ],
+    "toc": [
+      "_includes/head.html",
+      "_includes/js-selector.html",
+      "_includes/toc-status.html"
+    ],
+    "url": [
+      "_includes/comments/disqus.html",
+      "_includes/post-sharing.html",
+      "_includes/related-posts.html",
+      "_includes/sidebar.html",
+      "_includes/topbar.html",
+      "assets/feed.xml"
+    ]
+  }
+}

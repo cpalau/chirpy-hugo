@@ -1,0 +1,141 @@
+{
+  "question": "Q1: number_of_words auto vs .WordCount",
+  "versions": {
+    "hugo": "hugo v0.168.0+extended+withdeploy linux/amd64 BuildDate=unknown",
+    "jekyll": "4.4.1",
+    "liquid": "4.0.4"
+  },
+  "conclusion": "`.WordCount` is whitespace-based and diverges for CJK (each Han/Kana/Hangul character counts as one word in Jekyll). The ported partial (findRE \\p{Han}\\p{Katakana}\\p{Hiragana}\\p{Hangul}) matches Jekyll on every case. Read time must use the partial, never .WordCount.",
+  "cases": [
+    {
+      "name": "english",
+      "chars": 44,
+      "jekyll_split": 9,
+      "jekyll_auto": 9,
+      "hugo_wordcount": 9,
+      "hugo_partial": 9,
+      "wordcount_matches": true,
+      "partial_matches": true
+    },
+    {
+      "name": "punctuation",
+      "chars": 30,
+      "jekyll_split": 6,
+      "jekyll_auto": 6,
+      "hugo_wordcount": 6,
+      "hugo_partial": 6,
+      "wordcount_matches": true,
+      "partial_matches": true
+    },
+    {
+      "name": "hyphens",
+      "chars": 36,
+      "jekyll_split": 3,
+      "jekyll_auto": 3,
+      "hugo_wordcount": 3,
+      "hugo_partial": 3,
+      "wordcount_matches": true,
+      "partial_matches": true
+    },
+    {
+      "name": "numbers",
+      "chars": 20,
+      "jekyll_split": 4,
+      "jekyll_auto": 4,
+      "hugo_wordcount": 4,
+      "hugo_partial": 4,
+      "wordcount_matches": true,
+      "partial_matches": true
+    },
+    {
+      "name": "spanish",
+      "chars": 39,
+      "jekyll_split": 7,
+      "jekyll_auto": 7,
+      "hugo_wordcount": 7,
+      "hugo_partial": 7,
+      "wordcount_matches": true,
+      "partial_matches": true
+    },
+    {
+      "name": "cyrillic",
+      "chars": 53,
+      "jekyll_split": 7,
+      "jekyll_auto": 7,
+      "hugo_wordcount": 7,
+      "hugo_partial": 7,
+      "wordcount_matches": true,
+      "partial_matches": true
+    },
+    {
+      "name": "emoji",
+      "chars": 17,
+      "jekyll_split": 5,
+      "jekyll_auto": 5,
+      "hugo_wordcount": 5,
+      "hugo_partial": 5,
+      "wordcount_matches": true,
+      "partial_matches": true
+    },
+    {
+      "name": "markup",
+      "chars": 24,
+      "jekyll_split": 6,
+      "jekyll_auto": 6,
+      "hugo_wordcount": 6,
+      "hugo_partial": 6,
+      "wordcount_matches": true,
+      "partial_matches": true
+    },
+    {
+      "name": "cjk_ja",
+      "chars": 11,
+      "jekyll_split": 1,
+      "jekyll_auto": 11,
+      "hugo_wordcount": 1,
+      "hugo_partial": 11,
+      "wordcount_matches": false,
+      "partial_matches": true
+    },
+    {
+      "name": "cjk_zh",
+      "chars": 9,
+      "jekyll_split": 1,
+      "jekyll_auto": 9,
+      "hugo_wordcount": 1,
+      "hugo_partial": 9,
+      "wordcount_matches": false,
+      "partial_matches": true
+    },
+    {
+      "name": "cjk_ko",
+      "chars": 11,
+      "jekyll_split": 2,
+      "jekyll_auto": 10,
+      "hugo_wordcount": 2,
+      "hugo_partial": 10,
+      "wordcount_matches": false,
+      "partial_matches": true
+    },
+    {
+      "name": "cjk_mixed",
+      "chars": 35,
+      "jekyll_split": 7,
+      "jekyll_auto": 9,
+      "hugo_wordcount": 7,
+      "hugo_partial": 9,
+      "wordcount_matches": false,
+      "partial_matches": true
+    },
+    {
+      "name": "empty",
+      "chars": 0,
+      "jekyll_split": 0,
+      "jekyll_auto": 0,
+      "hugo_wordcount": 0,
+      "hugo_partial": 0,
+      "wordcount_matches": true,
+      "partial_matches": true
+    }
+  ]
+}

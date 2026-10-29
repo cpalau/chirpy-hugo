@@ -1,0 +1,56 @@
+{
+  "question": "Q3: page.previous/next vs .Prev/.Next",
+  "versions": {
+    "hugo": "hugo v0.168.0+extended+withdeploy linux/amd64 BuildDate=unknown",
+    "jekyll": "4.4.1",
+    "liquid": "4.0.4"
+  },
+  "conclusion": "Jekyll page.previous is the older post and page.next the newer one, and Hugo agrees. Map previous -> .PrevInSection and next -> .NextInSection. The section-scoped variants are mandatory: .Prev/.Next walk every regular page, so an unrelated page (about, archives) becomes a neighbour.",
+  "mapping_holds": true,
+  "cases": [
+    {
+      "post": "post-01",
+      "jekyll_previous": "-",
+      "jekyll_next": "post-02",
+      "hugo_prev": "about",
+      "hugo_next": "post-02",
+      "hugo_prev_in_section": "-",
+      "hugo_next_in_section": "post-02",
+      "previous_is_older_maps_to_prev_in_section": true,
+      "next_is_newer_maps_to_next_in_section": true
+    },
+    {
+      "post": "post-02",
+      "jekyll_previous": "post-01",
+      "jekyll_next": "post-03",
+      "hugo_prev": "post-01",
+      "hugo_next": "post-03",
+      "hugo_prev_in_section": "post-01",
+      "hugo_next_in_section": "post-03",
+      "previous_is_older_maps_to_prev_in_section": true,
+      "next_is_newer_maps_to_next_in_section": true
+    },
+    {
+      "post": "post-03",
+      "jekyll_previous": "post-02",
+      "jekyll_next": "post-04",
+      "hugo_prev": "post-02",
+      "hugo_next": "post-04",
+      "hugo_prev_in_section": "post-02",
+      "hugo_next_in_section": "post-04",
+      "previous_is_older_maps_to_prev_in_section": true,
+      "next_is_newer_maps_to_next_in_section": true
+    },
+    {
+      "post": "post-04",
+      "jekyll_previous": "post-03",
+      "jekyll_next": "-",
+      "hugo_prev": "post-03",
+      "hugo_next": "-",
+      "hugo_prev_in_section": "post-03",
+      "hugo_next_in_section": "-",
+      "previous_is_older_maps_to_prev_in_section": true,
+      "next_is_newer_maps_to_next_in_section": true
+    }
+  ]
+}

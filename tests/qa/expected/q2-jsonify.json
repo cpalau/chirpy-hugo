@@ -1,0 +1,110 @@
+{
+  "question": "Q2: jsonify escaping vs Ruby JSON.generate",
+  "versions": {
+    "hugo": "hugo v0.168.0+extended+withdeploy linux/amd64 BuildDate=unknown",
+    "jekyll": "4.4.1",
+    "liquid": "4.0.4"
+  },
+  "conclusion": "Hugo escapes <, > and & as \\u003c/\\u003e/\\u0026 and U+2028/U+2029; Ruby emits them raw. Everything else is byte-identical. The five-substitution wrapper in tests/qa/q2-jsonify.mjs (NORMALIZER) reproduces Ruby exactly and must be used by every JSON output of the theme.",
+  "cases": [
+    {
+      "name": "plain",
+      "input": "Fixture 1",
+      "jekyll": "\"Fixture 1\"",
+      "hugo_jsonify": "\"Fixture 1\"",
+      "hugo_normalized": "\"Fixture 1\"",
+      "identical_raw": true,
+      "identical_normalized": true
+    },
+    {
+      "name": "quotes",
+      "input": "He said \"hi\" and 'bye'",
+      "jekyll": "\"He said \\\"hi\\\" and 'bye'\"",
+      "hugo_jsonify": "\"He said \\\"hi\\\" and 'bye'\"",
+      "hugo_normalized": "\"He said \\\"hi\\\" and 'bye'\"",
+      "identical_raw": true,
+      "identical_normalized": true
+    },
+    {
+      "name": "backslash",
+      "input": "C:\\path\\to\\file",
+      "jekyll": "\"C:\\\\path\\\\to\\\\file\"",
+      "hugo_jsonify": "\"C:\\\\path\\\\to\\\\file\"",
+      "hugo_normalized": "\"C:\\\\path\\\\to\\\\file\"",
+      "identical_raw": true,
+      "identical_normalized": true
+    },
+    {
+      "name": "newlines",
+      "input": "line1\nline2\ttab",
+      "jekyll": "\"line1\\nline2\\ttab\"",
+      "hugo_jsonify": "\"line1\\nline2\\ttab\"",
+      "hugo_normalized": "\"line1\\nline2\\ttab\"",
+      "identical_raw": true,
+      "identical_normalized": true
+    },
+    {
+      "name": "html",
+      "input": "<script>alert('x')</script> & <b>",
+      "jekyll": "\"<script>alert('x')</script> & <b>\"",
+      "hugo_jsonify": "\"\\u003cscript\\u003ealert('x')\\u003c/script\\u003e \\u0026 \\u003cb\\u003e\"",
+      "hugo_normalized": "\"<script>alert('x')</script> & <b>\"",
+      "identical_raw": false,
+      "identical_normalized": true
+    },
+    {
+      "name": "ampersand",
+      "input": "R&D and AT&T",
+      "jekyll": "\"R&D and AT&T\"",
+      "hugo_jsonify": "\"R\\u0026D and AT\\u0026T\"",
+      "hugo_normalized": "\"R&D and AT&T\"",
+      "identical_raw": false,
+      "identical_normalized": true
+    },
+    {
+      "name": "unicode",
+      "input": "áéíóú ñ 中文 🚀",
+      "jekyll": "\"áéíóú ñ 中文 🚀\"",
+      "hugo_jsonify": "\"áéíóú ñ 中文 🚀\"",
+      "hugo_normalized": "\"áéíóú ñ 中文 🚀\"",
+      "identical_raw": true,
+      "identical_normalized": true
+    },
+    {
+      "name": "separators",
+      "input": "a b c",
+      "jekyll": "\"a b c\"",
+      "hugo_jsonify": "\"a\\u2028b\\u2029c\"",
+      "hugo_normalized": "\"a b c\"",
+      "identical_raw": false,
+      "identical_normalized": true
+    },
+    {
+      "name": "control",
+      "input": "bell\u0007end",
+      "jekyll": "\"bell\\u0007end\"",
+      "hugo_jsonify": "\"bell\\u0007end\"",
+      "hugo_normalized": "\"bell\\u0007end\"",
+      "identical_raw": true,
+      "identical_normalized": true
+    },
+    {
+      "name": "slashes",
+      "input": "/posts/a/ https://example.com/x",
+      "jekyll": "\"/posts/a/ https://example.com/x\"",
+      "hugo_jsonify": "\"/posts/a/ https://example.com/x\"",
+      "hugo_normalized": "\"/posts/a/ https://example.com/x\"",
+      "identical_raw": true,
+      "identical_normalized": true
+    },
+    {
+      "name": "url",
+      "input": "http://127.0.0.1:4001/posts/full/",
+      "jekyll": "\"http://127.0.0.1:4001/posts/full/\"",
+      "hugo_jsonify": "\"http://127.0.0.1:4001/posts/full/\"",
+      "hugo_normalized": "\"http://127.0.0.1:4001/posts/full/\"",
+      "identical_raw": true,
+      "identical_normalized": true
+    }
+  ]
+}
