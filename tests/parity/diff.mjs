@@ -43,14 +43,14 @@ function readIgnore() {
   for (const raw of lines) {
     const line = raw.trimEnd();
     if (!line || line.trimStart().startsWith('#')) continue;
+    if (/^token_classes:\s*true/.test(line)) {
+      out.tokenClasses = true;
+      continue;
+    }
     if (!line.startsWith(' ')) {
       if (line === 'selectors:') section = 'selectors';
       else if (line === 'attributes:') section = 'attributes';
       else section = null;
-      continue;
-    }
-    if (/^token_classes:\s*true/.test(line)) {
-      out.tokenClasses = true;
       continue;
     }
     if (!section) continue;
@@ -58,9 +58,10 @@ function readIgnore() {
     if (!m) continue;
     const value = m[1].replace(/^["']|["']$/g, '');
     if (section === 'selectors') {
-      // "selector | D-xx | reason"
-      const [selector, id, ...rest] = value.split('|').map((s) => s.trim());
-      out.selectors.push({ selector, id, reason: rest.join(' | ') });
+      // "selector | D-xx | reason", or "selector@attr | D-xx | reason"
+      const [raw, id, ...rest] = value.split('|').map((s) => s.trim());
+      const [selector, attribute] = raw.split('@');
+      out.selectors.push({ selector, attribute: attribute || null, id, reason: rest.join(' | ') });
     } else {
       const [name, id, ...rest] = value.split('|').map((s) => s.trim());
       out.attributes.push({ name, id, reason: rest.join(' | ') });
@@ -105,12 +106,21 @@ function matches(node, selector) {
   });
 }
 
+function textOf(node) {
+  if (node.nodeName === '#text') return node.value;
+  return (node.childNodes || []).map(textOf).join('');
+}
+
 function attr(node, name) {
   const a = node.attrs?.find((x) => x.name === name);
   return a ? a.value : null;
 }
 
 // --- canonicalization ---
+
+// D-14: Jekyll emits /page2/, Hugo /page/2/. Normalise the shape so the
+// comparison measures the page, not the URL option Hugo mangles.
+const normalizePageURLs = (value) => value.replace(/\/page\/(\d+)\//g, '/page$1/');
 
 function canonicalize(node, ignore, inherited = false, inRougeCode = false) {
   const tag = node.tagName;
@@ -120,7 +130,7 @@ function canonicalize(node, ignore, inherited = false, inRougeCode = false) {
   if (node.nodeName === '#comment') return null;
 
   if (node.nodeName === '#text') {
-    let value = node.value;
+    let value = normalizePageURLs(node.value);
     value = preserve ? value : value.replace(/\s+/g, ' ');
     if (!preserve) value = value.trim();
     if (!value) return null;
@@ -132,18 +142,24 @@ function canonicalize(node, ignore, inherited = false, inRougeCode = false) {
     return { tag: node.nodeName, attrs: [], children, preserve };
   }
 
-  if (tag && ignore.selectors.some((s) => matches(node, s.selector))) return null;
+  if (tag && ignore.selectors.some((s) => !s.attribute && matches(node, s.selector))) return null;
 
   const attrs = (node.attrs || [])
     .filter((a) => !ignore.attributes.some((x) => x.name === a.name))
     .filter((a) => !(ignore.tokenClasses && rouge && tag === 'span' && a.name === 'class'))
+    .filter((a) => !ignore.selectors.some((s) => s.attribute === a.name && matches(node, s.selector)))
     .map((a) => {
-      let value = a.value;
+      let value = normalizePageURLs(a.value);
       if (a.name === 'class') value = value.split(/\s+/).filter(Boolean).sort().join(' ');
       if (BOOLEAN.has(a.name)) value = '';
       return [a.name, value];
     })
     .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+
+  if (ignore.tokenClasses && rouge && tag === 'pre') {
+    const text = (node.childNodes || []).map((c) => (c.nodeName === '#text' ? c.value : textOf(c))).join('');
+    return { tag, attrs, children: [{ text }], preserve: true };
+  }
 
   let children = (node.childNodes || [])
     .map((c) => canonicalize(c, ignore, preserve, rouge))
@@ -161,7 +177,10 @@ function canonicalize(node, ignore, inherited = false, inRougeCode = false) {
         .replace(/\\u0022/gi, '"')
         .replace(/\\u0026/gi, '&')
         .replace(/\\u0027/gi, "'")
-        .replace(/\\'/g, "'");
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"')
+        .replace(/\\n/g, ' ')
+        .replace(/\\t/g, ' ');
       return { text: v.replace(/\s+/g, ' ').trim() };
     });
   }

@@ -25,8 +25,14 @@ const ROOT = path.resolve(import.meta.dirname, '../..');
 const PORT = 4001;
 const FIXED_TIME = new Date('2026-06-01T12:00:00Z');
 
+// The twelve fixtures, plus the three listing pages of fixture 11.
+const FIXTURES = [
+  '/', '/posts/full/', '/posts/code/', '/posts/prompts/', '/posts/math/',
+  '/posts/mermaid/', '/posts/embeds/', '/posts/images/', '/posts/i18n-es/',
+  '/posts/tables-footnotes/', '/about/', '/archives/', '/categories/', '/tags/',
+];
 const PAGES = process.argv.includes('--all')
-  ? ['/', '/posts/full/', '/posts/code/', '/posts/prompts/', '/posts/images/', '/about/', '/tags/']
+  ? FIXTURES
   : ['/', '/posts/full/', '/posts/code/'];
 
 const VIEWPORTS = [
@@ -136,7 +142,21 @@ async function main() {
           await page.evaluate(() => document.fonts.ready);
           await page.waitForTimeout(250);
           const name = `${theme}-${viewport.name}-${url === '/' ? 'home' : url.replace(/^\/|\/$/g, '').replace(/\//g, '-')}.png`;
+          // Declared exceptions: D-09 (footer branding) and D-02 (code token
+          // colours). Their boxes are recorded so the comparator can prove that
+          // *nothing else* differs by a single pixel.
+          const masks = await page.evaluate(() => {
+            const rect = (el, id) => {
+              const b = el.getBoundingClientRect();
+              return { id, x: b.left + window.scrollX, y: b.top + window.scrollY, w: b.width, h: b.height };
+            };
+            const out = [];
+            document.querySelectorAll('footer > p:nth-of-type(2)').forEach((el) => out.push(rect(el, 'D-09')));
+            document.querySelectorAll('td.rouge-code > pre').forEach((el) => out.push(rect(el, 'D-02')));
+            return out;
+          });
           await page.screenshot({ path: path.join(outDir, name), fullPage: true, animations: 'disabled', caret: 'hide' });
+          fs.writeFileSync(path.join(outDir, name.replace(/\.png$/, '.masks.json')), JSON.stringify(masks));
         }
         await context.close();
         console.log(`  ${side}: ${theme} ${viewport.name} → ${PAGES.length} shot(s)`);

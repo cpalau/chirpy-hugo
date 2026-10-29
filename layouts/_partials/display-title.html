@@ -1,0 +1,14 @@
+{{- /* The title upstream would print. Jekyll keeps the front-matter/generated
+       string (`alpha`), while Hugo titlecases taxonomy terms (`Alpha`) and uses
+       the tab filename for pages. Returns a string. */ -}}
+{{- $kind := partial "page-kind.html" . -}}
+{{- $title := .Title -}}
+{{- if in (slice "taxonomy" "term" "tag" "category") $kind -}}
+  {{- $title = index (partial "taxonomy-labels.html" .) (lower .Title) | default .Title -}}
+{{- else if eq $kind "page" -}}
+  {{- $key := index (split (strings.Trim .RelPermalink "/") "/") 0 -}}
+  {{- if in (slice "about" "archives" "categories" "tags") $key -}}
+    {{- $title = T (printf "tabs.%s" $key) | default .Title -}}
+  {{- end -}}
+{{- end -}}
+{{- return $title -}}

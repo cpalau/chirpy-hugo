@@ -86,6 +86,32 @@ A template is "done" when `npm run test:parity` and `npm run test:visual`
 pass against the **Jekyll build of the same content**. "It looks right in my
 browser" is not evidence.
 
+### R3b — Pixel parity is 100 %, not a budget
+
+There is **no percentage budget**. A page is correct when **zero** pixels
+differ from the Jekyll render, and a single differing pixel fails Gate G5.
+
+The only permitted exceptions are the ones declared in
+`docs/COMPATIBILITY.md`, and each one must be:
+
+1. **impossible** to reproduce in Hugo (not "hard", not "not today"),
+2. **bounded**: the harness records its exact bounding box at capture time and
+   counts every pixel outside those boxes, so an exemption cannot hide a
+   regression somewhere else,
+3. **proved harmless** by a test, and
+4. listed with its `D-xx`.
+
+Today there are exactly two, and both are rectangles measured on every run:
+
+| D-xx | Box | Why |
+|---|---|---|
+| D-02 | every `td.rouge-code > pre` | Chroma's token classes are not Rouge's, and two pairs are coloured differently |
+| D-09 | `footer > p:nth-of-type(2)` | the footer must credit Hugo, not claim Jekyll |
+
+Anything else — one pixel, one attribute, one text node — is a bug, not a
+divergence. If a page is not at zero, `docs/POC.md` §5 tracks it with an owner;
+it is never silently accepted by raising a threshold.
+
 ### R4 — Build must be warning-free
 
 `hugo --panicOnWarning --gc --minify` must pass. No `WARN`, no `ERROR`, no

@@ -6,18 +6,15 @@
     flex-lg-row justify-content-lg-between align-items-lg-center pb-lg-3
   "
 >
+  {{- $social := .Site.Params.social }}
   <p>
-    {{- "©" }}
-    <time>{{ now.Year }}</time>
-
-    {{- $social := .Site.Params.social -}}
-    {{- if $social.links -}}
+    © <time>{{ now.Year }}</time>
+    {{ if $social.links -}}
       <a href="{{ index $social.links 0 }}">{{ $social.name }}</a>.
     {{- else -}}
       <em class="fst-normal">{{ $social.name }}</em>.
     {{- end }}
-
-    {{- with T "copyright.brief" }}
+    {{ with T "copyright.brief" -}}
       <span
         data-bs-toggle="tooltip"
         data-bs-placement="top"

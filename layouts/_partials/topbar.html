@@ -2,7 +2,7 @@
 {{- $kind := partial "page-kind.html" . -}}
 {{- $tabKeys := slice "home" "about" "archives" "categories" "tags" -}}
 {{- $home := T "tabs.home" | default "Home" -}}
-{{- $segments := split (strings.Trim .RelPermalink "/") "/" -}}
+{{- $segments := split (strings.TrimSuffix "/" .RelPermalink) "/" -}}
 <header id="topbar-wrapper" class="flex-shrink-0" aria-label="Top Bar">
   <div id="topbar" class="d-flex align-items-center justify-content-between px-lg-3 h-100">
     <nav id="breadcrumb" aria-label="Breadcrumb">
@@ -17,8 +17,7 @@
               <a href="{{ "/" | relURL }}">{{ strings.FirstUpper $home }}</a>
             </span>
           {{- else if eq $i (sub $total 1) }}
-            {{- $label := $.Title -}}
-            {{- if in $tabKeys $item }}{{ $label = T (printf "tabs.%s" $item) | default $.Title }}{{ end }}
+            {{- $label := partial "display-title.html" $ }}
             <span>{{ $label }}</span>
           {{- else if in (slice "category" "tag") $kind }}
             <span>
@@ -37,8 +36,7 @@
       {{- if eq $kind "home" }}
         {{- T "title" | default .Site.Title -}}
       {{- else if eq $kind "page" }}
-        {{- $key := index $segments 0 -}}
-        {{- if in $tabKeys $key }}{{ T (printf "tabs.%s" $key) | default .Title }}{{ else }}{{ .Title }}{{ end -}}
+        {{- partial "display-title.html" . -}}
       {{- else }}
         {{- T (printf "layout.%s" $kind) | default (strings.FirstUpper $kind) -}}
       {{- end }}

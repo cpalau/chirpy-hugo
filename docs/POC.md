@@ -89,20 +89,27 @@ than the exempted ones, class lists, text content, nesting — matches.
 18 comparisons (3 pages × 3 viewports × 2 themes), Playwright + pixelmatch,
 budget `threshold 0.1`, `maxDiffPixelRatio 0.001`.
 
-| Pages | Light | Dark |
-|---|---|---|
-| `/posts/code/` desktop | **0.083 % ✅** | **0.081 % ✅** |
-| `/posts/code/` tablet | 0.129 % | 0.135 % |
-| `/posts/code/` mobile | 0.238 % | 0.245 % |
-| `/posts/full/` desktop | 0.158 % | 0.153 % |
-| `/posts/full/` mobile | 0.523 % | 0.511 % |
-| home desktop | 0.154 % | 0.152 % |
-| home mobile | 0.523 % | 0.522 % |
+The gate is **zero pixels**, not a ratio (AGENTS.md R3b). The harness records the
+bounding box of the two declared exceptions (D-02 code tokens, D-09 footer) and
+counts every pixel outside them.
 
-Two pairs already pass the budget after one day. The rest is between 0.13 % and
-0.52 %, localised in thin horizontal bands (81 rows out of 2300 on the desktop
-post page) and traceable to the known DOM differences: related-post order,
-read-time word count and the term-page labels. No layout breakage remains.
+| Matrix | Result |
+|---|---|
+| 3 pages × 3 viewports × 2 themes | **18 / 18** pixel-identical outside the boxes |
+| 14 pages × 3 viewports × 2 themes | **58 / 84** pixel-identical outside the boxes |
+
+The 3-page set was the first target and is met. On the full 14-page matrix the
+remaining 26 pairs are five pages, each with a named cause:
+
+| Page | Cause |
+|---|---|
+| `/posts/math/` | MathJax renders client-side; the capture does not wait for it to finish (F7: renderer-stabilised pass) |
+| `/posts/mermaid/` | same, Mermaid |
+| `/posts/tables-footnotes/` | the footnote block (D-16) |
+| `/posts/embeds/` | the iframes are blocked by the route allowlist; the placeholder heights differ (F7: local stubs) |
+| `/categories/` | the taxonomy index layout still differs from the tab page |
+
+None of them is a percentage budget: each is a specific, reproducible page.
 
 Two real bugs were found *by* Gate 5 and fixed, which is the reason the numbers
 are this low:

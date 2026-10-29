@@ -1,23 +1,19 @@
 {{- /* Ports _includes/search-loader.html. SimpleJekyllSearch consumes the JSON
-       index; the template string must stay byte-identical. */ -}}
-{{- $result := `<article class="px-1 px-sm-2 px-lg-4 px-xl-0">
-    <header>
-      <h2><a href="{url}">{title}</a></h2>
-      <div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1">
-        {categories}
-        {tags}
-      </div>
-    </header>
-    <p>{content}</p>
-  </article>` -}}
+       index; the template string must stay byte-identical. Go's html/template
+       re-encodes JS string literals (\/, \u003c, \"), so the comparator
+       normalises those sequences (tests/parity/ignore.yml). */ -}}
+{{- /* The result template is inlined literally: Go's html/template re-encodes
+       `<` inside an interpolated JS string, and the executed JS must stay
+       byte-identical to upstream. Only the JSON path and the i18n string are
+       interpolated, and neither contains `<`. */ -}}
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     SimpleJekyllSearch({
       searchInput: document.getElementById('search-input'),
       resultsContainer: document.getElementById('search-results'),
-      json: '{{ "/assets/js/data/search.json" | relURL | safeJS }}',
-      searchResultTemplate: '{{ $result | safeJS }}',
-      noResultsText: '<p class="mt-5">{{ T "search.no_results" | safeJS }}</p>',
+      json: '{{ "/assets/js/data/search.json" | relURL }}',
+      searchResultTemplate: ' <article class="px-1 px-sm-2 px-lg-4 px-xl-0"> <header> <h2><a href="{url}">{title}</a></h2> <div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags} </div> </header> <p>{content}</p> </article>',
+      noResultsText: '<p class="mt-5">{{ T "search.no_results" }}</p>',
       templateMiddleware: function(prop, value, template) {
         if (prop === 'categories') {
           if (value === '') {

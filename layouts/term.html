@@ -2,10 +2,11 @@
 {{- define "main" }}
 {{- $isCategory := eq .Type "categories" }}
 {{- $labels := partial "taxonomy-labels.html" . }}
+<article class="px-1">
 <div id="page-{{ if $isCategory }}category{{ else }}tag{{ end }}">
   <h1 class="ps-lg-2">
     <i class="{{ if $isCategory }}far fa-folder-open{{ else }}fa fa-tag{{ end }} fa-fw text-muted"></i>
-    {{ index $labels (lower .Title) | default .Title }}
+    {{ partial "display-title.html" . }}
     <span class="lead text-muted ps-2">{{ len .Pages }}</span>
   </h1>
   <ul class="content ps-0">
@@ -18,4 +19,5 @@
     {{- end }}
   </ul>
 </div>
+</article>
 {{- end }}

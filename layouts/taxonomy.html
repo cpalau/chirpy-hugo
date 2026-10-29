@@ -1,6 +1,7 @@
 {{- /* Ports _layouts/categories.html and _layouts/tags.html. */ -}}
 {{- define "main" }}
 {{- $labels := partial "taxonomy-labels.html" . }}
+{{- /* the tab pages upstream are wrapped by page.html: title + .content */ -}}
 {{- if eq .Type "categories" }}
 {{- $lang := .Lang -}}
 {{- $headPrefix := "h_" -}}
@@ -9,7 +10,6 @@
 {{- $names := slice -}}
 {{- range $name, $pages := .Site.Taxonomies.categories }}{{ $names = $names | append $name }}{{ end -}}
 {{- $names = sort $names -}}
-<div class="d-flex flex-column">
 {{- range $names }}
   {{- $name := . -}}
   {{- $pages := index $.Site.Taxonomies.categories $name -}}
@@ -72,17 +72,31 @@
   {{- $groupIndex = add $groupIndex 1 }}
   {{- end }}
 {{- end }}
-</div>
+  </div>
+</article>
 {{- else }}
-{{- $names := slice -}}
-{{- range $name, $pages := .Site.Taxonomies.tags }}{{ $names = $names | append $name }}{{ end -}}
-{{- $names = partial "sort-natural.html" $names -}}
+{{- /* Upstream sorts the ORIGINAL strings; Hugo only keeps the lowercased
+       keys, so the labels are sorted and mapped back (G-40). */ -}}
+{{- $byLabel := dict -}}
+{{- $labelsOnly := slice -}}
+{{- range $name, $pages := .Site.Taxonomies.tags -}}
+  {{- $label := index $labels $name | default $name -}}
+  {{- $byLabel = merge $byLabel (dict $label $name) -}}
+  {{- $labelsOnly = $labelsOnly | append $label -}}
+{{- end -}}
+{{- $sorted := partial "sort-natural.html" $labelsOnly -}}
+<article class="px-1">
+  <h1 class="dynamic-title">{{ partial "display-title.html" . }}</h1>
+  <div class="content">
 <div id="tags" class="d-flex flex-wrap mx-xl-2">
-  {{- range $names }}
+  {{- range $sorted }}
+  {{- $key := index $byLabel . }}
   <div>
-    <a class="tag" href="{{ printf "/tags/%s/" (urlquery (partial "slugify.html" .)) | relURL }}">{{ index $labels . | default . }}<span class="text-muted">{{ len (index $.Site.Taxonomies.tags .) }}</span></a>
+    <a class="tag" href="{{ printf "/tags/%s/" (urlquery (partial "slugify.html" $key)) | relURL }}"> {{ . }}<span class="text-muted">{{ len (index $.Site.Taxonomies.tags $key) }}</span></a>
   </div>
   {{- end }}
 </div>
+  </div>
+</article>
 {{- end }}
 {{- end }}

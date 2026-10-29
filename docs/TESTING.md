@@ -244,6 +244,13 @@ expect(page).toHaveScreenshot(`…png`, {
 });
 ```
 
+**The rule is zero pixels, not a ratio** (`AGENTS.md` R3b). The capture step
+records the bounding box of every declared exception (D-02 code tokens, D-09
+footer) in a `.masks.json` next to each screenshot; the comparator counts the
+differing pixels **outside** those boxes and fails if there is a single one.
+Inside the boxes the count is reported, never hidden: a change in the code
+colouring still shows up in the numbers.
+
 A failure writes three artifacts to `test-results/`: expected (Jekyll),
 actual (Hugo), diff (highlighted). The diff image is the review artifact; it is
 attached to the CI run and must be reviewed before updating snapshots.

@@ -16,4 +16,5 @@
   {{- if $i }}{{ $json = printf "%s," $json }}{{ end -}}
   {{- $json = printf "%s\n  {\n    \"title\": %s,\n    \"url\": %s,\n    \"categories\": %s,\n    \"tags\": %s,\n    \"date\": %s,\n    \"content\": %s\n  }" $json (partial "jsonify.html" $item.title) (partial "jsonify.html" $item.url) (partial "jsonify.html" $item.categories) (partial "jsonify.html" $item.tags) (partial "jsonify.html" $item.date) (partial "jsonify.html" $item.content) -}}
 {{- end -}}
-[{{ $json }}{{ if $out }}\n{{ end }}]
+[{{ $json }}
+]

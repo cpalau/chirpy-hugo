@@ -20,14 +20,7 @@
 
   {{- $titleText := .Site.Title -}}
   {{- if ne $kind "home" -}}
-    {{- $pageTitle := .Title -}}
-    {{- if eq $kind "page" -}}
-      {{- $key := index (split (strings.Trim .RelPermalink "/") "/") 0 -}}
-      {{- if in (slice "about" "archives" "categories" "tags") $key -}}
-        {{- $pageTitle = T (printf "tabs.%s" $key) | default .Title -}}
-      {{- end -}}
-    {{- end -}}
-    {{- $titleText = printf "%s | %s" $pageTitle .Site.Title -}}
+    {{- $titleText = printf "%s | %s" (partial "display-title.html" .) .Site.Title -}}
   {{- end }}
   <title>{{ $titleText }}</title>
 

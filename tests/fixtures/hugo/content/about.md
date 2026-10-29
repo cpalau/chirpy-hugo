@@ -2,6 +2,7 @@
 title: "About"
 layout: page
 date: 2026-01-01T00:00:00Z
+description: "About this site"
 ---
 
 ## About this site

@@ -113,8 +113,9 @@ execute external highlighter binaries, and rewriting the SCSS is forbidden
 
 ### Decision
 
-- Accept. `tests/parity/ignore.yml` exempts the `class` attribute of `<span>`
-  inside `td.rouge-code`; everything else in the block is compared.
+- Accept. `tests/parity/ignore.yml` exempts the token markup (`<pre>` content is
+  compared as text) and Gate G5 masks exactly `td.rouge-code > pre`; every pixel
+  outside that box must be zero.
 - Documented here so users know exactly what "not pixel perfect" means: the
   colour of some tokens, nothing else.
 - A user who needs exact colours can post-process the output with Rouge outside
@@ -402,6 +403,61 @@ coupling.
 - G8: sha256 of every committed artifact equals the gem's copy (`--check`).
 - G8: a new gem-only artifact with no `source: gem` declaration fails coverage.
 - G5: the visual suite consumes the committed artifacts, exactly like a user.
+
+---
+
+## D-15 — Taxonomy index metadata
+
+| | |
+|---|---|
+| Status | open |
+| Affects | `/categories/`, `/tags/` (head only) |
+| Upstream | the `_tabs` placeholders are pages with a date, so jekyll-seo-tag emits `og:type=article` plus `article:published_time` |
+| This port | Hugo generates the taxonomy index, which has no page date, so it emits `og:type=website` |
+| Blast radius | two `<meta>` tags; no pixels |
+
+Upstream's date is the **file mtime** of the tab file, which is not reproducible
+in any case. The fixture pins it, but a Hugo taxonomy page cannot carry front
+matter. Making the theme invent a date would be worse than the missing tag.
+
+Pixel impact: none (proved by G5). Tracked in `docs/POC.md` §5.
+
+---
+
+## D-16 — Footnote markup
+
+| | |
+|---|---|
+| Status | open |
+| Affects | `post/tables-footnotes` |
+| Upstream | kramdown: `id="fn:<label>"`, `class="footnote"`, `rel="footnote"` |
+| This port | Goldmark: `id="fn:<n>"`, `class="footnote-ref"`, no `rel` |
+| Blast radius | footnote anchors; the visible text and rules are identical |
+
+Hugo has no footnote render hook, so the ids and classes cannot be rewritten
+without re-implementing the extension. What *is* reproduced: no `<hr>` before
+the list (Goldmark adds one), the backlink class, and the space before the
+backlink.
+
+Pixel impact: none (proved by G5). Internal `#fn:1` anchors differ from
+upstream's `#fn:<label>`.
+
+---
+
+## D-17 — Display math written with `$$`
+
+| | |
+|---|---|
+| Status | closed |
+| Affects | `post/math` |
+| Upstream | kramdown rewrites `$$ … $$` as `\[ … \]` |
+| This port | a `replaceRE` in `_partials/content.html` does the same |
+| Blast radius | none |
+
+Goldmark's passthrough keeps the `$$` delimiters verbatim; kramdown converts
+them. The theme converts them too, so the rendered text matches. Passthrough is
+also enabled (`markup.goldmark.extensions.passthrough`) because without it
+Goldmark eats LaTeX escapes such as `\,`.
 
 ---
 

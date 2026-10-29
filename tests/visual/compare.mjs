@@ -30,6 +30,14 @@ const argValue = (name, fallback) => {
 const THRESHOLD = argValue('--threshold', 0.1);
 const MAX_RATIO = argValue('--max-ratio', 0.001);
 
+function readMasks(dir, file) {
+  const p = path.join(dir, file.replace(/\.png$/, '.masks.json'));
+  if (!fs.existsSync(p)) return [];
+  return JSON.parse(fs.readFileSync(p, 'utf8'));
+}
+
+const inMask = (masks, x, y) => masks.some((m) => x >= m.x && x < m.x + m.w && y >= m.y && y < m.y + m.h);
+
 function main() {
   if (!fs.existsSync(ORACLE) || !fs.existsSync(HUGO)) {
     console.error('missing shots; run tests/visual/capture.mjs for both sides');
@@ -71,13 +79,33 @@ function main() {
       threshold: THRESHOLD,
       includeAA: false,
     });
-    const ratio = pixels / (width * height);
-    if (ratio > MAX_RATIO) {
+    const masks = [...readMasks(ORACLE, file), ...readMasks(HUGO, file)];
+    let outside = 0;
+    let inside = 0;
+    const bbox = { x0: Infinity, y0: Infinity, x1: -1, y1: -1 };
+    if (pixels) {
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const i = (y * width + x) * 4;
+          if (diff.data[i] !== 255 || diff.data[i + 1] !== 0 || diff.data[i + 2] !== 0) continue;
+          if (inMask(masks, x, y)) inside += 1;
+          else {
+            outside += 1;
+            if (x < bbox.x0) bbox.x0 = x;
+            if (y < bbox.y0) bbox.y0 = y;
+            if (x > bbox.x1) bbox.x1 = x;
+            if (y > bbox.y1) bbox.y1 = y;
+          }
+        }
+      }
+    }
+    const ratio = outside / (width * height);
+    if (outside > 0) {
       fs.writeFileSync(path.join(OUT, file.replace(/\.png$/, '-diff.png')), PNG.sync.write(diff));
       failed += 1;
-      rows.push({ file, status: 'DIFF', ratio, pixels, heightDelta });
+      rows.push({ file, status: 'DIFF', ratio, pixels, outside, inside, heightDelta, bbox });
     } else {
-      rows.push({ file, status: 'ok', ratio, pixels, heightDelta });
+      rows.push({ file, status: 'ok', ratio, pixels, outside, inside, heightDelta, bbox });
     }
   }
 
@@ -85,10 +113,12 @@ function main() {
   for (const row of rows) {
     const pct = (row.ratio * 100).toFixed(3);
     const delta = row.heightDelta ? `  height +${row.heightDelta}px` : '';
-    console.log(`  ${row.status === 'ok' ? 'ok  ' : 'FAIL'}  ${row.file.padEnd(width)}  ${pct}%${delta}`);
+    const declared = row.inside ? `  (${row.inside}px in declared D-02/D-09 boxes)` : '';
+    const where = row.outside ? `  at x${row.bbox.x0}-${row.bbox.x1} y${row.bbox.y0}-${row.bbox.y1}` : '';
+    console.log(`  ${row.status === 'ok' ? 'ok  ' : 'FAIL'}  ${row.file.padEnd(width)}  ${row.outside ?? 0}px outside${where}${declared}${delta}`);
   }
-  console.log(`\n${rows.length} pair(s): ${rows.length - failed} within budget, ${failed} over it`);
-  console.log(`budget: threshold ${THRESHOLD}, max ${MAX_RATIO * 100}% of pixels`);
+  console.log(`\n${rows.length} pair(s): ${rows.length - failed} pixel-identical outside the declared boxes, ${failed} not`);
+  console.log(`rule: 0 differing pixels outside D-02/D-09 boxes (threshold ${THRESHOLD}, AA ignored)`);
   if (failed) console.log(`diff images: ${path.relative(ROOT, OUT)}`);
   process.exit(failed === 0 ? 0 : 1);
 }

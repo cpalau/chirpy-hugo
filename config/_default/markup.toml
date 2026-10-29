@@ -17,3 +17,12 @@
 [markup.tableOfContents]
   startLevel = 2
   endLevel = 3
+
+# Math is passed through untouched, otherwise Goldmark eats LaTeX escapes
+# (`\,` becomes `,`) and the rendered formula changes.
+[markup.goldmark.extensions.passthrough]
+  enable = true
+
+[markup.goldmark.extensions.passthrough.delimiters]
+  block = [['$$', '$$'], ['\\[', '\\]']]
+  inline = [['$', '$'], ['\\(', '\\)']]

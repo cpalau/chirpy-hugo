@@ -3,27 +3,29 @@
        is a bug to be measured by G4, not silently ignored. */ -}}
 {{- $kind := partial "page-kind.html" . -}}
 {{- $site := .Site -}}
-{{- $title := cond (eq $kind "home") $site.Title .Title -}}
+{{- $title := cond (eq $kind "home") $site.Title (partial "display-title.html" .) -}}
 {{- $desc := "" -}}
 {{- if .Description -}}
   {{- $desc = .Description -}}
-{{- else if eq $kind "home" -}}
-  {{- $desc = $site.Params.description -}}
-{{- else -}}
+{{- else if eq $kind "post" -}}
   {{- $desc = .Summary | plainify | replaceRE `\s+` " " | strings.TrimSpace -}}
+{{- else -}}
+  {{- $desc = $site.Params.description -}}
 {{- end -}}
 {{- $author := "" -}}
 {{- $authorURL := "" -}}
+{{- $authorTwitter := "" -}}
 {{- with .Params.author -}}
   {{- with index hugo.Data.authors . -}}
     {{- $author = .name -}}
     {{- $authorURL = .url | default "" -}}
+    {{- $authorTwitter = .twitter | default "" -}}
   {{- end -}}
 {{- end -}}
 {{- $social := $site.Params.social -}}
 {{- $twitterSite := "" -}}
 {{- with $site.Params.twitter_username }}{{ $twitterSite = printf "@%s" . }}{{ end -}}
-{{- $isArticle := ne $kind "home" -}}
+{{- $isArticle := in (slice "post" "page" "archives") $kind -}}
 {{- $iso := "2006-01-02T15:04:05-07:00" -}}
 {{- $modified := .Date -}}
 {{- with .Params.lastmod }}{{ $modified = time.AsTime . }}{{ end -}}
@@ -38,8 +40,14 @@
 <meta name="description" content="{{ . }}" />
 <meta name="twitter:description" property="og:description" content="{{ . }}" />
 {{- end }}
-<link rel="canonical" href="{{ .Permalink }}" />
-<meta property="og:url" content="{{ .Permalink }}" />
+{{- $canonical := .Permalink -}}
+{{- if eq $kind "home" -}}
+  {{- with (.Paginate (where $.Site.RegularPages "Type" "posts")) -}}
+    {{- if gt .PageNumber 1 }}{{ $canonical = .URL | absURL }}{{ end -}}
+  {{- end -}}
+{{- end }}
+<link rel="canonical" href="{{ $canonical }}" />
+<meta property="og:url" content="{{ $canonical }}" />
 <meta property="og:site_name" content="{{ $site.Title }}" />
 {{- $pageImage := "" -}}
 {{- $pageImageAlt := "" -}}
@@ -58,11 +66,11 @@
 {{- end }}
 {{- end }}
 <meta property="og:type" content="{{ cond $isArticle "article" "website" }}" />
-{{- if and (eq $kind "home") .Paginator }}
-  {{- with .Paginator.Next }}
+{{- if eq $kind "home" }}
+  {{- with (.Paginate (where $.Site.RegularPages "Type" "posts")).Next }}
 <link rel="next" href="{{ .URL | absURL }}" />
   {{- end }}
-  {{- with .Paginator.Prev }}
+  {{- with (.Paginate (where $.Site.RegularPages "Type" "posts")).Prev }}
 <link rel="prev" href="{{ .URL | absURL }}" />
   {{- end }}
 {{- end }}
@@ -89,10 +97,8 @@
 {{- with $twitterSite }}
 <meta name="twitter:site" content="{{ . }}" />
 {{- end }}
-{{- with $author }}
-{{- with $site.Params.twitter_username }}
+{{- with $authorTwitter }}
 <meta name="twitter:creator" content="@{{ . }}" />
-{{- end }}
 {{- end }}
 {{- with $site.Params.webmaster_verifications }}
 {{- with .google }}
@@ -115,7 +121,7 @@
 {{- end }}
 {{- end }}
 {{- $ld := "" -}}
-{{- if $isArticle -}}
+{{- if or (eq $kind "post") (eq $kind "archives") -}}
   {{- $ld = printf `{"@context":"https://schema.org","@type":"BlogPosting"` -}}
   {{- with $author -}}
     {{- $authorObj := printf `{"@type":"Person","name":%s` (partial "jsonify.html" .) -}}
@@ -123,15 +129,22 @@
     {{- $ld = printf `%s,"author":%s}` $ld $authorObj -}}
   {{- end -}}
   {{- $ld = printf `%s,"dateModified":%s,"datePublished":%s,"description":%s,"headline":%s` $ld (partial "jsonify.html" ($modified.Format $iso)) (partial "jsonify.html" (.Date.Format $iso)) (partial "jsonify.html" $desc) (partial "jsonify.html" .Title) -}}
+  {{- $pageImage := "" -}}
+  {{- with .Params.image }}{{ $pageImage = partial "media-url.html" (dict "src" (.path | default .) "subpath" $.Params.media_subpath "absolute" true) }}{{ end -}}
   {{- with .Params.image -}}
     {{- if reflect.IsMap . -}}
       {{- $img := printf `{"alt":%s` (partial "jsonify.html" (.alt | default "")) -}}
       {{- with .lqip }}{{ $img = printf `%s,"lqip":%s` $img (partial "jsonify.html" .) }}{{ end -}}
-      {{- with .path }}{{ $img = printf `%s,"path":%s` $img (partial "jsonify.html" .) }}{{ end -}}
-      {{- $ld = printf `%s,"image":%s}` $ld $img -}}
+      {{- with $pageImage }}{{ $img = printf `%s,"url":%s` $img (partial "jsonify.html" .) }}{{ end -}}
+      {{- $img = printf `%s,"@type":"imageObject"}` $img -}}
+      {{- $ld = printf `%s,"image":%s` $ld $img -}}
     {{- end -}}
   {{- end -}}
   {{- $ld = printf `%s,"mainEntityOfPage":{"@type":"WebPage","@id":%s},"url":%s}` $ld (partial "jsonify.html" .Permalink) (partial "jsonify.html" .Permalink) -}}
+{{- else if and (eq $kind "home") (gt (.Paginate (where $.Site.RegularPages "Type" "posts")).PageNumber 1) -}}
+  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebPage","description":%s,"headline":%s,"url":%s}` (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $canonical) -}}
+{{- else if in (slice "taxonomy" "term" "tag" "category") $kind -}}
+  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebPage","description":%s,"headline":%s,"url":%s}` (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $canonical) -}}
 {{- else -}}
   {{- $ld = printf `{"@context":"https://schema.org","@type":"WebSite"` -}}
   {{- if and (ne $kind "home") (not .Date.IsZero) -}}

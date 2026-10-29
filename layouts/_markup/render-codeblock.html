@@ -2,6 +2,11 @@
        Chroma produces the token stream; this hook rebuilds Rouge's DOM and
        prepends the code header that upstream generates in refactor-content. */ -}}
 {{- $lang := .Type | default "text" -}}
+{{- /* kramdown has no mermaid lexer: it emits a plain pre/code block, and the
+       Mermaid script looks for exactly that. */ -}}
+{{- if eq $lang "mermaid" -}}
+<pre><code class="language-mermaid">{{ .Inner | htmlEscape }}</code></pre>
+{{- else -}}
 {{- $res := transform.HighlightCodeBlock . (dict "noClasses" false "lineNos" false) -}}
 {{- $inner := $res.Inner -}}
 {{- $inner = replace $inner `<span class="line"><span class="cl">` "" -}}
@@ -19,7 +24,10 @@
 {{- $code := strings.TrimSuffix "\n" (printf "%s" .Inner) -}}
 {{- $lines := cond (eq $code "") 0 (len (split $code "\n")) -}}
 {{- $nolineno := false -}}
-{{- if or .Attributes.nolineno (in (slice "plaintext" "console" "terminal" "text") $lang) }}{{ $nolineno = true }}{{ end -}}
+{{- /* Only the explicit attribute adds the class: the SCSS hides the gutter of
+       console/terminal/plaintext by language, not by class. */ -}}
+{{- /* `{.nolineno}` arrives as a CSS class, not as an attribute. */ -}}
+{{- if in (split (.Attributes.class | default "") " ") "nolineno" }}{{ $nolineno = true }}{{ end -}}
 {{- $file := .Attributes.file -}}
 {{- $label := $file -}}
 {{- $icon := "far fa-file-code fa-fw" -}}
@@ -34,3 +42,4 @@
 <div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">{{ range $i := seq 1 $lines }}{{ $i }}
 {{ end }}</pre></td><td class="rouge-code"><pre>{{ $inner | safeHTML }}</pre></td></tr></tbody></table></code></div>
 </div>
+{{- end -}}

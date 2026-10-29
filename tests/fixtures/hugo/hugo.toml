@@ -51,6 +51,14 @@ enableGitInfo = false
 [markup.goldmark.parser.attribute]
   block = true
 
+# Math must reach MathJax untouched (`\,` is a LaTeX thin space).
+[markup.goldmark.extensions.passthrough]
+  enable = true
+
+[markup.goldmark.extensions.passthrough.delimiters]
+  block = [['$$', '$$'], ['\\[', '\\]']]
+  inline = [['$', '$'], ['\\(', '\\)']]
+
 [markup.highlight]
   noClasses = false
 

@@ -41,13 +41,15 @@
     <a href="{{ .RelPermalink }}" class="post-preview row g-0 flex-md-row-reverse">
       {{- $col := "12" -}}
       {{- with .Params.image }}
-        {{- $src := .path | default . -}}
-        {{- $src = partial "media-url.html" (dict "src" $src "subpath" $page.Params.media_subpath) -}}
-        {{- $lqip := "" -}}
-        {{- with .lqip }}{{ $lqip = printf `lqip="%s"` (partial "media-url.html" (dict "src" . "subpath" $page.Params.media_subpath)) }}{{ end -}}
-        {{- $alt := .alt | default "Preview Image" -}}
       <div class="col-md-5">
-        <img src="{{ $src }}" alt="{{ $alt }}" {{ $lqip | safeHTMLAttr }}>
+        {{ partial "image.html" (dict
+          "src" (.path | default .)
+          "alt" (.alt | default "Preview Image")
+          "class" (printf "preview-img%s" (cond (not .no_bg) "" " no-bg"))
+          "lqip" (.lqip | default "")
+          "page" $page
+          "mode" "preview"
+        ) }}
       </div>
         {{- $col = "7" -}}
       {{- end }}

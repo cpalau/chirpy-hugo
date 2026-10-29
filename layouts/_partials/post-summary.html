@@ -11,7 +11,7 @@
     {{- $content = replace $content `<td class="rouge-gutter gl"><pre class="lineno">` `<!-- <td class="rouge-gutter gl"><pre class="lineno">` -}}
     {{- $content = replace $content `</td><td class="rouge-code">` `</td> --><td class="rouge-code">` -}}
   {{- end -}}
-  {{- $text := $content | plainify | replaceRE `\s+` " " | strings.TrimSpace -}}
+  {{- $text := partial "plain-text.html" $content -}}
   {{- if not $full -}}
     {{- $max := .max_length | default 200 -}}
     {{- if gt (strings.RuneCount $text) $max -}}

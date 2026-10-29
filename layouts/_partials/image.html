@@ -1,7 +1,7 @@
 {{- /* Final image markup, shared by render-image.html and the `img` shortcode.
        Reproduces refactor-content's R4/R5: classes move to the wrapper, width
        and height stay on the <img>, loading="lazy" unless there is a LQIP.
-       Context: dict src alt class width height lqip page. */ -}}
+       Context: dict src alt class width height lqip page mode ("popup" | "preview"). */ -}}
 {{- $src := .src -}}
 {{- $alt := .alt | default "" -}}
 {{- $class := .class | default "" -}}
@@ -37,4 +37,8 @@
 {{- if not $lqip }}{{ $img = printf `%s loading="lazy"` $img }}{{ end -}}
 {{- $img = printf "%s>" $img -}}
 {{- $wrap := printf "popup img-link %s" (delimit $wrapperClasses " ") -}}
-{{- printf `<a href="%s" class="%s">%s</a>` $url $wrap $img | safeHTML -}}
+{{- if eq (.mode | default "popup") "preview" -}}
+  {{- printf `<div class="%s">%s</div>` (delimit $wrapperClasses " ") $img | safeHTML -}}
+{{- else -}}
+  {{- printf `<a href="%s" class="%s">%s</a>` $url $wrap $img | safeHTML -}}
+{{- end -}}

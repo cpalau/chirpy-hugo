@@ -1,0 +1,11 @@
+{{- /* Jekyll's `strip_html`, which runs on HTML that already has newlines between
+       blocks. Hugo's `plainify` concatenates them ("IntroductionThis"), losing
+       word boundaries and breaking both the read-time count and the search
+       index. Block boundaries become a space; inline tags are removed without
+       one, exactly like kramdown's output. Returns a string. */ -}}
+{{- $s := printf "%s" . -}}
+{{- $s = replaceRE `</(p|h[1-6]|li|ul|ol|dl|dt|dd|div|pre|blockquote|figcaption|td|th|tr|table|section|article|aside|header|footer|nav|tbody|thead)>` " " $s -}}
+{{- $s = replaceRE `<br\s*/?>` " " $s -}}
+{{- $s = replaceRE `<[^>]+>` "" $s -}}
+{{- $s = htmlUnescape $s -}}
+{{- return ($s | replaceRE `\s+` " " | strings.TrimSpace) -}}

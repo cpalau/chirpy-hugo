@@ -8,7 +8,12 @@ selectors:
   - 'meta[name="generator"] | D-06 | generator meta differs by design'
   - 'link[rel="next"] | D-14 | pagination URL shape /page2/ vs /page/2/'
   - 'link[rel="prev"] | D-14 | pagination URL shape /page2/ vs /page/2/'
+  - 'a.page-link@href | D-14 | pagination widget links, same URL shape'
   - 'footer p:nth-of-type(2) | D-09 | the footer credits Hugo and this project'
+
+# Canonicalization note: Go's html/template re-encodes JS string literals
+# inside <script> (\/, \u003c, \", \n). The comparator normalises those
+# sequences before comparing, so a real change in the JS still fails the gate.
 
 # D-02: Chroma classifies tokens differently from Rouge (kd vs kr, s2 vs sb, …).
 # The structure, the gutter, the code header and the spacing are compared; the

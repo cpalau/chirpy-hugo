@@ -1,17 +1,22 @@
-{{- /* Ports _includes/related-posts.html: Chirpy's own scoring (+1 per shared
-       tag, +0.5 per shared category, top 3). G-11. */ -}}
+{{- /* Ports _includes/related-posts.html (G-11).
+       Upstream builds a flat list (categories first, then tags), reverses it,
+       scores each candidate (+1 per shared tag, +0.5 per shared category) and
+       sorts the strings "score:index" lexicographically, then reverses. That
+       string sort is why 1.0 can outrank 1.5: it is part of the reference
+       behaviour and it is reproduced here, not "fixed". */ -}}
 {{- $total := 3 -}}
 {{- $tagScore := 1.0 -}}
 {{- $categoryScore := 0.5 -}}
 {{- $page := . -}}
-{{- $candidates := slice -}}
+
+{{- $match := slice -}}
 {{- $seen := slice -}}
 {{- range $page.Params.categories -}}
   {{- with index $.Site.Taxonomies.categories (partial "slugify.html" .) -}}
     {{- range .Pages -}}
       {{- if not (in $seen .RelPermalink) -}}
         {{- $seen = $seen | append .RelPermalink -}}
-        {{- $candidates = $candidates | append . -}}
+        {{- $match = $match | append . -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
@@ -21,32 +26,47 @@
     {{- range .Pages -}}
       {{- if not (in $seen .RelPermalink) -}}
         {{- $seen = $seen | append .RelPermalink -}}
-        {{- $candidates = $candidates | append . -}}
+        {{- $match = $match | append . -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
 
-{{- $scored := slice -}}
-{{- range $candidates -}}
-  {{- if ne .RelPermalink $page.RelPermalink -}}
+{{- /* reverse, like Liquid's `reverse` */ -}}
+{{- $reversed := slice -}}
+{{- range $i := seq (len $match) -}}
+  {{- $reversed = $reversed | append (index $match (sub (len $match) $i)) -}}
+{{- end -}}
+
+{{- $scoreList := slice -}}
+{{- range $i, $candidate := $reversed -}}
+  {{- if ne $candidate.RelPermalink $page.RelPermalink -}}
     {{- $score := 0.0 -}}
-    {{- range .Params.tags -}}
+    {{- range $candidate.Params.tags -}}
       {{- if in $page.Params.tags . }}{{ $score = add $score $tagScore }}{{ end -}}
     {{- end -}}
-    {{- range .Params.categories -}}
+    {{- range $candidate.Params.categories -}}
       {{- if in $page.Params.categories . }}{{ $score = add $score $categoryScore }}{{ end -}}
     {{- end -}}
     {{- if gt $score 0.0 -}}
-      {{- $key := printf "%05.2f:%013d" $score .Date.Unix -}}
-      {{- $scored = $scored | append (dict "k" $key "post" .) -}}
+      {{- $scoreList = $scoreList | append (dict "k" (printf "%v:%d" $score $i) "post" $candidate) -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- /* score first, then newest: one composite key keeps the order stable even
-       if Hugo's sort is not. */ -}}
-{{- $scored = sort $scored "k" "desc" -}}
-{{- $related := first $total $scored -}}
+
+{{- $keys := slice -}}
+{{- range $scoreList }}{{ $keys = $keys | append .k }}{{ end -}}
+{{- $keys = partial "sort-natural.html" $keys -}}
+{{- $ordered := slice -}}
+{{- range $j := seq (len $keys) -}}
+  {{- $ordered = $ordered | append (index $keys (sub (len $keys) $j)) -}}
+{{- end -}}
+
+{{- $related := slice -}}
+{{- range first $total $ordered -}}
+  {{- $key := . -}}
+  {{- range $scoreList }}{{ if eq .k $key }}{{ $related = $related | append .post }}{{ end }}{{ end -}}
+{{- end -}}
 
 {{- if gt (len $related) 0 }}
 <aside id="related-posts" aria-labelledby="related-label">
@@ -54,12 +74,12 @@
   <nav class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4">
     {{- range $related }}
     <article class="col">
-      <a href="{{ .post.RelPermalink }}" class="post-preview card h-100">
+      <a href="{{ .RelPermalink }}" class="post-preview card h-100">
         <div class="card-body">
-          {{ partial "datetime.html" (dict "date" .post.Date "lang" $.Lang) }}
-          <h4 class="pt-0 my-2">{{ .post.Title }}</h4>
+          {{ partial "datetime.html" (dict "date" .Date "lang" $.Lang) }}
+          <h4 class="pt-0 my-2">{{ .Title }}</h4>
           <div class="text-muted">
-            <p>{{ partial "post-summary.html" (dict "post" .post) }}</p>
+            <p>{{ partial "post-summary.html" (dict "post" .) }}</p>
           </div>
         </div>
       </a>

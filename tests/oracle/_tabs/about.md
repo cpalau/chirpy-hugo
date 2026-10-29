@@ -3,6 +3,7 @@
 icon: fas fa-info-circle
 order: 4
 date: 2026-01-01 00:00:00 +0000
+description: "About this site"
 ---
 
 ## About this site
