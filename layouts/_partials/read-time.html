@@ -1,0 +1,18 @@
+{{- /* Ports _includes/read-time.html: 180 wpm, integer division, minimum 1,
+       word count from the Jekyll-compatible partial (Q1). */ -}}
+{{- $words := partial "word-count.html" (.plain | default (.content | plainify)) -}}
+{{- $minutes := div $words 180 -}}
+{{- if lt $minutes 1 -}}{{- $minutes = 1 -}}{{- end -}}
+<span
+  class="readtime"
+  data-bs-toggle="tooltip"
+  data-bs-placement="bottom"
+  title="{{ $words }} {{ T "post.words" }}"
+>
+  <em>{{ $minutes }} {{ T "post.read_time.unit" }}</em>
+  {{- if .prompt -}}
+    {{- $promptWords := partial "word-count.html" (T "post.read_time.prompt") -}}
+    {{- if le $promptWords 1 }} {{ end -}}
+    {{- T "post.read_time.prompt" -}}
+  {{- end -}}
+</span>

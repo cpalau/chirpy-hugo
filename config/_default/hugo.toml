@@ -1,0 +1,49 @@
+# Theme defaults. Consumers override them; see docs/CONFIG.md.
+#
+# Hugo merges configuration per category. `params` is deep, so everything in
+# params.toml can be overridden key by key. `markup`, `outputs`, `module`,
+# `languages` and `permalinks` are REPLACED, not merged (D-07): docs/CONFIG.md
+# lists the ones a site must declare itself.
+
+baseURL = "https://example.com/"
+title = ""
+defaultContentLanguage = "en"
+locale = "en"
+timeZone = "UTC"
+
+# `.Lastmod` from git history is opt-in: upstream only uses it when a post has
+# more than one commit (Q5, F1). With it on, `.Lastmod` becomes the commit date.
+enableGitInfo = false
+
+[pagination]
+  pagerSize = 10
+  # D-13: Jekyll emits /page2/, Hugo emits /page/2/. The `path` option mangles
+  # the URL in 0.168, so the default shape is kept.
+  
+
+[taxonomies]
+  category = "categories"
+  tag = "tags"
+
+# `search.json` is served from the home page as its own output format.
+[outputFormats.search]
+  mediaType = "application/json"
+  baseName = "search"
+  isPlainText = true
+  notAlternative = true
+
+[outputs]
+  home = ["HTML", "RSS", "search"]
+  section = ["HTML", "RSS"]
+  taxonomy = ["HTML"]
+  term = ["HTML"]
+  page = ["HTML"]
+
+[css.sass]
+  transpiler = "dartsass"
+  outputStyle = "compressed"
+
+[module]
+  [module.hugoVersion]
+    min = "0.150.0"
+    extended = true

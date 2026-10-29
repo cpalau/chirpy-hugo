@@ -1,0 +1,25 @@
+{{- /* Replacement for _includes/refactor-content.html (G-01).
+       The render hooks already emit the final markup for code, images,
+       headings and tables. What is left is the two transforms that have no
+       hook: inline-code classes (G-39) and task-list checkboxes (R3). */ -}}
+{{- $c := .Content -}}
+{{- /* R1: wrap every table so it can scroll. The Rouge table inside a highlighted
+       block is unwrapped again, exactly as upstream does. */ -}}
+{{- if strings.Contains $c "<table" -}}
+  {{- $c = replace $c "<table" `<div class="table-wrapper"><table` -}}
+  {{- $c = replace $c "</table>" `</table></div>` -}}
+  {{- $c = replace $c `<code><div class="table-wrapper">` `<code>` -}}
+  {{- $c = replace $c `</table></div></code>` `</table></code>` -}}
+{{- end -}}
+{{- /* Inline code: the SCSS styles `code.highlighter-rouge` (G-39).
+       The <code> of a highlighted block is protected first, because there is no
+       inline-code hook and a bare replace would hit it too. */ -}}
+{{- $c = replace $c `<div class="highlight"><code>` "\u0000HLCODE\u0000" -}}
+{{- $c = replaceRE `<code>` `<code class="language-plaintext highlighter-rouge">` $c -}}
+{{- $c = replace $c "\u0000HLCODE\u0000" `<div class="highlight"><code>` -}}
+{{- /* Task lists: kramdown and Goldmark forms (R3). */ -}}
+{{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" ?/?>` `<i class="fas fa-check-circle fa-fw checked"></i>` $c -}}
+{{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="disabled" ?/?>` `<i class="far fa-circle fa-fw"></i>` $c -}}
+{{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="" checked="">` `<i class="fas fa-check-circle fa-fw checked"></i>` $c -}}
+{{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="">` `<i class="far fa-circle fa-fw"></i>` $c -}}
+{{- $c | safeHTML -}}

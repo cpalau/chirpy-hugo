@@ -1,0 +1,8 @@
+{{- /* Jekyll's `uri_escape` = Addressable::URI.normalize_component: it encodes
+       spaces but leaves `:` and `-`. `urlquery` is the closest primitive, so the
+       two sequences where they differ are mapped back. Returns a string.
+       Limitation: non-ASCII and reserved characters are unverified (F4 test). */ -}}
+{{- $s := . | urlquery -}}
+{{- $s = replace $s "+" "%20" -}}
+{{- $s = replace $s "%3A" ":" -}}
+{{- return $s -}}

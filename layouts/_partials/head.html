@@ -1,0 +1,101 @@
+{{- $kind := partial "page-kind.html" . -}}
+{{- $type := partial "origin-type.html" . -}}
+{{- $origin := index hugo.Data.origin $type -}}
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e">
+  <meta
+    name="viewport"
+    content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
+  >
+
+  <!-- Setup Open Graph image -->
+  {{ partial "seo.html" . }}
+
+  {{- with .Site.Params.social.fediverse_handle }}
+  <!-- Fediverse handle/creator -->
+  <meta name="fediverse:creator" content="{{ . }}">
+  {{- end }}
+
+  {{- $titleText := .Site.Title -}}
+  {{- if ne $kind "home" -}}
+    {{- $pageTitle := .Title -}}
+    {{- if eq $kind "page" -}}
+      {{- $key := index (split (strings.Trim .RelPermalink "/") "/") 0 -}}
+      {{- if in (slice "about" "archives" "categories" "tags") $key -}}
+        {{- $pageTitle = T (printf "tabs.%s" $key) | default .Title -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $titleText = printf "%s | %s" $pageTitle .Site.Title -}}
+  {{- end }}
+  <title>{{ $titleText }}</title>
+
+  {{ partial "favicons.html" . }}
+
+  <!-- Resource Hints -->
+  {{- if not .Site.Params.assets.self_host.enabled }}
+    {{- $hints := $origin.resource_hints -}}
+    {{- range $hint := $hints }}
+      {{- range $link := $hint.links }}
+  <link rel="{{ $link.rel }}" href="{{ $hint.url }}" {{ delimit ($link.opts | default slice) " " | safeHTMLAttr }}>
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  <!-- Bootstrap -->
+  {{- if ne hugo.Environment "production" }}
+  <link rel="stylesheet" href="{{ $origin.bootstrap.css }}">
+  {{- end }}
+
+  <!-- Theme style -->
+  {{- /* Precompiled with dart-sass and committed (D-13): Hugo cannot inject
+         `@use ... with` for a theme, and not every Hugo build ships Dart Sass. */ -}}
+  {{- $theme := .Site.Params.theme_mode | default "" -}}
+  {{- $file := "/assets/css/jekyll-theme-chirpy.css" -}}
+  {{- if eq $theme "light" }}{{ $file = "/assets/css/jekyll-theme-chirpy-light.css" }}
+  {{- else if eq $theme "dark" }}{{ $file = "/assets/css/jekyll-theme-chirpy-dark.css" }}{{ end }}
+  <link rel="stylesheet" href="{{ $file | relURL }}">
+
+  <!-- Web Font -->
+  <link rel="stylesheet" href="{{ $origin.webfonts }}">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="{{ $origin.fontawesome.css }}">
+
+  <!-- 3rd-party Dependencies -->
+  {{- if and .Site.Params.toc .Params.toc }}
+  <link rel="stylesheet" href="{{ $origin.toc.css }}">
+  {{- end }}
+
+  {{- if in (slice "post" "page" "home") $kind }}
+  <link rel="stylesheet" href="{{ (index $origin "lazy-polyfill").css }}">
+  {{- end }}
+
+  {{- if in (slice "page" "post") $kind }}
+  <!-- Image Popup -->
+  <link rel="stylesheet" href="{{ $origin.glightbox.css }}">
+  {{- end }}
+
+  <!-- Scripts -->
+  <script src="{{ "/assets/js/dist/theme.min.js" | relURL }}"></script>
+
+  {{ partial "js-selector.html" . }}
+
+  {{- if eq hugo.Environment "production" }}
+    {{- if .Site.Params.pwa.enabled }}
+  <!-- PWA -->
+  <script defer src="{{ "/app.min.js" | relURL }}?baseurl={{ .Site.Params.baseurl | default "" }}&register={{ .Site.Params.pwa.cache.enabled }}"></script>
+    {{- end }}
+
+  <!-- Web Analytics -->
+    {{- $analytics := .Site.Params.analytics -}}
+    {{- range $platform := slice "google" "goatcounter" "umami" "matomo" "cloudflare" "fathom" }}
+      {{- with (index $analytics $platform).id }}
+        {{ partial (printf "analytics/%s.html" $platform) $ }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{ partial "metadata-hook.html" . }}
+</head>

@@ -1,0 +1,30 @@
+{{- /* Ports _includes/comments/utterances.html. */ -}}
+{{- $cfg := .Site.Params.comments.utterances -}}
+<script>
+  (function () {
+    const themeMap = Theme.newThemeMap('github-light', 'github-dark');
+    const initTheme = themeMap[Theme.resolvedTheme];
+    let utterancesAttributes = {
+      src: 'https://utteranc.es/client.js',
+      repo: '{{ $cfg.repo }}',
+      'issue-term': '{{ $cfg.issue_term }}',
+      theme: initTheme,
+      crossorigin: 'anonymous',
+      async: ''
+    };
+    let utterancesNode = document.createElement('script');
+    Object.entries(utterancesAttributes).forEach(([key, value]) => utterancesNode.setAttribute(key, value));
+    const $footer = document.querySelector('footer');
+    $footer.insertAdjacentElement("beforebegin", utterancesNode);
+    addEventListener('message', (event) => {
+      if (event.source === window && event.data && event.data.id === Theme.eventId) {
+        const newTheme = themeMap[Theme.resolvedTheme];
+        const iframe = document.querySelector('.utterances-frame');
+        if (!iframe) {
+          return;
+        }
+        iframe.contentWindow.postMessage({ type: 'set-theme', theme: newTheme }, 'https://utteranc.es');
+      }
+    });
+  })();
+</script>

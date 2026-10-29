@@ -1,0 +1,40 @@
+{{- /* Ports _includes/trending-tags.html: top 10 by post count, ties broken by
+       natural sort of "name::count" (G-14, D-11). */ -}}
+{{- $max := 10 -}}
+{{- $sizes := slice -}}
+{{- $tagStrings := slice -}}
+{{- range $name, $pages := .Site.Taxonomies.tags -}}
+  {{- $size := len $pages -}}
+  {{- $sizes = $sizes | append (dict "size" $size) -}}
+  {{- $tagStrings = $tagStrings | append (printf "%s::%d" $name $size) -}}
+{{- end -}}
+{{- $sizes = sort $sizes "size" "desc" -}}
+{{- $tagStrings = partial "sort-natural.html" $tagStrings -}}
+{{- $labels := partial "taxonomy-labels.html" . -}}
+{{- $trending := slice -}}
+{{- range first $max $sizes -}}
+  {{- $size := .size -}}
+  {{- range $tagString := $tagStrings -}}
+    {{- $parts := split $tagString "::" -}}
+    {{- $name := index $parts 0 -}}
+    {{- $count := int (index $parts 1) -}}
+    {{- if eq $count $size -}}
+      {{- if not (in $trending $name) -}}
+        {{- $trending = $trending | append $name -}}
+        {{- break -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if gt (len $trending) 0 }}
+<section>
+  <h2 class="panel-heading">{{ T "panel.trending_tags" }}</h2>
+  <div class="d-flex flex-wrap mt-3 mb-1 me-3">
+    {{- range $trending }}
+      {{- $label := index $labels . | default . -}}
+      {{- $url := printf "/tags/%s/" (urlquery (partial "slugify.html" .)) }}
+    <a class="post-tag btn btn-outline-primary" href="{{ $url | relURL }}">{{ $label }}</a>
+    {{- end }}
+  </div>
+</section>
+{{- end }}

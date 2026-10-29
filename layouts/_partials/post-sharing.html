@@ -1,0 +1,34 @@
+{{- /* Ports _includes/post-sharing.html. */ -}}
+<div class="share-wrapper d-flex align-items-center">
+  <span class="share-label text-muted">{{ T "post.share" }}</span>
+  <span class="share-icons">
+    {{- $title := partial "uri-escape.html" (printf "%s - %s" .Title .Site.Title) -}}
+    {{- $url := .Permalink | urlquery -}}
+    {{- range hugo.Data.share.platforms -}}
+      {{- if eq .type "Mastodon" }}
+    <script defer type="module" src="https://cdn.jsdelivr.net/npm/@justinribeiro/share-to-mastodon/+esm"></script>
+    <button class="btn text-start" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ .type }}" aria-label="{{ .type }}">
+      <share-to-mastodon class="share-mastodon" message="{{ $title }}" url="{{ $url }}"><i class="fa-fw {{ .icon }}"></i></share-to-mastodon>
+    </button>
+      {{- else }}
+        {{- $link := .link -}}
+        {{- $link = replace $link "TITLE" $title -}}
+        {{- $link = replace $link "URL" $url -}}
+    <a href="{{ $link }}" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ .type }}" aria-label="{{ .type }}">
+      <i class="fa-fw {{ .icon }}"></i>
+    </a>
+      {{- end -}}
+    {{- end }}
+    <button
+      id="copy-link"
+      aria-label="Copy link"
+      class="btn small"
+      data-bs-toggle="tooltip"
+      data-bs-placement="top"
+      title="{{ T "post.button.share_link.title" }}"
+      data-title-succeed="{{ T "post.button.share_link.succeed" }}"
+    >
+      <i class="fa-fw fas fa-link pe-none fs-6"></i>
+    </button>
+  </span>
+</div>

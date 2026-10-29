@@ -1,0 +1,13 @@
+{{- /* Which vendor mirror to use: `basic` (self-hosted) or `cors` (CDN).
+       Returns a string; ports _includes/origin-type.html. */ -}}
+{{- $type := "cors" -}}
+{{- with .Site.Params.assets.self_host -}}
+  {{- if .enabled -}}
+    {{- with .env -}}
+      {{- if eq . hugo.Environment }}{{ $type = "basic" }}{{ end -}}
+    {{- else -}}
+      {{- $type = "basic" -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $type -}}

@@ -1,0 +1,15 @@
+{{- $size := 352 -}}
+{{- $theme := "" -}}
+{{- if .Get "compact" }}{{ $size = 152 }}{{ end -}}
+{{- if .Get "dark" }}{{ $theme = "?theme=0" }}{{ end -}}
+<iframe
+  class="embed-audio spotify"
+  src="https://open.spotify.com/embed/track/{{ .Get "id" }}{{ $theme }}"
+  height="{{ $size }}"
+  frameBorder="0"
+  allowfullscreen=""
+  allowtransparency="true"
+  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+  loading="lazy"
+>
+</iframe>

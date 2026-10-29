@@ -1,0 +1,27 @@
+{{- /* Rouge-compatible code block (D-02, G-02).
+       Chroma produces the token stream; this hook rebuilds Rouge's DOM and
+       prepends the code header that upstream generates in refactor-content. */ -}}
+{{- $lang := .Type | default "text" -}}
+{{- $res := transform.HighlightCodeBlock . (dict "noClasses" false "lineNos" false) -}}
+{{- $inner := $res.Inner -}}
+{{- $inner = replace $inner `<span class="line"><span class="cl">` "" -}}
+{{- $inner = replace $inner `</span></span>` "" -}}
+{{- if not (hasSuffix $inner "\n") }}{{ $inner = printf "%s\n" $inner }}{{ end -}}
+{{- $code := strings.TrimSuffix "\n" (printf "%s" .Inner) -}}
+{{- $lines := cond (eq $code "") 0 (len (split $code "\n")) -}}
+{{- $nolineno := false -}}
+{{- if or .Attributes.nolineno (in (slice "plaintext" "console" "terminal" "text") $lang) }}{{ $nolineno = true }}{{ end -}}
+{{- $file := .Attributes.file -}}
+{{- $label := $file -}}
+{{- $icon := "far fa-file-code fa-fw" -}}
+{{- if not $file -}}
+  {{- $label = partial "code-language.html" $lang -}}
+  {{- $icon = "fas fa-code fa-fw small" -}}
+{{- end -}}
+<div class="language-{{ $lang }}{{ if $nolineno }} nolineno{{ end }} highlighter-rouge"{{ with $file }} file="{{ . }}"{{ end }}>
+<div class="code-header">
+<span data-label-text="{{ $label }}"><i class="{{ $icon }}"></i></span>
+<button aria-label="copy" data-title-succeed="{{ T "post.button.copy_code.succeed" }}"><i class="far fa-clipboard"></i></button></div>
+<div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">{{ range $i := seq 1 $lines }}{{ $i }}
+{{ end }}</pre></td><td class="rouge-code"><pre>{{ $inner | safeHTML }}</pre></td></tr></tbody></table></code></div>
+</div>

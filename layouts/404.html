@@ -1,0 +1,8 @@
+{{- define "main" }}
+<article class="px-1">
+  <h1 class="dynamic-title">{{ T "tabs.about" | default "404" }}</h1>
+  <div class="content">
+    <p class="lead">{{ T "not_found.statement" }}</p>
+  </div>
+</article>
+{{- end }}

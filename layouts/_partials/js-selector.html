@@ -1,0 +1,61 @@
+{{- /* Ports _includes/js-selector.html: which bundles and vendor scripts a page
+       needs. G-05 reproduces upstream's operator-precedence quirk. */ -}}
+{{- $kind := partial "page-kind.html" . -}}
+{{- $type := partial "origin-type.html" . -}}
+{{- $origin := index hugo.Data.origin $type -}}
+{{- $dayjs := $origin.dayjs.js -}}
+{{- $urls := slice $origin.search.js -}}
+
+{{- if in (slice "post" "page" "home") $kind -}}
+  {{- $urls = $urls | append (index $origin "lazy-polyfill").js -}}
+  {{- if ne $kind "home" -}}
+    {{- $urls = $urls | append $origin.glightbox.js -}}
+    {{- $urls = $urls | append $origin.clipboard.js -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if in (slice "home" "post" "archives" "category" "tag") $kind -}}
+  {{- $locale := index (split .Lang "-") 0 -}}
+  {{- $urls = $urls | append $dayjs.common -}}
+  {{- $urls = $urls | append (replace $dayjs.locale ":LOCALE" $locale) -}}
+  {{- $urls = $urls | append $dayjs.relativeTime -}}
+  {{- $urls = $urls | append $dayjs.localizedFormat -}}
+{{- end -}}
+
+{{- /* Upstream: `h2 or h3 and site.toc and page.toc` evaluates as
+       `h2 OR (h3 AND toc)`. Parity includes the bug (G-05). */ -}}
+{{- if or (strings.Contains .Content "<h2") (and (strings.Contains .Content "<h3") .Site.Params.toc .Params.toc) -}}
+  {{- $urls = $urls | append $origin.toc.js -}}
+{{- end -}}
+
+{{- if .Params.mermaid -}}
+  {{- $urls = $urls | append $origin.mermaid.js -}}
+{{- end -}}
+
+{{ partial "jsdelivr-combine.html" (dict "urls" (delimit $urls ",")) }}
+
+{{- $bundle := "commons" -}}
+{{- if in (slice "home" "categories" "post" "page") $kind -}}
+  {{- $bundle = $kind -}}
+{{- else if in (slice "archives" "category" "tag") $kind -}}
+  {{- $bundle = "misc" -}}
+{{- end }}
+<script defer src="{{ printf "/assets/js/dist/%s.min.js" $bundle | relURL }}"></script>
+
+{{- if .Params.math }}
+<!-- MathJax -->
+<script src="{{ "/assets/js/data/mathjax.js" | relURL }}"></script>
+<script id="MathJax-script" async src="{{ $origin.mathjax.js | relURL }}"></script>
+{{- end }}
+
+{{- if eq $kind "post" }}
+<!-- Pageviews -->
+{{- $provider := .Site.Params.pageviews.provider -}}
+{{- if $provider -}}
+  {{- if eq $provider "goatcounter" -}}
+    {{- with .Site.Params.analytics.goatcounter.id -}}
+      {{ partial "pageviews/goatcounter.html" $ }}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- end }}

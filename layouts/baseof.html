@@ -1,0 +1,59 @@
+<!doctype html>
+{{- $type := partial "origin-type.html" . -}}
+{{- $mode := .Site.Params.theme_mode | default "" -}}
+{{- $lang := or .Params.lang .Site.Params.alt_lang .Site.Language.Lang -}}
+<!-- `alt_lang` can specify a language different from the UI -->
+<html lang="{{ $lang }}"{{ if in (slice "light" "dark") $mode }} data-bs-theme="{{ $mode }}"{{ end }}>
+  {{ partial "head.html" . }}
+  <body>
+    {{ partial "sidebar.html" . }}
+
+    <div id="main-wrapper" class="d-flex justify-content-center">
+      <div class="container d-flex flex-column px-xxl-5">
+        {{ partial "topbar.html" . }}
+
+        <div class="row flex-grow-1">
+          <main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4">
+            {{ block "main" . }}{{ end }}
+          </main>
+
+          <!-- panel -->
+          <aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted">
+            <div class="access">
+              {{ partial "update-list.html" . }}
+              {{ partial "trending-tags.html" . }}
+            </div>
+            {{ block "panel" . }}{{ end }}
+          </aside>
+        </div>
+
+        <div class="row">
+          <!-- tail -->
+          <div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 px-md-4">
+            {{ block "tail" . }}{{ end }}
+            {{ partial "footer.html" . }}
+          </div>
+        </div>
+
+        {{ partial "search-results.html" . }}
+      </div>
+
+      <aside aria-label="Scroll to Top">
+        <button id="back-to-top" type="button" class="btn btn-lg btn-box-shadow">
+          <i class="fas fa-angle-up"></i>
+        </button>
+      </aside>
+    </div>
+
+    <div id="mask" class="d-none position-fixed w-100 h-100 z-1"></div>
+
+    {{- if .Site.Params.pwa.enabled }}
+    {{ partial "pwa/notification.html" . }}
+    {{- end }}
+
+    <!-- Embedded scripts -->
+    {{ block "scripts" . }}{{ end }}
+
+    {{ partial "search-loader.html" . }}
+  </body>
+</html>

@@ -1,0 +1,14 @@
+{{- /* Translate a Ruby/strftime pattern (from the locale data) into a Go
+       layout. Only the tokens the upstream locales actually use are mapped;
+       anything unknown is left as-is and fails loudly in review.
+       Context: the strftime string. Returns a string. */ -}}
+{{- $s := . -}}
+{{- $map := dict
+  "%Y" "2006" "%y" "06" "%m" "01" "%-m" "1" "%d" "02" "%-d" "2" "%e" "_2"
+  "%H" "15" "%M" "04" "%S" "05" "%b" "Jan" "%B" "January"
+  "%a" "Mon" "%A" "Monday" "%p" "PM" "%Z" "MST" "%%" "%"
+-}}
+{{- range $k, $v := $map -}}
+  {{- $s = replace $s $k $v -}}
+{{- end -}}
+{{- return $s -}}

@@ -1,0 +1,20 @@
+{{- /* Replaces kramdown's image IAL (D-01).
+       `inline=true` keeps the image inside the surrounding paragraph — that is
+       what upstream gets when the markdown image shares a paragraph with text
+       (floats). Without it the shortcode owns a paragraph of its own, which is
+       what kramdown produces for a standalone image. */ -}}
+{{- $html := partial "image.html" (dict
+  "src" (.Get "src")
+  "alt" (.Get "alt")
+  "class" (.Get "class")
+  "width" (.Get "width")
+  "height" (.Get "height")
+  "lqip" (.Get "lqip")
+  "page" .Page
+) -}}
+{{- $inline := .Get "inline" | default false -}}
+{{- if or (eq $inline true) (eq (printf "%v" $inline) "true") -}}
+  {{- $html -}}
+{{- else -}}
+  <p>{{ $html }}</p>
+{{- end -}}

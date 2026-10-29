@@ -1,0 +1,169 @@
+{{- define "main" -}}
+{{- $kind := partial "page-kind.html" . -}}
+{{- if eq $kind "post" -}}
+  {{- $enableToc := partial "toc/enabled.html" . -}}
+  {{- $labels := partial "taxonomy-labels.html" . -}}
+  {{- $lang := .Lang -}}
+  {{- $params := .Site.Params -}}
+<article class="px-1" data-toc="{{ $enableToc }}">
+  <header>
+    <h1 data-toc-skip>{{ .Title }}</h1>
+    {{- with .Description }}
+    <p class="post-desc fw-light mb-4">{{ . }}</p>
+    {{- end }}
+
+    <div class="post-meta text-muted">
+      <!-- published date -->
+      <span>
+        {{ T "post.posted" }}
+        {{ partial "datetime.html" (dict "date" .Date "tooltip" true "lang" $lang) }}
+      </span>
+
+      <!-- lastmod date -->
+      {{- $lastmod := .Date -}}
+      {{- with .Params.lastmod }}{{ $lastmod = time.AsTime . }}{{ end -}}
+      {{- if and (not $lastmod.IsZero) (ne ($lastmod.Format "2006-01-02T15:04:05Z07:00") (.Date.Format "2006-01-02T15:04:05Z07:00")) }}
+      <span>
+        {{ T "post.updated" }}
+        {{ partial "datetime.html" (dict "date" $lastmod "tooltip" true "lang" $lang) }}
+      </span>
+      {{- end }}
+
+      {{- with .Params.image }}
+      <div class="mt-3 mb-3">
+        {{ partial "image.html" (dict
+          "src" (.path | default .)
+          "alt" (.alt | default "Preview Image")
+          "class" (printf "preview-img%s" (cond (not .no_bg) "" " no-bg"))
+          "width" "1200"
+          "height" "630"
+          "lqip" (.lqip | default "")
+          "page" $
+        ) }}
+        {{- with .alt }}
+        <figcaption class="text-center pt-2 pb-2">{{ . }}</figcaption>
+        {{- end }}
+      </div>
+      {{- end }}
+
+      <div class="d-flex justify-content-between">
+        <span>
+          {{ T "post.written_by" }}
+          <em>
+            {{- $authors := .Params.author | default .Params.authors -}}
+            {{- if $authors -}}
+              {{- range $i, $key := (cond (reflect.IsSlice $authors) $authors (slice $authors)) -}}
+                {{- if $i }}{{ "</em>, <em>" | safeHTML }}{{ end -}}
+                {{- with index hugo.Data.authors $key -}}
+                  {{- if .url }}<a href="{{ .url }}">{{ .name }}</a>{{ else }}{{ .name }}{{ end -}}
+                {{- else -}}{{ $key }}{{- end -}}
+              {{- end -}}
+            {{- else -}}
+              <a href="{{ index $params.social.links 0 }}">{{ $params.social.name }}</a>
+            {{- end -}}
+          </em>
+        </span>
+
+        <div>
+          {{- if and $params.pageviews.provider (index $params.analytics $params.pageviews.provider).id }}
+          <span>
+            <em id="pageviews"><i class="fas fa-spinner fa-spin small"></i></em>
+            {{ T "post.pageview_measure" }}
+          </span>
+          {{- end }}
+
+          {{ partial "read-time.html" (dict "content" .Content "plain" .Plain "prompt" true) }}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  {{- if $enableToc }}
+  <div id="toc-bar" class="d-flex align-items-center justify-content-between invisible">
+    <span class="label text-truncate">{{ .Title }}</span>
+    <button type="button" class="toc-trigger btn me-1"><i class="fa-solid fa-list-ul fa-fw"></i></button>
+  </div>
+
+  <button id="toc-solo-trigger" type="button" class="toc-trigger btn btn-outline-secondary btn-sm">
+    <span class="label ps-2 pe-1">{{ T "panel.toc" }}</span>
+    <i class="fa-solid fa-angle-right fa-fw"></i>
+  </button>
+
+  <dialog id="toc-popup" class="p-0">
+    <div class="header d-flex flex-row align-items-center justify-content-between">
+      <div class="label text-truncate py-2 ms-4">{{ .Title }}</div>
+      <button id="toc-popup-close" type="button" class="btn-close btn-sm mx-3" aria-label="Close"></button>
+    </div>
+    <div id="toc-popup-content" class="px-4 py-3 pb-4"></div>
+  </dialog>
+  {{- end }}
+
+  <div class="content">
+    {{ partial "content.html" . }}
+  </div>
+
+  <div class="post-tail-wrapper text-muted">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+      {{- with .Params.categories }}
+      <div class="post-meta">
+        <i class="far fa-folder-open fa-fw me-1"></i>
+        {{- range $i, $c := . -}}
+          {{- if $i }},{{ end -}}
+          <a href="{{ printf "/categories/%s/" (urlquery (partial "slugify.html" $c)) | relURL }}">{{ index $labels (lower $c) | default $c }}</a>
+        {{- end }}
+      </div>
+      {{- end }}
+
+      {{ partial "post-edit.html" . }}
+    </div>
+
+    {{- with .Params.tags }}
+    <div class="post-tags">
+      <i class="fa fa-tags fa-fw me-1"></i>
+      {{- range . }}
+      <a href="{{ printf "/tags/%s/" (urlquery (partial "slugify.html" .)) | relURL }}" class="post-tag no-text-decoration">{{ index $labels (lower .) | default . }}</a>
+      {{- end }}
+    </div>
+    {{- end }}
+
+    <div class="post-tail-bottom d-flex justify-content-between align-items-center mt-5 pb-2">
+      <div class="license-wrapper">
+        {{- $tpl := T "copyright.license.template" -}}
+        {{- if $tpl -}}
+          {{- $link := printf `<a href="%s">%s</a>` (T "copyright.license.link") (T "copyright.license.name") -}}
+          {{ replace $tpl ":LICENSE_NAME" $link | safeHTML }}
+        {{- end }}
+      </div>
+      {{ partial "post-sharing.html" . }}
+    </div>
+  </div>
+</article>
+{{- else -}}
+<article class="px-1">
+  {{- $key := index (split (strings.Trim .RelPermalink "/") "/") 0 -}}
+  {{- $title := .Title -}}
+  {{- if in (slice "about" "archives" "categories" "tags") $key -}}
+    {{- $title = T (printf "tabs.%s" $key) | default .Title -}}
+  {{- end }}
+  <h1 class="dynamic-title">{{ $title }}</h1>
+  <div class="content">
+    {{ partial "content.html" . }}
+  </div>
+</article>
+{{- end -}}
+{{- end }}
+
+{{- define "panel" -}}
+{{- if eq (partial "page-kind.html" .) "post" }}{{ partial "toc.html" . }}{{ end -}}
+{{- end }}
+
+{{- define "tail" -}}
+{{- if eq (partial "page-kind.html" .) "post" -}}
+{{ partial "related-posts.html" . }}
+{{ partial "post-nav.html" . }}
+{{- end -}}
+{{- end }}
+
+{{- define "scripts" -}}
+{{- if eq (partial "page-kind.html" .) "post" }}{{ partial "comment.html" . }}{{ end -}}
+{{- end }}

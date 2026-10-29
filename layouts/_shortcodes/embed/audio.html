@@ -1,0 +1,23 @@
+{{- $src := trim (.Get "src") " " -}}
+{{- $title := trim (.Get "title") " " -}}
+{{- $types := split (trim (.Get "types") " ") "|" -}}
+{{- if not (strings.Contains $src "://") -}}
+  {{- $src = partial "media-url.html" (dict "src" $src "subpath" .Page.Params.media_subpath) -}}
+{{- end -}}
+{{- $ext := index (split $src ".") (sub (len (split $src ".")) 1) -}}
+{{- $all := slice $ext | append $types -}}
+{{- $filepath := strings.TrimSuffix (printf ".%s" $ext) $src -}}
+<p>
+  <audio class="embed-audio file" controls>
+    {{- range $type := $all -}}
+      {{- $mime := $type -}}
+      {{- range hugo.Data.media }}{{ if eq .extension $type }}{{ $mime = .mime_type }}{{ end }}{{ end }}
+    <source src="{{ $filepath }}.{{ $type }}" type="audio/{{ $mime }}">
+    {{- end }}
+    Your browser does not support the audio tag. Here is a
+    <a href="{{ $src }}">link to the audio file</a> instead.
+  </audio>
+  {{- with $title }}
+  <em>{{ . }}</em>
+  {{- end }}
+</p>

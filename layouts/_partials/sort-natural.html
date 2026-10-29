@@ -1,0 +1,27 @@
+{{- /* Reproduce Liquid's `sort_natural` (D-11, Q4): String#casecmp is
+       ASCII-only case folding + byte comparison, and the sort is stable.
+       `lt` is a byte comparison, `sort` is not (it collates Unicode).
+       Cost is O(n²) with n = number of labels; only used for tag lists.
+       Context: a slice. Returns a slice. */ -}}
+{{- $upper := split "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "" -}}
+{{- $lower := split "abcdefghijklmnopqrstuvwxyz" "" -}}
+{{- $sorted := slice -}}
+{{- range $item := . -}}
+  {{- $key := $item -}}
+  {{- range $i, $u := $upper -}}{{- $key = replace $key $u (index $lower $i) -}}{{- end -}}
+  {{- $entry := dict "k" $key "v" $item -}}
+  {{- $next := slice -}}
+  {{- $placed := false -}}
+  {{- range $existing := $sorted -}}
+    {{- if and (not $placed) (lt $key $existing.k) -}}
+      {{- $next = $next | append $entry -}}
+      {{- $placed = true -}}
+    {{- end -}}
+    {{- $next = $next | append $existing -}}
+  {{- end -}}
+  {{- if not $placed -}}{{- $next = $next | append $entry -}}{{- end -}}
+  {{- $sorted = $next -}}
+{{- end -}}
+{{- $out := slice -}}
+{{- range $sorted -}}{{- $out = $out | append .v -}}{{- end -}}
+{{- return $out -}}

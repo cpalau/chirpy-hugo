@@ -1,0 +1,12 @@
+{{- /* Jekyll's `number_of_words: 'auto'` (Q1). Never use .WordCount: it is
+       whitespace-based and diverges on every CJK case. Returns an int. */ -}}
+{{- $s := . -}}
+{{- $cjk := findRE `[\p{Han}\p{Katakana}\p{Hiragana}\p{Hangul}]` $s -}}
+{{- $runs := findRE `[^\p{Han}\p{Katakana}\p{Hiragana}\p{Hangul}\s]+` $s -}}
+{{- $n := 0 -}}
+{{- if eq (len $cjk) 0 -}}
+  {{- $n = len $runs -}}
+{{- else -}}
+  {{- $n = add (len $cjk) (len $runs) -}}
+{{- end -}}
+{{- return $n -}}

@@ -1,0 +1,8 @@
+<iframe
+  class="embed-video twitch"
+  loading="lazy"
+  src="https://player.twitch.tv/?video={{ .Get "id" }}&parent={{ (index (split site.BaseURL "://") 1) | strings.TrimSuffix "/" }}"
+  frameborder="0"
+  allowfullscreen="true"
+  scrolling="no"
+></iframe>

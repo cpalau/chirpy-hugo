@@ -1,0 +1,17 @@
+{{- /* Hugo normalises taxonomy keys (lowercase, diacritics kept), but upstream
+       keeps the string written in the front matter. This returns a map
+       {normalised key: original label} built from the pages, so both the label
+       and the slug can be rendered exactly like Jekyll.
+       Context: the site. Returns a dict. */ -}}
+{{- $labels := dict -}}
+{{- range .Site.RegularPages -}}
+  {{- range .Params.tags -}}
+    {{- $key := lower . -}}
+    {{- if not (index $labels $key) }}{{ $labels = merge $labels (dict $key .) }}{{ end -}}
+  {{- end -}}
+  {{- range .Params.categories -}}
+    {{- $key := lower . -}}
+    {{- if not (index $labels $key) }}{{ $labels = merge $labels (dict $key .) }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $labels -}}

@@ -1,0 +1,102 @@
+# All theme parameters and their defaults.
+#
+# Hugo deep-merges `params`, so a consumer overrides only what it needs and a
+# site with an empty `params` table still builds (R9). Every key below is
+# documented in docs/CONFIG.md.
+
+tagline = ""
+description = ""
+
+# Footer tooltip. Hugo has no notion of the theme's own version at render time.
+theme_version = "7.6.0"
+
+# Identity and media
+avatar = ""
+cdn = ""
+social_preview_image = ""
+
+# `light`, `dark` or empty (follow the system preference, keep the toggle).
+theme_mode = ""
+
+# `alt_lang` overrides the <html lang> when it differs from the UI language.
+alt_lang = ""
+
+# Global table-of-contents switch; each post can override it.
+toc = true
+
+github_username = ""
+twitter_username = ""
+
+[params.social]
+  name = ""
+  email = ""
+  fediverse_handle = ""
+  links = []
+
+[params.webmaster_verifications]
+  google = ""
+  bing = ""
+  alexa = ""
+  yandex = ""
+  baidu = ""
+  facebook = ""
+
+[params.analytics.google]
+  id = ""
+
+[params.analytics.goatcounter]
+  id = ""
+
+[params.analytics.umami]
+  id = ""
+  domain = ""
+
+[params.analytics.matomo]
+  id = ""
+  domain = ""
+
+[params.analytics.cloudflare]
+  id = ""
+
+[params.analytics.fathom]
+  id = ""
+
+[params.pageviews]
+  provider = ""
+
+[params.comments]
+  provider = ""
+
+[params.comments.disqus]
+  shortname = ""
+
+[params.comments.utterances]
+  repo = ""
+  issue_term = ""
+
+[params.comments.giscus]
+  repo = ""
+  repo_id = ""
+  category = ""
+  category_id = ""
+  mapping = "pathname"
+  strict = "0"
+  input_position = "bottom"
+  lang = ""
+  reactions_enabled = "1"
+
+[params.edit_post]
+  enabled = false
+  url = ""
+  static_url = false
+
+[params.assets.self_host]
+  enabled = false
+  env = ""
+
+[params.pwa]
+  enabled = true
+
+[params.pwa.cache]
+  enabled = true
+  deny_paths = []

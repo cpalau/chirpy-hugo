@@ -1,0 +1,19 @@
+# Mandatory for a consumer whose project config replaces this category (D-07).
+
+[markup.goldmark.renderer]
+  # Upstream content uses raw HTML.
+  unsafe = true
+
+[markup.goldmark.parser.attribute]
+  # Code fence attributes live in the info string (` ```shell {.nolineno}`).
+  block = true
+
+[markup.highlight]
+  # Classes, not inline styles: _sass/base/_syntax.scss provides the palette.
+  noClasses = false
+  # Chirpy renders its own line-number gutter (Rouge-compatible), see D-02.
+  lineNos = false
+
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 3

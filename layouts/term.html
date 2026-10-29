@@ -1,0 +1,21 @@
+{{- /* Ports _layouts/category.html and _layouts/tag.html. */ -}}
+{{- define "main" }}
+{{- $isCategory := eq .Type "categories" }}
+{{- $labels := partial "taxonomy-labels.html" . }}
+<div id="page-{{ if $isCategory }}category{{ else }}tag{{ end }}">
+  <h1 class="ps-lg-2">
+    <i class="{{ if $isCategory }}far fa-folder-open{{ else }}fa fa-tag{{ end }} fa-fw text-muted"></i>
+    {{ index $labels (lower .Title) | default .Title }}
+    <span class="lead text-muted ps-2">{{ len .Pages }}</span>
+  </h1>
+  <ul class="content ps-0">
+    {{- range .Pages }}
+    <li class="d-flex justify-content-between px-md-3">
+      <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+      <span class="dash flex-grow-1"></span>
+      {{ partial "datetime.html" (dict "date" .Date "class" "text-muted small text-nowrap" "lang" $.Lang) }}
+    </li>
+    {{- end }}
+  </ul>
+</div>
+{{- end }}

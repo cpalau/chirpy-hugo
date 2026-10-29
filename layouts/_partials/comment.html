@@ -1,0 +1,4 @@
+{{- /* Ports _includes/comment.html. */ -}}
+{{- if and .Params.comments .Site.Params.comments.provider }}
+{{ partial (printf "comments/%s.html" .Site.Params.comments.provider) . }}
+{{- end }}

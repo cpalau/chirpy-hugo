@@ -1,0 +1,8 @@
+{{- /* Jekyll's `slugify` with the default mode: downcase, collapse anything
+       that is not a letter or a decimal digit into '-', trim the dashes.
+       Diacritics are KEPT (G-40): `Ávila` becomes `ávila`, not `avila`.
+       Context: a string. Returns a string. */ -}}
+{{- $s := lower . -}}
+{{- $s = replaceRE `[^\p{L}\p{Nd}]+` "-" $s -}}
+{{- $s = strings.Trim $s "-" -}}
+{{- return $s -}}

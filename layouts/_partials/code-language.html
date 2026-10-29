@@ -1,0 +1,65 @@
+{{- /* Map a syntax-highlighter alias to its display name (G-06).
+       Ports _includes/language-alias.html. Returns a string. */ -}}
+{{- $lang := . | default "" -}}
+{{- $name := "" -}}
+{{- $upper := slice "css" "html" "scss" "ssh" "toml" "xml" "yaml" "json" -}}
+{{- if in $upper $lang -}}
+  {{- $name = upper $lang -}}
+{{- else if in (slice "actionscript" "as" "as3") $lang -}}
+  {{- $name = "ActionScript" -}}
+{{- else if eq $lang "applescript" -}}
+  {{- $name = "AppleScript" -}}
+{{- else if in (slice "brightscript" "bs" "brs") $lang -}}
+  {{- $name = "BrightScript" -}}
+{{- else if in (slice "cfscript" "cfc") $lang -}}
+  {{- $name = "CFScript" -}}
+{{- else if in (slice "coffeescript" "coffee" "coffee-script") $lang -}}
+  {{- $name = "CoffeeScript" -}}
+{{- else if in (slice "cs" "csharp") $lang -}}
+  {{- $name = "C#" -}}
+{{- else if eq $lang "erl" -}}
+  {{- $name = "Erlang" -}}
+{{- else if eq $lang "graphql" -}}
+  {{- $name = "GraphQL" -}}
+{{- else if in (slice "haskell" "hs") $lang -}}
+  {{- $name = "Haskell" -}}
+{{- else if in (slice "javascript" "js") $lang -}}
+  {{- $name = "JavaScript" -}}
+{{- else if in (slice "make" "mf" "gnumake" "bsdmake") $lang -}}
+  {{- $name = "Makefile" -}}
+{{- else if in (slice "md" "mkd") $lang -}}
+  {{- $name = "Markdown" -}}
+{{- else if eq $lang "m" -}}
+  {{- $name = "Matlab" -}}
+{{- else if in (slice "objective_c" "objc" "obj-c" "obj_c" "objectivec") $lang -}}
+  {{- $name = "Objective-C" -}}
+{{- else if in (slice "perl" "pl") $lang -}}
+  {{- $name = "Perl" -}}
+{{- else if in (slice "php" "php3" "php4" "php5") $lang -}}
+  {{- $name = "PHP" -}}
+{{- else if eq $lang "py" -}}
+  {{- $name = "Python" -}}
+{{- else if eq $lang "rb" -}}
+  {{- $name = "Ruby" -}}
+{{- else if in (slice "rs" "no_run" "ignore" "should_panic") $lang -}}
+  {{- $name = "Rust" -}}
+{{- else if in (slice "bash" "zsh" "ksh" "sh") $lang -}}
+  {{- $name = "Shell" -}}
+{{- else if in (slice "st" "squeak") $lang -}}
+  {{- $name = "Smalltalk" -}}
+{{- else if eq $lang "tex" -}}
+  {{- $name = "TeX" -}}
+{{- else if eq $lang "latex" -}}
+  {{- $name = "LaTeX" -}}
+{{- else if in (slice "ts" "typescript") $lang -}}
+  {{- $name = "TypeScript" -}}
+{{- else if in (slice "vb" "visualbasic") $lang -}}
+  {{- $name = "Visual Basic" -}}
+{{- else if in (slice "vue" "vuejs") $lang -}}
+  {{- $name = "Vue.js" -}}
+{{- else if eq $lang "yml" -}}
+  {{- $name = "YAML" -}}
+{{- else -}}
+  {{- $name = title $lang -}}
+{{- end -}}
+{{- return $name -}}

@@ -1,0 +1,57 @@
+{{- /* Ports _includes/post-paginator.html: upstream's windowed page numbers. */ -}}
+{{- $pag := . -}}
+<nav aria-label="Page Navigation">
+  <ul class="pagination align-items-center mt-4 mb-0">
+    <li class="page-item {{ if not $pag.HasPrev }}disabled{{ end }}">
+      <a class="page-link" href="{{ if $pag.HasPrev }}{{ $pag.Prev.URL }}{{ else }}#{{ end }}" aria-label="previous-page">
+        <i class="fas fa-angle-left"></i>
+      </a>
+    </li>
+
+    {{- $leftEllipsis := false -}}
+    {{- $rightEllipsis := false -}}
+    {{- $pre := sub $pag.PageNumber 1 -}}
+    {{- $next := add $pag.PageNumber 1 -}}
+    {{- $preLess := sub $pre 1 -}}
+    {{- $nextMore := add $next 1 -}}
+    {{- range $i := seq 1 $pag.TotalPages -}}
+      {{- $show := false -}}
+      {{- if eq $pag.PageNumber 1 -}}
+        {{- if or (le $i 3) (eq $i $pag.TotalPages) }}{{ $show = true }}{{ end -}}
+      {{- else if eq $pag.PageNumber $pag.TotalPages -}}
+        {{- if or (eq $i 1) (ge $i $preLess) }}{{ $show = true }}{{ end -}}
+      {{- else -}}
+        {{- if or (eq $i 1) (eq $i $pag.TotalPages) -}}
+          {{- $show = true -}}
+        {{- else if and (ge $i $pre) (le $i $next) -}}
+          {{- $show = true -}}
+        {{- end -}}
+      {{- end -}}
+
+      {{- if $show }}
+    <li class="page-item{{ if eq $i $pag.PageNumber }} active{{ end }}">
+      <a class="page-link" href="{{ if gt $i 1 }}{{ (index $pag.Pagers (sub $i 1)).URL }}{{ else }}{{ "/" | relURL }}{{ end }}">{{ $i }}</a>
+    </li>
+      {{- else -}}
+        {{- if and (lt $i $pre) (not $leftEllipsis) }}
+    <li class="page-item disabled"><span class="page-link">...</span></li>
+          {{- $leftEllipsis = true -}}
+        {{- else if and (gt $i $next) (not $rightEllipsis) }}
+    <li class="page-item disabled"><span class="page-link">...</span></li>
+          {{- $rightEllipsis = true -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end }}
+
+    <li class="page-index align-middle">
+      <span>{{ $pag.PageNumber }}</span>
+      <span class="text-muted">/ {{ $pag.TotalPages }}</span>
+    </li>
+
+    <li class="page-item {{ if not $pag.HasNext }}disabled{{ end }}">
+      <a class="page-link" href="{{ if $pag.HasNext }}{{ $pag.Next.URL }}{{ else }}#{{ end }}" aria-label="next-page">
+        <i class="fas fa-angle-right"></i>
+      </a>
+    </li>
+  </ul>
+</nav>

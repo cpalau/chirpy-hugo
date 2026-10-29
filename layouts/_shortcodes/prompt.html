@@ -1,0 +1,3 @@
+{{- /* Replaces kramdown's `{: .prompt-X }` (D-01).
+       RenderString with display "block" keeps the <p> wrapper that Jekyll emits. */ -}}
+<blockquote class="prompt-{{ .Get 0 | default "info" }}">{{ .Inner | .Page.RenderString (dict "display" "block") }}</blockquote>

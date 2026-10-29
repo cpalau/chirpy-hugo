@@ -1,0 +1,23 @@
+{{- /* Ports _includes/update-list.html: the 5 most recently updated posts,
+       ordered by `lastmod or date` descending (G-13). */ -}}
+{{- $max := 5 -}}
+{{- $items := slice -}}
+{{- range $i, $post := .Site.RegularPages -}}
+  {{- if eq $post.Type "posts" -}}
+    {{- $d := $post.Lastmod | default $post.Date -}}
+    {{- $items = $items | append (dict "ts" $d.Unix "i" $i "post" $post) -}}
+  {{- end -}}
+{{- end -}}
+{{- $items = sort $items "ts" "desc" -}}
+{{- if gt (len $items) 0 }}
+<section id="access-lastmod">
+  <h2 class="panel-heading">{{ T "panel.lastmod" }}</h2>
+  <ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2">
+    {{- range first $max $items }}
+    <li class="text-truncate lh-lg">
+      <a href="{{ .post.RelPermalink }}">{{ .post.Title }}</a>
+    </li>
+    {{- end }}
+  </ul>
+</section>
+{{- end }}

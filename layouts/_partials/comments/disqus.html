@@ -1,0 +1,39 @@
+{{- /* Ports _includes/comments/disqus.html. */ -}}
+{{- $cfg := .Site.Params.comments.disqus -}}
+<script>
+  (function () {
+    const disqusShortname = '{{ $cfg.shortname }}';
+    const container = document.createElement('div');
+    container.id = 'disqus_thread';
+    const $footer = document.querySelector('footer');
+    $footer.insertAdjacentElement('beforebegin', container);
+
+    let loaded = false;
+    const loadDisqus = () => {
+      if (loaded) return;
+      loaded = true;
+      const d = document.createElement('script');
+      d.src = `https://${disqusShortname}.disqus.com/embed.js`;
+      d.setAttribute('data-timestamp', +new Date());
+      (document.head || document.body).appendChild(d);
+    };
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) loadDisqus();
+      }, { rootMargin: '200px' }).observe(container);
+    } else {
+      loadDisqus();
+    }
+
+    addEventListener('message', (event) => {
+      if (!event.data || !event.data.id || event.data.id !== Theme.eventId) return;
+      if (window.DISQUS) {
+        window.DISQUS.reset({
+          reload: true,
+          config: function () { this.page.identifier = window.location.pathname; }
+        });
+      }
+    });
+  })();
+</script>

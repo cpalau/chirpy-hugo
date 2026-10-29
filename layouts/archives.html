@@ -1,0 +1,20 @@
+{{- define "main" }}
+{{- $month := T "df.archives.strftime" | default "/ %m" -}}
+{{- $monthLayout := partial "strftime.html" $month -}}
+{{- $dayjsMonth := T "df.archives.dayjs" | default "/ MM" -}}
+<div id="archives" class="pl-xl-3">
+  {{- range .Site.RegularPages.GroupByDate "2006" }}
+  {{- if eq .Key "0001" }}{{ continue }}{{ end }}
+  <time class="year lead d-block">{{ .Key }}</time>
+  <ul class="list-unstyled">
+    {{- range .Pages }}
+    <li>
+      <span class="date day" data-ts="{{ .Date.Unix }}" data-df="DD">{{ .Date.Format "02" }}</span>
+      <span class="date month small text-muted ms-1" data-ts="{{ .Date.Unix }}" data-df="{{ $dayjsMonth }}">{{ .Date.Format $monthLayout }}</span>
+      <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+    </li>
+    {{- end }}
+  </ul>
+  {{- end }}
+</div>
+{{- end }}

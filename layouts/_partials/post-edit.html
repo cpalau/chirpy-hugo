@@ -1,0 +1,14 @@
+{{- /* Ports _includes/post-edit.html. D-12: .File.Path, not Jekyll's page.path. */ -}}
+{{- $cfg := .Site.Params.edit_post -}}
+{{- if $cfg.enabled -}}
+  {{- $url := $cfg.url -}}
+  {{- if not $cfg.static_url -}}
+    {{- with .File -}}{{- $url = printf "%s/%s" $url .Path -}}{{- end -}}
+  {{- end }}
+<div class="post-edit">
+  <a href="{{ $url }}" target="_blank" rel="noopener">
+    <i class="fa fa-pen fa-fw me-1"></i>
+    <span>{{ T "post.edit" }}</span>
+  </a>
+</div>
+{{- end }}

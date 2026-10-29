@@ -1,0 +1,11 @@
+{{- /* Ports refactor-content's R4/R5 (G-03). Inline images always get the
+       popup wrapper; the home card cover is rendered by home.html instead. */ -}}
+{{- partial "image.html" (dict
+  "src" .Destination
+  "alt" .Text
+  "class" (.Attributes.class | default "")
+  "width" .Attributes.width
+  "height" .Attributes.height
+  "lqip" .Attributes.lqip
+  "page" .Page
+) -}}

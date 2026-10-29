@@ -1,0 +1,22 @@
+{{- /* Ports _includes/jsdelivr-combine.html: merges every jsDelivr URL into a
+       single `combine/` request, in order. No SRI upstream, none here. */ -}}
+{{- $domain := "https://cdn.jsdelivr.net/" -}}
+{{- $combined := "" -}}
+{{- range split .urls "," -}}
+  {{- $url := . -}}
+  {{- if strings.Contains $url $domain -}}
+    {{- $snippet := strings.TrimPrefix $domain $url -}}
+    {{- if $combined -}}
+      {{- $combined = printf "%s,%s" $combined $snippet -}}
+    {{- else -}}
+      {{- $combined = printf "%scombine/%s" $domain $snippet -}}
+    {{- end -}}
+  {{- else if strings.Contains $url "//" -}}
+    <script defer src="{{ $url }}"></script>
+  {{- else -}}
+    <script defer src="{{ $url | relURL }}"></script>
+  {{- end -}}
+{{- end -}}
+{{- with $combined }}
+<script defer src="{{ . }}"></script>
+{{- end }}

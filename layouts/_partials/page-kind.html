@@ -1,0 +1,20 @@
+{{- /* Jekyll's `page.layout`, derived from the Hugo kind.
+       Returns one of: home post page archives categories tags category tag.
+       Used anywhere the upstream templates branch on `page.layout`. */ -}}
+{{- $kind := "page" -}}
+{{- if eq .Kind "home" -}}
+  {{- $kind = "home" -}}
+{{- else if eq .Kind "section" -}}
+  {{- $kind = "page" -}}
+{{- else if eq .Kind "taxonomy" -}}
+  {{- $kind = cond (eq .Type "categories") "categories" "tags" -}}
+{{- else if eq .Kind "term" -}}
+  {{- $kind = cond (eq .Type "categories") "category" "tag" -}}
+{{- else if eq .Kind "page" -}}
+  {{- if .Layout -}}
+    {{- $kind = .Layout -}}
+  {{- else if eq .Type "posts" -}}
+    {{- $kind = "post" -}}
+  {{- end -}}
+{{- end -}}
+{{- return $kind -}}

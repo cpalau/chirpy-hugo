@@ -1,0 +1,88 @@
+{{- /* Ports _layouts/categories.html and _layouts/tags.html. */ -}}
+{{- define "main" }}
+{{- $labels := partial "taxonomy-labels.html" . }}
+{{- if eq .Type "categories" }}
+{{- $lang := .Lang -}}
+{{- $headPrefix := "h_" -}}
+{{- $listPrefix := "l_" -}}
+{{- $groupIndex := 0 -}}
+{{- $names := slice -}}
+{{- range $name, $pages := .Site.Taxonomies.categories }}{{ $names = $names | append $name }}{{ end -}}
+{{- $names = sort $names -}}
+<div class="d-flex flex-column">
+{{- range $names }}
+  {{- $name := . -}}
+  {{- $pages := index $.Site.Taxonomies.categories $name -}}
+  {{- $first := index $pages 0 -}}
+  {{- $firstCats := $first.Page.Params.categories | default slice -}}
+  {{- if and $firstCats (eq (index $firstCats 0) $name) }}
+  {{- $subs := slice -}}
+  {{- range $pages -}}
+    {{- with .Page.Params.categories -}}
+      {{- if gt (len .) 1 -}}
+        {{- $second := index . 1 -}}
+        {{- if not (in $subs $second) }}{{ $subs = $subs | append $second }}{{ end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $subs = sort $subs }}
+  <div class="card categories">
+    <div id="{{ $headPrefix }}{{ $groupIndex }}" class="card-header d-flex justify-content-between hide-border-bottom">
+      <span class="ms-2">
+        <i class="far fa-folder{{ if gt (len $subs) 0 }}-open{{ end }} fa-fw"></i>
+        <a href="{{ printf "/categories/%s/" (urlquery (partial "slugify.html" $name)) | relURL }}" class="mx-2">{{ index $labels $name | default $name }}</a>
+        <span class="text-muted small font-weight-light">
+          {{- if gt (len $subs) 0 -}}
+            {{ len $subs }}
+            {{- if gt (len $subs) 1 }}{{ T "categories.category_measure.plural" }}{{ else }}{{ T "categories.category_measure.singular" }}{{ end }},
+          {{- end -}}
+          {{ len $pages }}
+          {{- if gt (len $pages) 1 }}{{ T "categories.post_measure.plural" }}{{ else }}{{ T "categories.post_measure.singular" }}{{ end -}}
+        </span>
+      </span>
+      {{- if gt (len $subs) 0 }}
+      <a href="#{{ $listPrefix }}{{ $groupIndex }}" data-bs-toggle="collapse" aria-expanded="true" aria-label="{{ $headPrefix }}{{ $groupIndex }}-trigger" class="category-trigger hide-border-bottom">
+        <i class="fas fa-fw fa-angle-down"></i>
+      </a>
+      {{- else }}
+      <span data-bs-toggle="collapse" class="category-trigger hide-border-bottom disabled">
+        <i class="fas fa-fw fa-angle-right"></i>
+      </span>
+      {{- end }}
+    </div>
+    {{- if gt (len $subs) 0 }}
+    <div id="{{ $listPrefix }}{{ $groupIndex }}" class="collapse show" aria-expanded="true">
+      <ul class="list-group">
+        {{- range $subs }}
+        {{- $sub := . -}}
+        {{- $subPages := index $.Site.Taxonomies.categories $sub -}}
+        <li class="list-group-item">
+          <i class="far fa-folder fa-fw"></i>
+          <a href="{{ printf "/categories/%s/" (urlquery (partial "slugify.html" $sub)) | relURL }}" class="mx-2">{{ index $labels $sub | default $sub }}</a>
+          <span class="text-muted small font-weight-light">
+            {{ len $subPages }}
+            {{- if gt (len $subPages) 1 }}{{ T "categories.post_measure.plural" }}{{ else }}{{ T "categories.post_measure.singular" }}{{ end -}}
+          </span>
+        </li>
+        {{- end }}
+      </ul>
+    </div>
+    {{- end }}
+  </div>
+  {{- $groupIndex = add $groupIndex 1 }}
+  {{- end }}
+{{- end }}
+</div>
+{{- else }}
+{{- $names := slice -}}
+{{- range $name, $pages := .Site.Taxonomies.tags }}{{ $names = $names | append $name }}{{ end -}}
+{{- $names = partial "sort-natural.html" $names -}}
+<div id="tags" class="d-flex flex-wrap mx-xl-2">
+  {{- range $names }}
+  <div>
+    <a class="tag" href="{{ printf "/tags/%s/" (urlquery (partial "slugify.html" .)) | relURL }}">{{ index $labels . | default . }}<span class="text-muted">{{ len (index $.Site.Taxonomies.tags .) }}</span></a>
+  </div>
+  {{- end }}
+</div>
+{{- end }}
+{{- end }}

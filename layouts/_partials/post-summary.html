@@ -1,0 +1,22 @@
+{{- /* Ports _includes/post-summary.html.
+       Context: dict "post" (page) "full_text" (bool) "max_length" (int).
+       Returns the summary as a string (D-03: Jekyll truncate semantics). */ -}}
+{{- $post := .post -}}
+{{- $full := .full_text | default false -}}
+{{- if and $post.Description (not $full) -}}
+  {{- $post.Description -}}
+{{- else -}}
+  {{- $content := $post.Content -}}
+  {{- if strings.Contains $content `<td class="rouge-gutter gl"><pre class="lineno">` -}}
+    {{- $content = replace $content `<td class="rouge-gutter gl"><pre class="lineno">` `<!-- <td class="rouge-gutter gl"><pre class="lineno">` -}}
+    {{- $content = replace $content `</td><td class="rouge-code">` `</td> --><td class="rouge-code">` -}}
+  {{- end -}}
+  {{- $text := $content | plainify | replaceRE `\s+` " " | strings.TrimSpace -}}
+  {{- if not $full -}}
+    {{- $max := .max_length | default 200 -}}
+    {{- if gt (strings.RuneCount $text) $max -}}
+      {{- $text = printf "%s..." (substr $text 0 (sub $max 3)) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $text -}}
+{{- end -}}

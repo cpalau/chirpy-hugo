@@ -1,0 +1,37 @@
+{{- /* Ports _includes/footer.html. D-09: credits Hugo and this project. */ -}}
+<footer
+  aria-label="Site Info"
+  class="
+    d-flex flex-column justify-content-center text-muted
+    flex-lg-row justify-content-lg-between align-items-lg-center pb-lg-3
+  "
+>
+  <p>
+    {{- "©" }}
+    <time>{{ now.Year }}</time>
+
+    {{- $social := .Site.Params.social -}}
+    {{- if $social.links -}}
+      <a href="{{ index $social.links 0 }}">{{ $social.name }}</a>.
+    {{- else -}}
+      <em class="fst-normal">{{ $social.name }}</em>.
+    {{- end }}
+
+    {{- with T "copyright.brief" }}
+      <span
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title="{{ T "copyright.verbose" }}"
+      >{{ . }}</span>
+    {{- end }}
+  </p>
+
+  <p>
+    {{- $platform := `<a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>` -}}
+    {{- $theme := printf `<a data-bs-toggle="tooltip" data-bs-placement="top" title="v%s" href="%s" target="_blank" rel="noopener">Chirpy Hugo</a>` .Site.Params.theme_version "https://github.com/cpalau/chirpy-hugo" -}}
+    {{- $meta := T "meta" -}}
+    {{- $meta = replace $meta ":PLATFORM" $platform -}}
+    {{- $meta = replace $meta ":THEME" $theme -}}
+    {{- $meta | safeHTML }}
+  </p>
+</footer>

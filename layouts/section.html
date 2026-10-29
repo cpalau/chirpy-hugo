@@ -1,0 +1,12 @@
+{{- /* Hugo-only: upstream has no section listing. Kept minimal so the build is
+       warning-free and a section URL still resolves (see ports.yml new_files). */ -}}
+{{- define "main" }}
+<article class="px-1">
+  <h1 class="dynamic-title">{{ .Title }}</h1>
+  <div class="content">
+    {{ range .Pages }}
+    <p><a href="{{ .RelPermalink }}">{{ .Title }}</a></p>
+    {{- end }}
+  </div>
+</article>
+{{- end }}

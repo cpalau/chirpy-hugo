@@ -1,0 +1,9 @@
+{{- /* site.toc AND page.toc AND an <h2>/<h3 in the rendered body (G-32).
+       Returns a bool. */ -}}
+{{- $enabled := false -}}
+{{- if and .Site.Params.toc .Params.toc -}}
+  {{- if or (strings.Contains .Content "<h2") (strings.Contains .Content "<h3") -}}
+    {{- $enabled = true -}}
+  {{- end -}}
+{{- end -}}
+{{- return $enabled -}}

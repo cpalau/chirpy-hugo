@@ -1,0 +1,25 @@
+{{- /* Ports _includes/post-nav.html.
+       Q3: Jekyll's previous = older -> .NextInSection, next = newer -> .PrevInSection. */ -}}
+{{- $previous := .PrevInSection -}}
+{{- $next := .NextInSection -}}
+<nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation">
+  {{- with $previous }}
+  <a href="{{ .RelPermalink }}" class="btn btn-outline-primary" aria-label="{{ T "post.button.previous" }}">
+    <p>{{ .Title }}</p>
+  </a>
+  {{- else }}
+  <div class="btn btn-outline-primary disabled" aria-label="{{ T "post.button.previous" }}">
+    <p>-</p>
+  </div>
+  {{- end }}
+
+  {{- with $next }}
+  <a href="{{ .RelPermalink }}" class="btn btn-outline-primary" aria-label="{{ T "post.button.next" }}">
+    <p>{{ .Title }}</p>
+  </a>
+  {{- else }}
+  <div class="btn btn-outline-primary disabled" aria-label="{{ T "post.button.next" }}">
+    <p>-</p>
+  </div>
+  {{- end }}
+</nav>

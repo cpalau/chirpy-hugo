@@ -1,0 +1,145 @@
+{{- /* Reproduces the jekyll-seo-tag output (D-06).
+       Only the shapes the theme actually emits are implemented; anything else
+       is a bug to be measured by G4, not silently ignored. */ -}}
+{{- $kind := partial "page-kind.html" . -}}
+{{- $site := .Site -}}
+{{- $title := cond (eq $kind "home") $site.Title .Title -}}
+{{- $desc := "" -}}
+{{- if .Description -}}
+  {{- $desc = .Description -}}
+{{- else if eq $kind "home" -}}
+  {{- $desc = $site.Params.description -}}
+{{- else -}}
+  {{- $desc = .Summary | plainify | replaceRE `\s+` " " | strings.TrimSpace -}}
+{{- end -}}
+{{- $author := "" -}}
+{{- $authorURL := "" -}}
+{{- with .Params.author -}}
+  {{- with index hugo.Data.authors . -}}
+    {{- $author = .name -}}
+    {{- $authorURL = .url | default "" -}}
+  {{- end -}}
+{{- end -}}
+{{- $social := $site.Params.social -}}
+{{- $twitterSite := "" -}}
+{{- with $site.Params.twitter_username }}{{ $twitterSite = printf "@%s" . }}{{ end -}}
+{{- $isArticle := ne $kind "home" -}}
+{{- $iso := "2006-01-02T15:04:05-07:00" -}}
+{{- $modified := .Date -}}
+{{- with .Params.lastmod }}{{ $modified = time.AsTime . }}{{ end -}}
+<!-- Begin Jekyll SEO tag v2.9.1 -->
+<meta name="generator" content="{{ printf "Hugo %s" hugo.Version }}" />
+<meta property="og:title" content="{{ $title }}" />
+{{- with $author }}
+<meta name="author" content="{{ . }}" />
+{{- end }}
+<meta property="og:locale" content="{{ $site.Language.Lang }}" />
+{{- with $desc }}
+<meta name="description" content="{{ . }}" />
+<meta name="twitter:description" property="og:description" content="{{ . }}" />
+{{- end }}
+<link rel="canonical" href="{{ .Permalink }}" />
+<meta property="og:url" content="{{ .Permalink }}" />
+<meta property="og:site_name" content="{{ $site.Title }}" />
+{{- $pageImage := "" -}}
+{{- $pageImageAlt := "" -}}
+{{- with .Params.image -}}
+  {{- $pageImage = partial "media-url.html" (dict "src" (.path | default .) "subpath" $.Params.media_subpath "absolute" true) -}}
+  {{- $pageImageAlt = .alt | default "" -}}
+{{- end }}
+{{- $socialImage := "" -}}
+{{- with $site.Params.social_preview_image -}}
+  {{- $socialImage = partial "media-url.html" (dict "src" . "absolute" true) -}}
+{{- end }}
+{{- with $pageImage }}
+<meta property="og:image" content="{{ . }}" />
+{{- with $pageImageAlt }}
+<meta property="og:image:alt" content="{{ . }}" />
+{{- end }}
+{{- end }}
+<meta property="og:type" content="{{ cond $isArticle "article" "website" }}" />
+{{- if and (eq $kind "home") .Paginator }}
+  {{- with .Paginator.Next }}
+<link rel="next" href="{{ .URL | absURL }}" />
+  {{- end }}
+  {{- with .Paginator.Prev }}
+<link rel="prev" href="{{ .URL | absURL }}" />
+  {{- end }}
+{{- end }}
+{{- if $isArticle }}
+<meta property="article:published_time" content="{{ .Date.Format $iso }}" />
+<meta property="article:modified_time" content="{{ $modified.Format $iso }}" />
+{{- end }}
+{{- with $pageImage }}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ . }}" />
+{{- with $pageImageAlt }}
+<meta name="twitter:image:alt" content="{{ . }}" />
+{{- end }}
+{{- else }}
+  {{- with $socialImage }}
+<meta property="og:image" content="{{ . }}" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="{{ . }}" />
+  {{- else }}
+<meta name="twitter:card" content="summary" />
+  {{- end }}
+{{- end }}
+<meta name="twitter:title" content="{{ $title }}" />
+{{- with $twitterSite }}
+<meta name="twitter:site" content="{{ . }}" />
+{{- end }}
+{{- with $author }}
+{{- with $site.Params.twitter_username }}
+<meta name="twitter:creator" content="@{{ . }}" />
+{{- end }}
+{{- end }}
+{{- with $site.Params.webmaster_verifications }}
+{{- with .google }}
+<meta name="google-site-verification" content="{{ . }}" />
+{{- end }}
+{{- with .bing }}
+<meta name="msvalidate.01" content="{{ . }}" />
+{{- end }}
+{{- with .alexa }}
+<meta name="alexaVerifyID" content="{{ . }}" />
+{{- end }}
+{{- with .yandex }}
+<meta name="yandex-verification" content="{{ . }}" />
+{{- end }}
+{{- with .baidu }}
+<meta name="baidu-site-verification" content="{{ . }}" />
+{{- end }}
+{{- with .facebook }}
+<meta name="facebook-domain-verification" content="{{ . }}" />
+{{- end }}
+{{- end }}
+{{- $ld := "" -}}
+{{- if $isArticle -}}
+  {{- $ld = printf `{"@context":"https://schema.org","@type":"BlogPosting"` -}}
+  {{- with $author -}}
+    {{- $authorObj := printf `{"@type":"Person","name":%s` (partial "jsonify.html" .) -}}
+    {{- with $authorURL }}{{ $authorObj = printf `%s,"url":%s` $authorObj (partial "jsonify.html" .) }}{{ end -}}
+    {{- $ld = printf `%s,"author":%s}` $ld $authorObj -}}
+  {{- end -}}
+  {{- $ld = printf `%s,"dateModified":%s,"datePublished":%s,"description":%s,"headline":%s` $ld (partial "jsonify.html" ($modified.Format $iso)) (partial "jsonify.html" (.Date.Format $iso)) (partial "jsonify.html" $desc) (partial "jsonify.html" .Title) -}}
+  {{- with .Params.image -}}
+    {{- if reflect.IsMap . -}}
+      {{- $img := printf `{"alt":%s` (partial "jsonify.html" (.alt | default "")) -}}
+      {{- with .lqip }}{{ $img = printf `%s,"lqip":%s` $img (partial "jsonify.html" .) }}{{ end -}}
+      {{- with .path }}{{ $img = printf `%s,"path":%s` $img (partial "jsonify.html" .) }}{{ end -}}
+      {{- $ld = printf `%s,"image":%s}` $ld $img -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $ld = printf `%s,"mainEntityOfPage":{"@type":"WebPage","@id":%s},"url":%s}` $ld (partial "jsonify.html" .Permalink) (partial "jsonify.html" .Permalink) -}}
+{{- else -}}
+  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebSite"` -}}
+  {{- if and (ne $kind "home") (not .Date.IsZero) -}}
+    {{- $ld = printf `%s,"dateModified":%s,"datePublished":%s` $ld (partial "jsonify.html" ($modified.Format $iso)) (partial "jsonify.html" (.Date.Format $iso)) -}}
+  {{- end -}}
+  {{- $links := "[]" -}}
+  {{- with $social.links }}{{ $links = partial "jsonify.html" . }}{{ end -}}
+  {{- $ld = printf `%s,"description":%s,"headline":%s,"name":%s,"sameAs":%s,"url":%s}` $ld (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $social.name) $links (partial "jsonify.html" .Permalink) -}}
+{{- end }}
+<script type="application/ld+json">{{ $ld | safeJS }}</script>
+<!-- End Jekyll SEO tag -->

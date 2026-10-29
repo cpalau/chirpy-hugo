@@ -1,0 +1,112 @@
+{{- /* Ports _includes/sidebar.html. */ -}}
+{{- $params := .Site.Params -}}
+{{- $tabKeys := slice "home" "about" "archives" "categories" "tags" -}}
+{{- $current := .RelPermalink -}}
+<aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end">
+  <header class="profile-wrapper">
+    <a href="{{ "/" | relURL }}" id="avatar" class="rounded-circle">
+      {{- with $params.avatar -}}
+        <img src="{{ partial "media-url.html" (dict "src" .) }}" width="112" height="112" alt="avatar" onerror="this.style.display='none'">
+      {{- end -}}
+    </a>
+
+    <a class="site-title d-block" href="{{ "/" | relURL }}">{{ .Site.Title }}</a>
+    <p class="site-subtitle fst-italic mb-0">{{ $params.tagline }}</p>
+  </header>
+
+  <nav class="flex-column flex-grow-1 w-100 ps-0">
+    <ul class="nav">
+      <li class="nav-item{{ if eq .Kind "home" }} active{{ end }}">
+        <a href="{{ "/" | relURL }}" class="nav-link">
+          <i class="fa-fw fas fa-home"></i>
+          <span>{{ upper (T "tabs.home") }}</span>
+        </a>
+      </li>
+      {{- range .Site.Menus.main }}
+        {{- $key := trim .URL "/" -}}
+        {{- $label := .Name -}}
+        {{- if in $tabKeys $key -}}{{- $label = T (printf "tabs.%s" $key) | default .Name -}}{{- end }}
+      <li class="nav-item{{ if eq .URL $current }} active{{ end }}">
+        <a href="{{ .URL | relURL }}" class="nav-link">
+          <i class="fa-fw {{ .Params.icon }}"></i>
+          <span>{{ upper $label }}</span>
+        </a>
+      </li>
+      {{- end }}
+    </ul>
+  </nav>
+
+  <div class="sidebar-bottom d-flex flex-wrap align-items-center w-100">
+    {{- if not (in (slice "light" "dark") ($params.theme_mode | default "")) }}
+    <div class="btn-group dropup">
+      <button
+        type="button"
+        class="btn btn-link nav-link"
+        aria-label="Switch Mode"
+        id="mode-toggle"
+        data-bs-toggle="dropdown"
+      >
+        <i class="fa-regular fa-sun" data-theme-mode="light"></i><i class="fa-regular fa-moon" data-theme-mode="dark"></i><i class="fa-solid fa-display" data-theme-mode="system"></i>
+      </button>
+      <ul class="dropdown-menu rounded-3 mb-1 p-1">
+        <li>
+          <button class="dropdown-item d-flex align-items-center" type="button" data-theme-mode="light">
+            <i class="fa-regular fa-sun" data-theme-mode="light"></i>{{ T "theme.light" }}
+          </button>
+        </li>
+        <li>
+          <button class="dropdown-item d-flex align-items-center" type="button" data-theme-mode="dark">
+            <i class="fa-regular fa-moon" data-theme-mode="dark"></i>{{ T "theme.dark" }}
+          </button>
+        </li>
+        <li>
+          <button class="dropdown-item d-flex align-items-center" type="button" data-theme-mode="system">
+            <i class="fa-solid fa-display" data-theme-mode="system"></i>{{ T "theme.system" }}
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    {{- with hugo.Data.contact }}
+      {{- if gt (len .) 0 }}
+    <span class="icon-border"></span>
+      {{- end }}
+    {{- end }}
+    {{- end }}
+
+    {{- range hugo.Data.contact }}
+      {{- $type := .type -}}
+      {{- $url := "" -}}
+      {{- $rel := "" -}}
+      {{- $target := "" -}}
+      {{- if in (slice "github" "twitter") $type -}}
+        {{- $username := cond (eq $type "github") $params.github_username $params.twitter_username -}}
+        {{- with $username }}{{ $url = printf "https://%s.com/%s" $type . }}{{ end -}}
+      {{- else if eq $type "email" -}}
+        {{- with $params.social.email -}}
+          {{- $parts := split . "@" -}}
+          {{- $url = printf "javascript:void(location.href = 'mailto:' + ['%s','%s'].join('@'))" (index $parts 0) (index $parts 1) -}}
+        {{- end -}}
+      {{- else if eq $type "rss" -}}
+        {{- $url = "/feed.xml" | relURL -}}
+      {{- else -}}
+        {{- $url = .url -}}
+      {{- end -}}
+      {{- if $url -}}
+        {{- if not .noblank -}}
+          {{- $target = `target="_blank"` -}}
+          {{- $rel = "noopener noreferrer" -}}
+        {{- end -}}
+        {{- if eq $type "mastodon" -}}{{- $rel = trim (printf "%s me" $rel) " " -}}{{- end }}
+        <a
+          {{ printf `href="%s"` $url | safeHTMLAttr }}
+          aria-label="{{ $type }}"
+          {{ $target | safeHTMLAttr }}
+          {{- with $rel }} rel="{{ . }}"{{ end }}
+        >
+          <i class="{{ .icon }}"></i>
+        </a>
+      {{- end -}}
+    {{- end }}
+  </div>
+</aside>

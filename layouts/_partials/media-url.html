@@ -1,0 +1,26 @@
+{{- /* Build a media URL exactly like _includes/media-url.html.
+       Context: dict "src" "subpath" "absolute". Returns a string. */ -}}
+{{- $src := .src -}}
+{{- $url := "" -}}
+{{- with $src -}}
+  {{- if not (strings.Contains . ":") -}}
+    {{- $sub := $.subpath | default "" -}}
+    {{- $url = printf "%s/%s" $sub . -}}
+    {{- with $.Site.Params.cdn -}}
+      {{- $url = printf "%s/%s" . $url -}}
+    {{- end -}}
+    {{- $url = replace $url "///" "/" -}}
+    {{- $url = replace $url "//" "/" -}}
+    {{- $url = replace $url ":/" "://" -}}
+    {{- if not (strings.Contains $url "://") -}}
+      {{- if $.absolute -}}
+        {{- $url = absURL $url -}}
+      {{- else -}}
+        {{- $url = relURL $url -}}
+      {{- end -}}
+    {{- end -}}
+  {{- else -}}
+    {{- $url = . -}}
+  {{- end -}}
+{{- end -}}
+{{- return $url -}}

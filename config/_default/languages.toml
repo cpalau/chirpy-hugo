@@ -1,0 +1,5 @@
+# One language by default. Every locale shipped in i18n/ can be enabled here.
+[en]
+  languageName = "English"
+  languageCode = "en"
+  weight = 1

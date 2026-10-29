@@ -1,0 +1,10 @@
+{{- /* Ports _includes/datetime.html: server text plus data-ts/data-df so Day.js
+       can reformat client-side (G-15). Context: dict date class tooltip lang. */ -}}
+{{- $df := T "df.post.dayjs" | default "DD/MM/YYYY" -}}
+{{- $layout := partial "strftime.html" (T "df.post.strftime" | default "%d/%m/%Y") -}}
+<time
+  {{- with .class }} class="{{ . }}"{{ end }}
+  data-ts="{{ .date.Unix }}"
+  data-df="{{ $df }}"
+  {{- if .tooltip }} data-bs-toggle="tooltip" data-bs-placement="bottom"{{ end -}}
+>{{ .date | time.Format $layout }}</time>

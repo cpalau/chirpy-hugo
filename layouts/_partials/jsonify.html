@@ -1,0 +1,9 @@
+{{- /* Ruby-compatible jsonify (Q2): Hugo escapes <, >, &, U+2028 and U+2029,
+       Ruby does not. Returns a string. */ -}}
+{{- $j := jsonify . -}}
+{{- $j = replaceRE `\\u003c` "<" $j -}}
+{{- $j = replaceRE `\\u003e` ">" $j -}}
+{{- $j = replaceRE `\\u0026` "&" $j -}}
+{{- $j = replaceRE `\\u2028` "\u2028" $j -}}
+{{- $j = replaceRE `\\u2029` "\u2029" $j -}}
+{{- return $j -}}

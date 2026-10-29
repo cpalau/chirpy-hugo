@@ -1,0 +1,34 @@
+{{- $url := .Get "src" -}}
+{{- $title := .Get "title" -}}
+{{- $poster := .Get "poster" -}}
+{{- $types := split (trim (.Get "types") " ") "|" -}}
+{{- if not (strings.Contains $url "://") -}}
+  {{- $url = partial "media-url.html" (dict "src" $url "subpath" .Page.Params.media_subpath) -}}
+{{- end -}}
+{{- $posterAttr := "" -}}
+{{- with $poster -}}
+  {{- $p := . -}}
+  {{- if not (strings.Contains $p "://") }}{{ $p = partial "media-url.html" (dict "src" $p "subpath" $.Page.Params.media_subpath) }}{{ end -}}
+  {{- $posterAttr = printf `poster="%s"` $p -}}
+{{- end -}}
+{{- $attrs := "controls" -}}
+{{- if .Get "autoplay" }}{{ $attrs = printf "%s autoplay" $attrs }}{{ end -}}
+{{- if .Get "loop" }}{{ $attrs = printf "%s loop" $attrs }}{{ end -}}
+{{- if .Get "muted" }}{{ $attrs = printf "%s muted" $attrs }}{{ end -}}
+{{- $ext := index (split $url ".") (sub (len (split $url ".")) 1) -}}
+{{- $all := slice $ext | append $types -}}
+{{- $filepath := strings.TrimSuffix (printf ".%s" $ext) $url -}}
+<p>
+  <video class="embed-video file" {{ $posterAttr | safeHTMLAttr }} {{ $attrs }}>
+    {{- range $type := $all -}}
+      {{- $mime := $type -}}
+      {{- range hugo.Data.media }}{{ if eq .extension $type }}{{ $mime = .mime_type }}{{ end }}{{ end }}
+    <source src="{{ $filepath }}.{{ $type }}" type="video/{{ $mime }}">
+    {{- end }}
+    Your browser does not support the video tag. Here is a
+    <a href="{{ $url }}">link to the video file</a> instead.
+  </video>
+  {{- with $title }}
+  <em>{{ . }}</em>
+  {{- end }}
+</p>
