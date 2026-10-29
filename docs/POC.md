@@ -84,6 +84,36 @@ than the exempted ones, class lists, text content, nesting — matches.
 
 ---
 
+## 2b. Gate 5 — measured result
+
+18 comparisons (3 pages × 3 viewports × 2 themes), Playwright + pixelmatch,
+budget `threshold 0.1`, `maxDiffPixelRatio 0.001`.
+
+| Pages | Light | Dark |
+|---|---|---|
+| `/posts/code/` desktop | **0.083 % ✅** | **0.081 % ✅** |
+| `/posts/code/` tablet | 0.129 % | 0.135 % |
+| `/posts/code/` mobile | 0.238 % | 0.245 % |
+| `/posts/full/` desktop | 0.158 % | 0.153 % |
+| `/posts/full/` mobile | 0.523 % | 0.511 % |
+| home desktop | 0.154 % | 0.152 % |
+| home mobile | 0.523 % | 0.522 % |
+
+Two pairs already pass the budget after one day. The rest is between 0.13 % and
+0.52 %, localised in thin horizontal bands (81 rows out of 2300 on the desktop
+post page) and traceable to the known DOM differences: related-post order,
+read-time word count and the term-page labels. No layout breakage remains.
+
+Two real bugs were found *by* Gate 5 and fixed, which is the reason the numbers
+are this low:
+
+| Symptom | Cause |
+|---|---|
+| Whole page shifted 8 px; posts at 100 % diff | `assets/js/dist/*` and `app.min.js` were never published: Hugo does not serve `assets/`. `Theme is not defined` killed the whole JS layer, so the lazy-loaded cover stayed at its 1×1 LQIP and the baseline gap changed the header height. |
+| Code pages 22 px taller | The render hook appended the final newline **after** the last `</span>`; Rouge puts it inside. A newline after the span adds an empty line to the `<pre>`. |
+
+---
+
 ## 3. The decisive finding: Chroma ≠ Rouge
 
 This was the risk that F0.5 existed to measure (D-02, Q7).
@@ -132,6 +162,8 @@ accordingly (see `docs/COMPATIBILITY.md`).
 | P-08 | `transform.HighlightCodeBlock` keeps `<span class="line"><span class="cl">` even with `lineNos=false` | the hook strips the wrappers before rebuilding Rouge's table |
 | P-09 | A top-level `{{ $x := ... }}` in a template that also has `{{ define }}` blocks makes Hugo skip `baseof` and emit an empty page | variables go inside the `define` blocks |
 | P-10 | `hugo.Data` replaces the deprecated `.Site.Data` (0.156) | already applied; AGENTS §13.11 lists it |
+| P-11 | **Hugo does not publish `assets/`**, and Jekyll does. The JS bundles, `app.min.js` and `sw.min.js` live there upstream | `scripts/build-js.mjs` materialises them under `static/` (front matter stripped); without it the entire JS layer 404s |
+| P-12 | Chroma ends the token stream without a trailing newline, Rouge puts it inside the last span | the hook appends it *inside* the span; otherwise every code block grows one empty line |
 
 ---
 
@@ -143,8 +175,9 @@ accordingly (see `docs/COMPATIBILITY.md`).
 | Related posts: same set, different order — upstream sorts the score **as a string** (`"2:7"`, `"1:3"`, `"1.5:12"`), which puts 1.0 before 1.5 | fixture 1 | F4: reproduce the string sort with the candidate index |
 | Term/list page `<title>`, breadcrumb and SEO type (`Alpha` vs `alpha`, `article` vs `website`, missing intermediate crumb) | 23 listing pages | F3 |
 | Search-loader inline script is re-escaped by Go's JS context (`\/`, `\u003c`) | all pages | F6: emit the script with `safeHTML` |
+| Visual residual 0.13–0.52 % on home and post pages | 16 pairs | F8: follows the DOM items above |
 | Pagination URL shape (D-13) | 6 pages | accepted divergence, or an alias |
-| Gate 5 (pixels) | — | not run yet: Playwright browsers are not installed |
+| Gate 5 (pixels) | 18 pairs | run: 2 within budget, 16 between 0.13 % and 0.52 % (see §2b) |
 
 None of these is architectural. All are enumerated and reproducible with the
 commands at the top of this document.
@@ -155,7 +188,7 @@ commands at the top of this document.
 
 **GO.**
 
-The contract-renderer architecture holds: the emitted HTML matches Jekyll's
+Gate 4 and Gate 5 both ran. The contract-renderer architecture holds: the emitted HTML matches Jekyll's
 except for the items above, and the two irreducible ones are now known and
 bounded —
 

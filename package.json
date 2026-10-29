@@ -11,6 +11,9 @@
     "build:css": "bash scripts/build-css.sh"
   },
   "devDependencies": {
-    "parse5": "^7.2.1"
+    "parse5": "^7.2.1",
+    "pixelmatch": "^8.0.0",
+    "playwright-core": "^1.64.1",
+    "pngjs": "^7.0.0"
   }
 }

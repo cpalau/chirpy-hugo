@@ -6,7 +6,16 @@
 {{- $inner := $res.Inner -}}
 {{- $inner = replace $inner `<span class="line"><span class="cl">` "" -}}
 {{- $inner = replace $inner `</span></span>` "" -}}
-{{- if not (hasSuffix $inner "\n") }}{{ $inner = printf "%s\n" $inner }}{{ end -}}
+{{- /* Rouge ends the block with a newline *inside* the last token span; a newline
+       after </span> would add an empty line to the <pre> and 22px to the page. */ -}}
+{{- if hasSuffix $inner "</span>" -}}
+  {{- $before := strings.TrimSuffix "</span>" $inner -}}
+  {{- if not (hasSuffix $before "\n") -}}
+    {{- $inner = printf "%s\n</span>" $before -}}
+  {{- end -}}
+{{- else if not (hasSuffix $inner "\n") -}}
+  {{- $inner = printf "%s\n" $inner -}}
+{{- end -}}
 {{- $code := strings.TrimSuffix "\n" (printf "%s" .Inner) -}}
 {{- $lines := cond (eq $code "") 0 (len (split $code "\n")) -}}
 {{- $nolineno := false -}}

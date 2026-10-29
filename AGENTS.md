@@ -355,6 +355,8 @@ content layer; every one of them was measured, not assumed.
 | Pagination URLs | Hugo's `/page/2/` | `[pagination] path` is broken in 0.168; Jekyll emits `/page2/` (D-14) |
 | Taxonomy labels | `_partials/taxonomy-labels.html` | Hugo lowercases taxonomy keys; the front-matter case must be recovered |
 | `lastmod` | front matter only | `enableGitInfo` turns `.Lastmod` into the commit date and leaks into SEO |
+| Publishing `assets/` | `scripts/build-js.mjs` and `scripts/build-css.sh` write to `static/` | Hugo does **not** publish `assets/`; Jekyll does. Every file the browser loads must be under `static/` or reached through a Hugo Pipes resource |
+| Code block trailing newline | inside the last token span | after `</span>` it adds an empty line to the `<pre>` (+22 px) |
 
 Rules derived from it:
 
