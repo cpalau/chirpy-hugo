@@ -1,0 +1,265 @@
+# Configuration Contract
+
+Jekyll **merges** the theme's `_config.yml` into the site configuration. Hugo
+also merges theme/module configuration, but **per category**, with the project
+taking priority:
+
+| Category | Merge strategy | Meaning for this theme |
+|---|---|---|
+| `params` | `deep` | Safe to ship defaults; users override individual keys |
+| `menus`, `outputformats`, `mediatypes` | `shallow` | New keys added, existing ones kept from the project |
+| `markup`, `outputs`, `permalinks`, `module`, `languages`, `pagination` | `none` | If the project defines the category, the theme's version is replaced |
+
+This document is therefore the single source of truth for everything the theme
+reads, and the reference used by `scripts/check-config.mjs`.
+
+Rules:
+
+- **R-CFG-1** — The theme never reads a param that is not listed here.
+- **R-CFG-2** — Every param has an in-template default; a site with an empty
+  `params` table must build.
+- **R-CFG-3** — `check-config.mjs` fails if a template reads an undocumented key.
+- **R-CFG-4** — `starter/config/_default/params.toml` is canonical; upgrades
+  diff against it.
+
+---
+
+## 1. Site-level mapping
+
+| Jekyll `_config.yml` | Hugo | Notes |
+|---|---|---|
+| `lang` | `defaultContentLanguage` + `languageCode` | |
+| `timezone` | `timeZone` | IANA name |
+| `title` | `title` | |
+| `tagline` | `params.tagline` | sidebar subtitle |
+| `description` | `params.description` | meta + feed |
+| `url` | `baseURL` | must end with `/` |
+| `baseurl` | `baseURL` path component | subdirectory deployments |
+| `theme` | `module.imports` | Hugo Module |
+| `theme_mode` | `params.theme_mode` | `light` \| `dark` \| empty (system) |
+| `alt_lang` | `params.alt_lang` | optional `<html lang>` override |
+| `avatar` | `params.avatar` | local or CORS URL |
+| `cdn` | `params.cdn` | prefixes media paths starting with `/` |
+| `social_preview_image` | `params.social_preview_image` | default `og:image` |
+| `toc` | `params.toc` | global TOC switch |
+| `paginate` | `pagination.pagerSize` | |
+| `paginate_path` | `pagination.path` | default `/page:num/` |
+| `github.username` | `params.github_username` | |
+| `twitter.username` | `params.twitter_username` | |
+| `feed` | custom output format | upstream feed is hand-written Atom (5 posts) |
+| `jekyll-archives` | `taxonomies` | categories + tags only |
+| `compress_html` | `minify` | |
+
+---
+
+## 2. `params.social`
+
+| Jekyll | Hugo | Type |
+|---|---|---|
+| `social.name` | `params.social.name` | string — default post author and copyright holder |
+| `social.email` | `params.social.email` | string |
+| `social.fediverse_handle` | `params.social.fediverse_handle` | string — emits `fediverse:creator` |
+| `social.links[]` | `params.social.links[]` | list of URLs; the first is the copyright link |
+
+---
+
+## 2b. Theme identity
+
+| Jekyll | Hugo | Notes |
+|---|---|---|
+| `theme.version` (Ruby gem) | `params.theme_version` | used only in the footer tooltip |
+| `site.theme` | — | upstream interpolates the gem name into the CSS path; our build emits a fixed path |
+
+Hugo has no notion of "the theme's own version" at render time, so it is an
+explicit parameter. `scripts/check-config.mjs` keeps it in sync with `theme.toml`
+and the module tag.
+
+---
+
+## 3. `params.webmaster_verifications`
+
+| Key | Emitted as |
+|---|---|
+| `google` | `<meta name="google-site-verification">` |
+| `bing` | `<meta name="msvalidate.01">` |
+| `alexa` | `<meta name="alexaVerifyID">` |
+| `yandex` | `<meta name="yandex-verification">` |
+| `baidu` | `<meta name="baidu-site-verification">` |
+| `facebook` | `<meta name="facebook-domain-verification">` |
+
+Empty values emit nothing.
+
+---
+
+## 4. `params.analytics`
+
+| Provider | Keys | Emitted when |
+|---|---|---|
+| `google` | `id` | `id` non-empty |
+| `goatcounter` | `id` | `id` non-empty |
+| `umami` | `id`, `domain` | `id` non-empty |
+| `matomo` | `id`, `domain` | `id` and `domain` non-empty |
+| `cloudflare` | `id` | `id` non-empty |
+| `fathom` | `id` | `id` non-empty |
+
+Providers are independent; several may be enabled at once, as upstream allows.
+
+---
+
+## 5. `params.pageviews`
+
+| Key | Value |
+|---|---|
+| `provider` | `goatcounter` \| empty |
+
+Requires `params.analytics.goatcounter.id` for the counter endpoint.
+
+---
+
+## 6. `params.comments`
+
+| Key | Values |
+|---|---|
+| `provider` | `disqus` \| `utterances` \| `giscus` \| empty |
+| `disqus.shortname` | string |
+| `utterances.repo` | `owner/repo` |
+| `utterances.issue_term` | `pathname` \| `url` \| `title` \| … |
+| `giscus.repo` | `owner/repo` |
+| `giscus.repo_id` | string |
+| `giscus.category` | string |
+| `giscus.category_id` | string |
+| `giscus.mapping` | default `pathname` |
+| `giscus.strict` | default `0` |
+| `giscus.input_position` | default `bottom` |
+| `giscus.lang` | default site language |
+| `giscus.reactions_enabled` | default `1` |
+
+Per-post override: front matter `comments: false`.
+
+---
+
+## 7. `params.edit_post`
+
+| Key | Values |
+|---|---|
+| `enabled` | bool |
+| `url` | repository base URL |
+| `static_url` | bool — when `false`, the page path is appended |
+
+---
+
+## 8. `params.assets`
+
+| Key | Values |
+|---|---|
+| `assets.self_host.enabled` | bool |
+| `assets.self_host.env` | `development` \| `production` \| empty (both) |
+
+Mirrors upstream `assets.self_host`.
+
+**Important (audit G-24):** when self-hosting is enabled, upstream points at
+`/assets/lib/*`, which comes from the separate repository
+[`cotes2020/chirpy-static-assets`](https://github.com/cotes2020/chirpy-static-assets).
+Our theme must mount that repository as a Hugo module (or document the manual
+mount). Self-host mode does not work without it.
+
+---
+
+## 9. `params.pwa`
+
+| Key | Values |
+|---|---|
+| `pwa.enabled` | bool |
+| `pwa.cache.enabled` | bool |
+| `pwa.cache.deny_paths` | list of path prefixes excluded from the offline cache |
+
+---
+
+## 9b. Data files
+
+| File | Purpose |
+|---|---|
+| `data/authors.yaml` | author registry (`name`, `twitter`, `url`) |
+| `data/contact.yaml` | sidebar contact entries (`type`, `icon`, `noblank`, `url`) |
+| `data/share.yaml` | share platforms (`type`, `icon`, `link` with `TITLE`/`URL`) |
+| `data/media.yaml` | extension → MIME type for audio and video embeds |
+| `data/origin/basic.yml` | self-hosted vendor asset paths (`/assets/lib/...`) |
+| `data/origin/cors.yml` | CDN vendor URLs and resource hints (**no SRI**) |
+
+`data/media.yaml` is required by the audio and video embeds: without it, the
+`<source type="…">` values are wrong.
+
+---
+
+## 10. Front matter
+
+Documented in `FEATURES.md` §2. Equivalent to upstream:
+
+```yaml
+title: string
+date: datetime
+categories: [string]
+tags: [string]
+pin: bool
+author: string                # key in data/authors.yaml
+description: string
+image:
+  path: string
+  alt: string
+  lqip: string                # base64 data URI
+media_subpath: string
+toc: bool
+comments: bool
+math: bool
+mermaid: bool
+```
+
+Post defaults (upstream `defaults`) become a cascade:
+
+```toml
+# content/posts/_index.md
+cascade:
+  layout: page
+  comments: true
+  toc: true
+```
+
+---
+
+## 11. Minimal user configuration
+
+Because `params` uses Hugo's `deep` merge strategy, **the theme ships every
+default** in `config/_default/params.toml`. A user site does not need to declare
+any of them; it only overrides what it wants to change.
+
+The only settings a user must provide are the ones in non-merging categories
+(`markup`, `outputs`), and the theme emits a build warning with the exact
+snippet when they are missing:
+
+```toml
+[markup.goldmark.renderer]
+  unsafe = true          # upstream content uses raw HTML
+
+[markup.goldmark.parser.attribute]
+  block = true           # classes on images and code fences
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]   # search.json
+```
+
+Everything else is optional.
+
+---
+
+## 12. Upgrade procedure
+
+```bash
+node scripts/check-config.mjs --upstream v7.6.0
+```
+
+The script:
+
+1. greps upstream `_includes/` and `_layouts/` for `site.*` and `page.*` reads,
+2. compares against the keys documented here,
+3. prints new, removed and renamed keys,
+4. exits non-zero in `--check` mode when documentation is out of date.

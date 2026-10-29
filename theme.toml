@@ -1,0 +1,47 @@
+# theme.toml — metadata used by https://themes.gohugo.io and by Hugo tooling.
+# Keep in sync with README.md and with the module path in go.mod.
+
+name = "Chirpy Hugo"
+license = "MIT"
+licenselink = "https://github.com/cpalau/chirpy-hugo/blob/main/LICENSE"
+description = "A Hugo port of the Chirpy theme: minimal, responsive, feature-rich, and byte-parity with the Jekyll original."
+homepage = "https://github.com/cpalau/chirpy-hugo"
+demosite = "https://example.com/"
+tags = [
+  "blog",
+  "responsive",
+  "dark mode",
+  "multilingual",
+  "i18n",
+  "search",
+  "pwa",
+  "syntax highlighting",
+  "technical writing"
+]
+features = [
+  "Responsive layout",
+  "Dark and light modes with persistence",
+  "33 localized UI languages",
+  "Pinned posts",
+  "Hierarchical categories",
+  "Trending tags",
+  "Client-side table of contents",
+  "Last modified dates",
+  "Client-side search",
+  "PWA with offline cache",
+  "Multiple comment systems",
+  "Multiple analytics providers",
+  "SEO with Open Graph, Twitter cards and JSON-LD",
+  "Math and Mermaid support",
+  "Media embeds"
+]
+min_version = "0.150.0"
+
+[author]
+  name = "Cristian Palau"
+  homepage = "https://github.com/cpalau"
+
+[original]
+  name = "Chirpy"
+  homepage = "https://github.com/cotes2020/jekyll-theme-chirpy"
+  author = "Cotes Chung"

@@ -1,0 +1,409 @@
+# Master Plan
+
+| | |
+|---|---|
+| Project | `chirpy-hugo` — Hugo port of `cotes2020/jekyll-theme-chirpy` |
+| Upstream baseline | **v7.6.0** (2026-06-20) |
+| Module | `github.com/cpalau/chirpy-hugo` |
+| Starter | `github.com/cpalau/chirpy-hugo-starter` |
+| License | MIT (original copyright preserved) |
+| Total estimate | ~30 working days |
+| Status | Upstream audit complete; phase F0 next |
+
+Related documents:
+
+- [FEATURES.md](FEATURES.md) — complete feature inventory
+- [TESTING.md](TESTING.md) — verification gates
+- [COMPATIBILITY.md](COMPATIBILITY.md) — declared divergences
+- [CONFIG.md](CONFIG.md) — configuration contract
+- [UPSTREAM.md](UPSTREAM.md) — sync procedure
+- [SHORTCODES.md](SHORTCODES.md) — shortcode reference
+- [I18N.md](I18N.md) — internationalization contract
+- [AUDIT.md](AUDIT.md) — file-by-file audit of upstream v7.6.0 (source of truth)
+
+> Site-specific migration work is **not** part of this repository. This repo is
+> public and generic; adopter-specific content is documented outside Git.
+
+---
+
+## 1. Decision log
+
+| # | Decision | Value |
+|---|---|---|
+| D1 | Authoring syntax | Native Hugo shortcodes. kramdown IAL converted once, never emulated. |
+| D2 | Search | Upstream search as theme default; Pagefind optional in the starter. |
+| D3 | Visibility | Public repository from day one, MIT + attribution. |
+| D4 | Scope | Theme and verification harness together. Adopter-specific site migration is out of scope and lives outside this repository. |
+| D5 | Starting point | From scratch. The existing `geekifan` port is not used. |
+| D6 | Verification | Jekyll (Ruby) as HTML oracle + Playwright pixel comparison. Both mandatory. |
+| D7 | i18n | All 33 upstream locales are in scope from day one, not a later addition. |
+
+---
+
+## 2. Vision
+
+A Hugo theme that renders **the same HTML, and therefore the same pixels**, as
+Chirpy for the same content, while keeping upstream SCSS, JavaScript and image
+assets byte-for-byte identical. Upstream releases must cost hours, not days.
+
+### Core principle: a contract renderer
+
+> Only the template layer is reimplemented. Everything else is copied from
+> upstream. The emitted HTML must be equivalent to Jekyll's.
+
+Consequences:
+
+- Upstream JS works unmodified → `_javascript/` sync is trivial.
+- Upstream SCSS works unmodified → `_sass/` sync is trivial.
+- A release reduces to: asset diff (copy) + template diff (port).
+
+All safety rules derived from this principle are in
+[`AGENTS.md`](../AGENTS.md) §2.
+
+---
+
+## 3. Definition of Done — v1.0
+
+1. Zero DOM diffs in the parity harness for all 12 fixtures, after canonicalization.
+2. Zero visual diffs above threshold (≤ 0.1 % of pixels) across
+   `12 fixtures × 3 viewports × 2 themes`.
+3. `hugo --panicOnWarning --gc --minify` emits no warnings.
+4. 100 % of the inventory in `FEATURES.md` is ✅ parity or 🟡 declared divergence.
+5. All 33 locales have 100 % key coverage against `en`.
+6. `html-validate` and `html-proofer` green, including internal anchors.
+7. Axe: no `serious`/`critical`. Lighthouse ≥ 95 in all four categories.
+8. `scripts/sync-upstream` runs end-to-end against `v7.6.0` with no undocumented step.
+9. `starter/` produces a working site in under 5 minutes.
+10. Every copied asset hash matches upstream.
+11. Adoption gate green: `HugoBasicExample` and a fresh site with only the
+    documented minimum configuration build with no warnings.
+
+### Out of scope for v1.0
+
+- Migrating any specific site. That work is adopter-specific, is documented
+  outside this repository, and does not affect the theme contract.
+- Content embedding Liquid tags.
+- Emulating kramdown IAL at build time.
+
+---
+
+## 4. Upstream anatomy
+
+| Area | Files | Notes |
+|---|---|---|
+| `_layouts/` | 10 | default, home, post, page, archives, categories, category, tag, tags, compress |
+| `_includes/` | 45 | 6 analytics, 3 comments, 6 embeds, 30 structural |
+| `_javascript/` | **27** | 9 Rollup entry points + 18 modules |
+| `_sass/` | 30 | abstracts, base, components, layout, pages, themes |
+| `_data/locales/` | 33 | one YAML per language |
+| `_data/` | 39 | authors, contact, share, media, 2 origin files, 33 locales |
+
+Jekyll plugin surface that must be replaced: `jekyll-paginate`,
+`jekyll-seo-tag`, `jekyll-archives`, `jekyll-sitemap`, `jekyll-include-cache`,
+`jekyll-redirect-from`, `jekyll-relative-links`, `jekyll-avatar`,
+kramdown + Rouge, `jekyll-compress-html`.
+
+Upstream does **not** use `jekyll-feed`: the Atom feed is a hand-written
+template (`assets/feed.xml`). It does not use SRI either.
+
+Build artifacts (`_sass/vendors/`, `assets/js/dist/`) are **git-ignored
+upstream** and must be committed here (D-10).
+
+Mapping for each one is in [FEATURES.md](FEATURES.md) §4.1 and §4.13, with the
+full evidence in [AUDIT.md](AUDIT.md).
+
+---
+
+## 5. The decisive finding: kramdown IAL
+
+Upstream content relies on kramdown attribute lists:
+
+```markdown
+> **Tip**: something
+{: .prompt-tip }
+
+Create `_config.yml`{: .filepath }
+
+```shell
+command
+```
+{: .nolineno }
+
+![img](/x.png){: .left }
+```
+
+Classes in use: `prompt-tip|info|warning|danger`, `filepath`, `nolineno`,
+`light`, `dark`, `left`, `right`, `shadow`, `normal`.
+
+**Goldmark has no IAL.** Block attribute lists exist in Hugo but are written
+*before* the block; inline IAL does not exist at all.
+
+| Mechanism | Hugo status | Solution |
+|---|---|---|
+| Block IAL (`nolineno`, `file=`) | Partial (`parser.attribute.block`) | Converter reorders; shortcode as alternative |
+| Inline IAL (`code{: .filepath}`) | None | Explicit HTML or shortcode |
+| Prompts | None | `{{< prompt tip >}}` shortcode |
+| Image classes | None | Render hook with explicit attribute |
+
+Plan: canonical shortcodes plus a one-shot, idempotent, dry-runnable
+`scripts/convert-content.mjs`. Recorded as **D-01**.
+
+---
+
+## 6. Phases
+
+Total ≈ 30 working days. Detailed tasks and acceptance criteria per phase below.
+
+```
+F0 (2d) → F0.5 (1d, GATE) → F1 (3d) → F2 (4d) → F3 (3d) → F4 (4d)
+        → F5 (3d) → F6 (2d) → F7 (4d) → F8 (3d) → F9 (2d)
+```
+
+Gate 4 (HTML parity) and Gate 5 (visual parity) are created in F0.5 and
+extended in F7. They are never deferred, because F8 depends on them.
+
+---
+
+### F0 — Specification and conformance corpus (2 d)
+
+- [x] Audit upstream v7.6.0 file by file — see [AUDIT.md](AUDIT.md).
+- [ ] Pin upstream tag `v7.6.0` and commit sha in `tests/contract/ports.yml`.
+- [ ] Inventory all 10 `_layouts/` files: purpose and Hugo target.
+- [ ] Inventory all 45 `_includes/` files: classify `copy` / `transform` / `manual`.
+- [ ] Inventory 27 JS files (9 entry points + 18 modules) and 30 SCSS partials; confirm all are `copy`.
+- [ ] Extract every parameter read by upstream templates → `CONFIG.md` skeleton.
+- [ ] Write the 12 fixture specifications.
+- [ ] Create `tests/oracle/` with `Gemfile` pinning `jekyll-theme-chirpy = 7.6.0`.
+- [ ] Create the 12 fixtures in Jekyll syntax and in Hugo syntax.
+- [ ] Verify all 12 fixtures build under Jekyll with no Liquid errors.
+- [ ] Draft `COMPATIBILITY.md` with D-01…D-11.
+- [ ] Answer audit questions Q1–Q8 (`AUDIT.md` §9) with a test each.
+- [ ] Gate: any fixture that cannot exist in both worlds is resolved here.
+
+**Acceptance**: oracle builds; `ports.yml` covers 100 % of upstream templates;
+fixtures documented.
+
+| # | Fixture | Covers |
+|---|---|---|
+| 1 | `post/full` | image, LQIP, TOC, lastmod, related, nav, edit link, pageviews |
+| 2 | `post/code` | code blocks, line numbers, `nolineno`, `filepath`, many languages |
+| 3 | `post/prompts` | all four prompt types |
+| 4 | `post/math` | MathJax inline and block |
+| 5 | `post/mermaid` | diagram |
+| 6 | `post/embeds` | YouTube, Spotify, Bilibili, Twitch, audio, video |
+| 7 | `post/images` | light/dark, left/right, shadow, normal, popup |
+| 8 | `post/i18n-es` | accents, ñ, punctuation in headings (D-04) |
+| 9 | `post/tables-footnotes` | tables, footnotes, internal/external links |
+| 10 | `home/pinned` | pinned posts, pagination, long summaries (D-03) |
+| 11 | `listing` | archives, hierarchical categories, tags, trending tags |
+| 12 | `system` | search, PWA assets, RSS, 404, sitemap |
+
+---
+
+### F0.5 — Proof of concept (1 d) — decision gate
+
+- [ ] Port `baseof.html`, `head.html`, `seo.html`.
+- [ ] Port `home.html` and the post layout.
+- [ ] Implement `render-codeblock.html` with Rouge-compatible markup (D-02).
+- [ ] Implement the parse5 canonicalizer and the Playwright comparator.
+- [ ] Run Gate 4 on fixtures 1, 2, 10.
+- [ ] Run Gate 5 on the same fixtures.
+- [ ] Write `reports/poc-findings.md` with the measured diff inventory.
+- [ ] Go/No-Go review against `COMPATIBILITY.md`.
+
+**Acceptance**: measured diff report, confirmed divergence list, decision.
+
+---
+
+### F1 — Scaffolding (3 d)
+
+- [ ] `LICENSE`, `NOTICE.md`, `README.md`, `AGENTS.md`, `theme.toml`.
+- [ ] Canonical theme skeleton: `archetypes/`, `content/`, `static/`, `images/`.
+- [ ] `go.mod` (module `github.com/cpalau/chirpy-hugo`) and `config/_default/*.toml`.
+- [ ] `config/_default/params.toml` with **all defaults** (Hugo deep-merges
+      `params`, so users never copy them).
+- [ ] Document the mandatory non-merging settings (`markup`, `outputs`) and add
+      the build warning that prints the exact snippet when they are missing.
+- [ ] `exampleSite/` self-contained demo with neutral content.
+- [ ] `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600).
+- [ ] `scripts/sync-upstream.mjs` v1: `copy` and `transform`, hash verification.
+- [ ] Copy `_sass/` → `assets/scss/`, `_javascript/` → `assets/js/`, `_data/origin/` → `data/origin/`.
+- [ ] Generate and **commit** `assets/js/dist/*.min.js` (9 bundles) and
+      `assets/scss/vendors/_bootstrap.scss` (D-10).
+- [ ] Generate the SCSS entry at build time (`resources.FromString` +
+      `toCSS`), reproducing `@use 'abstracts/variables' with ($theme: …)`.
+- [ ] `scripts/i18n.mjs`: 33 locale files → `i18n/*.yaml`.
+- [ ] `package.json`: rollup build (committed `dist`), sass, purgecss.
+- [ ] Adapt `purgecss.js` globs to `layouts/`, `_shortcodes/`, `assets/js/`.
+- [ ] ESLint and Stylelint with upstream configs.
+- [ ] `commitlint.config.js` + husky `commit-msg` hook; CI validates the PR range.
+- [ ] `CHANGELOG.md` (Keep a Changelog) and the PR rule that every change adds an entry.
+- [ ] CI `ci.yml`: install, lint, build, html.
+- [ ] Smoke build of an empty starter site.
+
+**Acceptance**: empty site builds warning-free; asset hashes match upstream;
+i18n key parity green.
+
+---
+
+### F2 — Base layer (4 d)
+
+- [ ] `baseof.html`: document shell, `lang`, `dir`, `origin-type`.
+- [ ] `head.html`: charset, theme-color, viewport, title composition, metadata hook.
+- [ ] `seo.html`: description, canonical, OG, Twitter, JSON-LD, `fediverse:creator`, verifications.
+- [ ] `favicons.html` with the v7.4 favicon set.
+- [ ] `sidebar.html`: avatar, name, bio, contacts, theme toggle.
+- [ ] `topbar.html`: breadcrumb logic.
+- [ ] `footer.html`: copyright, license, meta string.
+- [ ] `datetime.html`, `media-url.html`, `language-alias.html`, `language-selector.html`.
+- [ ] `js-selector.html`: conditional script loading, self-host vs CDN (no SRI), jsDelivr combine.
+- [ ] `404.html`.
+- [ ] Contract selectors for sidebar/topbar/footer.
+- [ ] Gate 4 green for fixture 12.
+
+**Acceptance**: chrome and SEO pixel-identical; JSON-LD validated.
+
+---
+
+### F3 — Home and listings (3 d)
+
+- [ ] `home.html`: pinned first, then paginated.
+- [ ] `post-summary.html` replicating `markdownify | strip_html | truncate: 200` (D-03).
+- [ ] `post-paginator.html`.
+- [ ] `section.html` and archives grouped by year.
+- [ ] `update-list.html`.
+- [ ] `taxonomy.html` for categories and tags.
+- [ ] `term.html` with hierarchical category support.
+- [ ] `trending-tags.html`.
+- [ ] Gate 4 green for fixtures 10 and 11.
+
+**Acceptance**: ordering, grouping, counts and summary text match byte-for-byte.
+
+---
+
+### F4 — Post and page (4 d)
+
+- [ ] `page.html` header: title, date, author, read time, lastmod.
+- [ ] `toc.html` and TOC enablement logic.
+- [ ] `post-nav.html`, `related-posts.html` (custom score), `post-sharing.html`.
+- [ ] `post-edit.html`, `read-time.html`, license notice.
+- [ ] `pageviews/goatcounter.html`.
+- [ ] Comments: disqus, utterances, giscus (with theme sync).
+- [ ] Embeds as shortcodes.
+- [ ] Contract selectors for the post page.
+- [ ] Gate 4 green for fixtures 1, 6, 9.
+
+**Acceptance**: post page pixel-identical; comments follow the theme.
+
+---
+
+### F5 — Render hooks and shortcodes (3 d) — highest risk
+
+- [ ] `render-codeblock.html`: Rouge-compatible DOM, line numbers, `start_line`.
+- [ ] No line numbers for `plaintext`, `console`, `terminal`.
+- [ ] `nolineno` and `file=` support.
+- [ ] `render-image.html`: LQIP, light/dark, left/right, shadow, normal, `media_subpath`, `cdn`.
+- [ ] `render-heading.html`: anchors, `data-toc-skip`, ids (D-04).
+- [ ] `render-link.html`, `render-table.html`.
+- [ ] `{{< prompt >}}` (4 types) and `{{< filepath >}}`.
+- [ ] MathJax and Mermaid wiring.
+- [ ] Gate 4 green for fixtures 2, 3, 4, 5, 7, 8.
+
+**Acceptance**: highlighting DOM identical to Rouge for every fixture language;
+accented heading ids identical.
+
+---
+
+### F6 — Special outputs (2 d)
+
+- [ ] `search.json` with the exact upstream schema.
+- [ ] `sw.min.js` and `swconf.js` output formats with cache list and `deny_paths`.
+- [ ] Manifest and installability.
+- [ ] Atom feed matching `assets/feed.xml` exactly (5 posts, summary 400 chars,
+      `&` escaping).
+- [ ] `sitemap.xml` verified against Jekyll's.
+- [ ] Subdirectory `baseURL` test.
+- [ ] Gate 4 green for fixture 12.
+
+**Acceptance**: search returns identical results in Playwright; PWA installable;
+feed valid.
+
+---
+
+### F7 — Verification harness completion (4 d)
+
+- [ ] Gate 1: build manifest test.
+- [ ] Gate 2: `html-validate` + `html-proofer`.
+- [ ] Gate 3: selector extractor wired to `ports.yml`.
+- [ ] Gate 4: canonicalizer, DOM diff, snapshot policy.
+- [ ] Gate 5: Playwright projects, determinism, route blocking, masking.
+- [ ] Gate 5: interaction suite (toc, search, theme, copy, lightbox).
+- [ ] Gate 6: axe and Lighthouse budgets.
+- [ ] Gate 7: i18n coverage.
+- [ ] Gate 8: upstream drift and asset hashes.
+- [ ] Gate 9: adoption — fresh site, `HugoBasicExample`, hostile config.
+- [ ] `visual.yml` nightly and `upstream-watch.yml` weekly workflows.
+- [ ] PR CI under 12 minutes.
+
+**Acceptance**: `npm run test:all` green; gates documented.
+
+---
+
+### F8 — Convergence to zero diff (3 d)
+
+- [ ] Iterate Gates 4 and 5 until zero diffs on all 12 fixtures.
+- [ ] Fix or formally declare every remaining difference.
+- [ ] Finalize `COMPATIBILITY.md`.
+- [ ] Performance budget check.
+- [ ] Cross-browser spot check (Firefox, WebKit).
+
+**Acceptance**: DoD items 1–3, 5–7.
+
+---
+
+### F9 — Tooling, starter and docs (2 d)
+
+- [ ] `sync-upstream.mjs` v2: classification, report, `--check`.
+- [ ] `check-config.mjs`.
+- [ ] `convert-content.mjs`: IAL → shortcodes, `--dry-run`, idempotent.
+- [ ] `starter/` with `params.toml`, example content, Pagefind option.
+- [ ] `exampleSite/` finalized as living documentation.
+- [ ] Gallery assets (`images/screenshot.png`, `images/tn.png`) and
+      `theme.toml` metadata verified.
+- [ ] Consumer README: install as module, as submodule, and locally.
+- [ ] `scripts/release.mjs` (version bump, changelog promotion, consistency checks).
+- [ ] Release notes template and checklist exercised on `v1.0.0`.
+- [ ] Documentation complete and accurate.
+- [ ] Tag `v1.0.0`.
+
+**Acceptance**: DoD items 4, 8, 9.
+
+---
+
+## 7. Risks
+
+| Risk | Prob. | Impact | Mitigation |
+|---|---|---|---|
+| D-02 (Rouge/Chroma) never reaches parity | Medium | High | F0.5 measures it in one day; fallback documented |
+| D-04 heading ids break deep links | Medium | Medium | Accented fixture + anchor tests |
+| Port rots after two releases | Medium | High | Gates 3 and 8 plus weekly watch |
+| Visual CI slow or flaky | High | Low | Reduced PR matrix, nightly full, blocked external requests |
+| Config not inherited (D-07) | High | Medium | `check-config` plus starter as source of truth |
+| Upstream license change | Very low | High | MIT is irrevocable for published code; sha pinned |
+| Bus factor | High | High | `AGENTS.md`, `UPSTREAM.md`, tests as living documentation |
+| Screenshot drift across machines | Medium | Medium | Pinned container, fixed fonts and browser |
+
+---
+
+## 8. Environment (verified)
+
+| Requirement | Status |
+|---|---|
+| Hugo extended | ✅ v0.168.0+extended |
+| Node / npm | ✅ v24.22.1 / 11.19.1 |
+| Go | ✅ 1.27.2 |
+| Ruby / bundler (Jekyll oracle) | ✅ 3.4.10 / 4.0.3 |
+| Python | ✅ 3.12.13 |
+| Containers | ✅ podman 6.1.4 |
+| GitHub CLI | ✅ `cpalau` |
+| Playwright | ⬜ installed in F7 |

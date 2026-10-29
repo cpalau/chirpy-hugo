@@ -1,0 +1,34 @@
+# Hugo
+/public/
+/resources/_gen/
+.hugo_build.lock
+.hugo_state/
+
+# Node
+node_modules/
+npm-debug.log*
+package-lock.json.bak
+
+# Test artifacts
+.out/
+test-results/
+playwright-report/
+blob-report/
+coverage/
+reports/
+
+# Ruby (Jekyll oracle)
+tests/oracle/vendor/
+tests/oracle/.bundle/
+tests/oracle/_site/
+.jekyll-cache/
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
