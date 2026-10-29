@@ -1,0 +1,19 @@
+# Jekyll oracle: the HTML reference for the Hugo port.
+#
+# The theme is consumed as the published gem because `site.theme` is
+# interpolated into the stylesheet path and the gem ships the ten build
+# artifacts that upstream git-ignores (see docs/COMPATIBILITY.md D-10).
+#
+# `jekyll-compress-html` is deliberately absent: it is not a gem, it is the
+# Liquid layout `_layouts/compress.html` that ships inside the theme.
+source "https://rubygems.org"
+
+gem "jekyll", "~> 4.4"
+gem "jekyll-theme-chirpy", "= 7.6.0"
+
+# Direct dependencies of the theme that the site config enables explicitly.
+gem "jekyll-archives", "~> 2.2"
+gem "jekyll-include-cache", "~> 0.2"
+gem "jekyll-paginate", "~> 1.1"
+gem "jekyll-seo-tag", "~> 2.8"
+gem "jekyll-sitemap", "~> 1.4"

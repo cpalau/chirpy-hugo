@@ -1,0 +1,168 @@
+# Jekyll oracle configuration.
+#
+# This file is the reference half of the fixture contract. Its Hugo counterpart
+# is `tests/fixtures/hugo/hugo.toml`; every value here has a documented
+# equivalent in `docs/CONFIG.md`.
+#
+# Rules for editing it:
+#   · keep it deterministic (UTC, fixed baseURL, no build timestamps),
+#   · no external network dependency (cdn and self-hosting are off),
+#   · no personal data: everything is `example.*`.
+
+theme: jekyll-theme-chirpy
+
+lang: en
+timezone: UTC
+
+title: "Chirpy Fixtures"
+tagline: "Parity fixtures for chirpy-hugo"
+description: "Neutral fixtures used to compare the Jekyll original with the Hugo port."
+
+# Both builds must share this exact baseURL so that absolute URLs
+# (canonical, og:url, JSON-LD, share links) are comparable.
+url: "http://127.0.0.1:4001"
+baseurl: ""
+
+github:
+  username: example
+twitter:
+  username: example
+
+social:
+  name: "Example Author"
+  email: "author@example.com"
+  fediverse_handle: "@author@example.com"
+  links:
+    - "https://example.com/author"
+
+webmaster_verifications:
+  google: "example-google"
+  bing: "example-bing"
+  alexa: "example-alexa"
+  yandex: "example-yandex"
+  baidu: "example-baidu"
+  facebook: "example-facebook"
+
+analytics:
+  google:
+    id: "G-EXAMPLE"
+  goatcounter:
+    id: "example"
+  umami:
+    id:
+    domain:
+  matomo:
+    id:
+    domain:
+  cloudflare:
+    id:
+  fathom:
+    id:
+
+pageviews:
+  provider: goatcounter
+
+# Empty means "follow the system preference" and keeps the theme toggle.
+theme_mode:
+
+# No CDN: every asset is local so the build and the screenshots are offline.
+cdn: ""
+avatar: "/assets/img/avatar.png"
+social_preview_image: "/assets/img/social-preview.png"
+
+toc: true
+
+actions:
+  edit_post:
+    enabled: true
+    url: "https://example.com/edit"
+    # D-12: parity fixtures use a static URL, so Jekyll's `page.path` never
+    # leaks into the comparison.
+    static_url: true
+
+comments:
+  provider: giscus
+  disqus:
+    shortname:
+  utterances:
+    repo:
+    issue_term:
+  giscus:
+    repo: "example/example"
+    repo_id: "R_kgDOexample"
+    category: "Comments"
+    category_id: "DIC_kwDOexample"
+    mapping: pathname
+    strict: "0"
+    input_position: top
+    lang: en
+    reactions_enabled: "1"
+
+assets:
+  self_host:
+    enabled: false
+
+pwa:
+  enabled: true
+  cache:
+    # Disabled on purpose: `swconf.js` embeds `"now"` in `cacheName` (G-21), so
+    # an enabled cache makes the output non-deterministic. The cache-enabled
+    # variant is covered by Gate G4 in F6 with a frozen clock.
+    enabled: false
+    deny_paths:
+      - "/example"
+
+paginate: 3
+paginate_path: "/page:num/"
+
+kramdown:
+  footnote_backlink: "&#8617;&#xfe0e;"
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: highlight
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
+
+collections:
+  tabs:
+    output: true
+    sort_by: order
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+      comments: true
+      toc: true
+      permalink: /posts/:title/
+  - scope:
+      path: ""
+      type: tabs
+    values:
+      layout: page
+      permalink: /:title/
+
+sass:
+  style: compressed
+
+jekyll-archives:
+  enabled: [categories, tags]
+  layouts:
+    category: category
+    tag: tag
+  permalinks:
+    tag: /tags/:name/
+    category: /categories/:name/
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - build.sh
+  - vendor
+  - .bundle
