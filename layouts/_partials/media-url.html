@@ -6,7 +6,7 @@
   {{- if not (strings.Contains . ":") -}}
     {{- $sub := $.subpath | default "" -}}
     {{- $url = printf "%s/%s" $sub . -}}
-    {{- with $.Site.Params.cdn -}}
+    {{- with site.Params.cdn -}}
       {{- $url = printf "%s/%s" . $url -}}
     {{- end -}}
     {{- $url = replace $url "///" "/" -}}

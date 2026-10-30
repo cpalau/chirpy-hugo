@@ -233,7 +233,26 @@ async function main() {
         );
         await page.setViewportSize({ width: viewport.width, height: Math.min(pageHeight, 9000) });
         await page.evaluate(() => window.scrollTo(0, 0));
-        await page.waitForTimeout(150);
+        // tocbot's scrollspy recomputes its offsets when the viewport changes and
+        // marks a different entry as active for a few frames. Wait until the
+        // active entry stops changing, otherwise the TOC column is a flake.
+        await page.evaluate(async () => {
+          const active = () => document.querySelector('#toc .toc-link.active')?.getAttribute('href') ?? '';
+          const deadline = Date.now() + 2000;
+          let last = null;
+          let stable = 0;
+          while (Date.now() < deadline) {
+            const current = active();
+            if (current === last) stable += 1;
+            else {
+              stable = 0;
+              last = current;
+            }
+            if (stable >= 3) return;
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+        });
+        await page.waitForTimeout(80);
 
         const masks = await page.evaluate(() => {
           const rect = (el, id) => {

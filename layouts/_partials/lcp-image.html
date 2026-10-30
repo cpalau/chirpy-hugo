@@ -4,7 +4,9 @@
 {{- $url := "" -}}
 {{- $page := . -}}
 {{- with .Params.image -}}
-  {{- $url = partial "media-url.html" (dict "src" (.path | default .) "subpath" $page.Params.media_subpath) -}}
+  {{- with (partial "image-data.html" .).src -}}
+    {{- $url = partial "media-url.html" (dict "src" . "subpath" $page.Params.media_subpath) -}}
+  {{- end -}}
 {{- end -}}
 {{- if and (not $url) (eq .Kind "home") -}}
   {{- $all := where .Site.RegularPages "Type" "posts" -}}
@@ -19,7 +21,9 @@
   {{- end -}}
   {{- with $candidate -}}
     {{- with .Params.image -}}
-      {{- $url = partial "media-url.html" (dict "src" (.path | default .) "subpath" $candidate.Params.media_subpath) -}}
+      {{- with (partial "image-data.html" .).src -}}
+        {{- $url = partial "media-url.html" (dict "src" . "subpath" $candidate.Params.media_subpath) -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

@@ -1,0 +1,21 @@
+{{- /*
+  Normalise the `image` front matter, which upstream accepts in two shapes:
+
+    image: /assets/img/preview.png
+    image: { path: /assets/img/preview.png, alt: ..., lqip: ..., no_bg: true }
+
+  Accessing `.path` on a string is a template error, so every caller goes
+  through this partial instead of indexing the value directly.
+*/ -}}
+{{- $image := . -}}
+{{- $data := dict "src" "" "alt" "" "lqip" "" "no_bg" false -}}
+{{- if reflect.IsMap $image -}}
+  {{- $data = dict
+    "src" ($image.path | default "")
+    "alt" ($image.alt | default "")
+    "lqip" ($image.lqip | default "")
+    "no_bg" ($image.no_bg | default false) -}}
+{{- else -}}
+  {{- $data = merge $data (dict "src" $image) -}}
+{{- end -}}
+{{- return $data -}}

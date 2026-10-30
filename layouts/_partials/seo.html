@@ -59,8 +59,11 @@
 {{- $pageImage := "" -}}
 {{- $pageImageAlt := "" -}}
 {{- with .Params.image -}}
-  {{- $pageImage = partial "media-url.html" (dict "src" (.path | default .) "subpath" $.Params.media_subpath "absolute" true) -}}
-  {{- $pageImageAlt = .alt | default "" -}}
+  {{- $image := partial "image-data.html" . -}}
+  {{- with $image.src -}}
+    {{- $pageImage = partial "media-url.html" (dict "src" . "subpath" $.Params.media_subpath "absolute" true) -}}
+  {{- end -}}
+  {{- $pageImageAlt = $image.alt -}}
 {{- end }}
 {{- $socialImage := "" -}}
 {{- with $site.Params.social_preview_image -}}
@@ -147,7 +150,7 @@
   {{- end -}}
   {{- $ld = printf `%s,"dateModified":%s,"datePublished":%s,"description":%s,"headline":%s` $ld (partial "jsonify.html" ($modified.Format $iso)) (partial "jsonify.html" (.Date.Format $iso)) (partial "jsonify.html" $desc) (partial "jsonify.html" .Title) -}}
   {{- $pageImage := "" -}}
-  {{- with .Params.image }}{{ $pageImage = partial "media-url.html" (dict "src" (.path | default .) "subpath" $.Params.media_subpath "absolute" true) }}{{ end -}}
+  {{- with .Params.image }}{{ with (partial "image-data.html" .).src }}{{ $pageImage = partial "media-url.html" (dict "src" . "subpath" $.Params.media_subpath "absolute" true) }}{{ end }}{{ end -}}
   {{- with .Params.image -}}
     {{- if reflect.IsMap . -}}
       {{- $img := printf `{"alt":%s` (partial "jsonify.html" (.alt | default "")) -}}
@@ -155,6 +158,9 @@
       {{- with $pageImage }}{{ $img = printf `%s,"url":%s` $img (partial "jsonify.html" .) }}{{ end -}}
       {{- $img = printf `%s,"@type":"imageObject"}` $img -}}
       {{- $ld = printf `%s,"image":%s` $ld $img -}}
+    {{- else -}}
+      {{- /* A plain string is the image URL, as jekyll-seo-tag emits it. */ -}}
+      {{- with $pageImage }}{{ $ld = printf `%s,"image":%s` $ld (partial "jsonify.html" .) }}{{ end -}}
     {{- end -}}
   {{- end -}}
   {{- $ld = printf `%s,"mainEntityOfPage":{"@type":"WebPage","@id":%s},"url":%s}` $ld (partial "jsonify.html" .Permalink) (partial "jsonify.html" .Permalink) -}}

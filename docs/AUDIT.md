@@ -583,7 +583,8 @@ Method:
 3. Every partial named by a template was checked statically, including the two
    configuration-driven dispatches (`analytics/<provider>.html`,
    `comments/<provider>.html`). This is now part of `check-config.mjs`.
-4. Every provider was built and asserted in the adoption gate.
+4. Every provider, both `image` shapes and the CDN path were built and asserted
+   in the adoption gate (`--features-only`).
 5. Every declared parameter was matched against the templates that read it: no
    dead parameter and no undocumented one.
 
@@ -596,6 +597,8 @@ Findings:
 | `purgecss.js`, `rollup.config.js`, `eslint.config.js`, `.stylelintrc.json` still claimed as ports | dead entries implied tooling that does not exist | marked `retired` (D-10) |
 | FEATURES C18/C31 said the vendor bundle was not shipped | understated the feature set | updated to D-22 (`static/assets/lib`, hash-verified) |
 | A site missing the non-merging settings built silently | broken highlighting/feed with no explanation | build warning with the exact snippet (F1) |
+| `params.cdn` was ignored: `media-url.html` read `$.Site` inside a `dict` context | every media URL stayed on the origin | `site.Params.cdn`, asserted in the feature matrix |
+| `image:` front matter as a string crashed the build (`.path` on a string) | the documented string form was unusable | `_partials/image-data.html` normalises both shapes; JSON-LD matches `jekyll-seo-tag` (verified against the oracle) |
 
 No upstream feature is unimplemented: the 186 inventory rows are 163 direct
 parity, 16 declared divergences and 7 out of scope, and every out-of-scope row

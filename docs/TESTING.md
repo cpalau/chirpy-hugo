@@ -409,8 +409,9 @@ This gate is what makes the theme usable by other people. It answers one
 question: *can someone install this without reading our source?*
 
 ```bash
-npm run test:adoption                       # every scenario
-node tests/adoption/check.mjs --deploy-only # the deployment shape only
+npm run test:adoption                        # every scenario
+node tests/adoption/check.mjs --deploy-only  # the deployment shape only
+node tests/adoption/check.mjs --features-only # providers, image shapes, CDN (PR CI)
 ```
 
 Every scenario uses the starter configuration unless stated, and every one is
@@ -421,7 +422,8 @@ built with `--panicOnWarning`: a warning is a failure.
 | fresh site | `starter/hugo.toml` is the whole config; empty `[params]` works; one post renders |
 | subdirectory `baseURL` | every theme URL keeps the `/blog/` prefix (no dropped or doubled base path) |
 | demo, deployment shape (`--baseURL …/chirpy-hugo/ --minify`) | no doubled base path; every internal URL resolves; the minified viewport still parses; taxonomy indexes list terms |
-| provider matrix | all six analytics providers and the three comment providers render. Both are dispatched from configuration (`analytics/<name>.html`, `comments/<provider>.html`), so a missing partial only fails when a user enables it |
+| provider matrix (`--features-only`) | all six analytics providers and the three comment providers render. Both are dispatched from configuration (`analytics/<name>.html`, `comments/<provider>.html`), so a missing partial only fails when a user enables it |
+| front matter and CDN (`--features-only`) | `image:` as a string and as a map both build, and `params.cdn` prefixes media in `og:image`, `twitter:image` and JSON-LD |
 | `HugoBasicExample` | a generic site builds, and it warns with the exact snippet for the settings Hugo does not merge |
 
 ### 11.1 The configuration warning

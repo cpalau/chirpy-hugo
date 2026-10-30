@@ -22,6 +22,36 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.1.1] - 2026-10-30
+
+### Added
+
+- **`image` front matter accepts a string and a map.** Upstream allows both
+  (`image: /path.png` and `image: { path, alt, lqip, no_bg }`); the port
+  dereferenced `.path` unconditionally, so a string image failed the whole
+  build. A new `_partials/image-data.html` normalises the value, and the JSON-LD
+  now emits a URL for the string form exactly as `jekyll-seo-tag` does.
+- **Provider and front-matter matrix in PR CI** (`--features-only`): six
+  analytics providers, three comment providers, both image shapes and media on
+  a CDN.
+
+### Changed
+
+- The visual capture waits for tocbot's scrollspy to settle after resizing the
+  viewport; the active TOC entry used to change for a few frames and produced
+  a one-off pixel diff in the right column.
+
+### Fixed
+
+- `params.cdn` was ignored: `media-url.html` read `$.Site` inside a partial
+  called with a `dict`, where `$` is the dict, so the CDN branch never ran.
+- A post or page with `image:` as a string crashed the build
+  (`can't evaluate field path in type string`).
+- JSON-LD omitted the image for the string form.
+
+### Security
+
+
 ## [1.1.0] - 2026-10-30
 
 ### Added

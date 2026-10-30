@@ -94,8 +94,8 @@ jobs:
             -d "$RUNNER_TEMP/deploy"
           node tests/adoption/check.mjs --deploy-only
 
-      - name: Analytics and comment provider matrix
-        run: node tests/adoption/check.mjs --providers-only
+      - name: Provider and front-matter matrix
+        run: node tests/adoption/check.mjs --features-only
 
       - name: Build the demo site (warnings are errors)
         run: |

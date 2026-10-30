@@ -30,17 +30,18 @@
       {{- end }}
 
       {{- with .Params.image }}
+      {{- $preview := partial "image-data.html" . }}
       <div class="mt-3 mb-3">
         {{ partial "image.html" (dict
-          "src" (.path | default .)
-          "alt" (.alt | default "Preview Image")
-          "class" (printf "preview-img%s" (cond (not .no_bg) "" " no-bg"))
+          "src" $preview.src
+          "alt" (or $preview.alt "Preview Image")
+          "class" (printf "preview-img%s" (cond (not $preview.no_bg) "" " no-bg"))
           "width" "1200"
           "height" "630"
-          "lqip" (.lqip | default "")
+          "lqip" $preview.lqip
           "page" $
         ) }}
-        {{- with .alt -}}
+        {{- with $preview.alt -}}
         <figcaption class="text-center pt-2 pb-2">{{ . }}</figcaption>
         {{- end -}}
       </div>

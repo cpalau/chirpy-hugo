@@ -154,6 +154,46 @@ function featureSite(name, extra) {
   return dir;
 }
 
+/** Front matter and configuration shapes that the rest of the corpus does not
+ *  exercise. `image` is accepted as a string or a map, and `cdn` prefixes every
+ *  media URL: a template that indexes `.path` on a string, or that reads the
+ *  CDN from the wrong context, fails only here. */
+function frontMatterMatrix() {
+  const dir = featureSite('front-matter', '');
+  const config = path.join(dir, 'hugo.toml');
+  fs.writeFileSync(
+    config,
+    fs
+      .readFileSync(config, 'utf8')
+      .replace('  description = "A site built with chirpy-hugo."', '  description = "A site built with chirpy-hugo."\n  cdn = "https://cdn.example.com"'),
+  );
+  fs.writeFileSync(
+    path.join(dir, 'content/posts/string.md'),
+    '---\ntitle: "String image"\ndate: 2026-03-01T10:00:00Z\ntags: ["x"]\nimage: "/assets/img/cover.png"\nmedia_subpath: /assets/media\n---\n\nBody.\n',
+  );
+  fs.writeFileSync(
+    path.join(dir, 'content/posts/map.md'),
+    '---\ntitle: "Map image"\ndate: 2026-03-02T10:00:00Z\ntags: ["x"]\nimage:\n  path: "/assets/img/cover.png"\n  alt: "Cover"\nmedia_subpath: /assets/media\n---\n\nBody.\n',
+  );
+
+  const out = build('front matter: image as string and map, media on a CDN', dir);
+  if (!out) return;
+
+  const read = (page) => fs.readFileSync(path.join(out, page), 'utf8');
+  const checks = [
+    ['string: og:image is absolute and on the CDN', 'posts/string/index.html', /property="og:image" content="https:\/\/cdn\.example\.com\/assets\/media\/assets\/img\/cover\.png"/],
+    ['string: twitter:image', 'posts/string/index.html', /name="twitter:image" content="[^"]*cover\.png"/],
+    ['string: JSON-LD image is a URL', 'posts/string/index.html', /"image":"https:\/\/cdn\.example\.com[^"]*cover\.png"/],
+    ['map: JSON-LD image is an ImageObject', 'posts/map/index.html', /"image":\{[^}]*"@type":"imageObject"\}/],
+    ['map: og:image:alt', 'posts/map/index.html', /property="og:image:alt" content="Cover"/],
+    ['home: both previews render', 'index.html', /posts\/string\/[\s\S]*posts\/map\/|posts\/map\/[\s\S]*posts\/string\//],
+  ];
+  for (const [name, page, pattern] of checks) {
+    if (pattern.test(read(page))) console.log(`  ok    ${name}`);
+    else fail(`front matter: ${name}`);
+  }
+}
+
 /** Build once, then prove every marker is in the output. */
 function expectMarkers(name, source, file, markers) {
   const out = build(name, source);
@@ -268,13 +308,15 @@ for (const [provider, extra, marker] of [
 }
 
 // `--providers-only` is the fast run PR CI needs: no clone, no deployment build.
-if (process.argv.includes('--providers-only')) {
+if (process.argv.includes('--features-only')) {
   providerMatrix();
-  console.log(failures ? `\n${failures} provider failure(s)` : '\nproviders verified');
+  frontMatterMatrix();
+  console.log(failures ? `\n${failures} feature failure(s)` : '\nfeatures verified');
   process.exit(failures ? 1 : 0);
 }
 
 providerMatrix();
+frontMatterMatrix();
 
 // 5. HugoBasicExample, cloned once.
 if (!fs.existsSync(BASIC)) {
