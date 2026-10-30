@@ -343,6 +343,11 @@ node tests/interactive/check.mjs
 node tests/interactive/check.mjs .out/example-deploy --base-path /chirpy-hugo
 ```
 
+The service worker is part of this gate: `tests/interactive/check.mjs` asserts
+that the page it loads has no uncaught script errors and that the worker's
+assets resolve. D-23 explains why a passing build could still look broken in a
+browser that had visited the previous deploy.
+
 Mobile covers the sidebar (trigger, mask, close) and the search overlay
 (trigger, input, results, cancel); desktop covers tocbot, the theme toggle, the
 copy button and search.

@@ -26,6 +26,35 @@ const OUT = path.join(ROOT, 'static');
 const FRONT_MATTER = /^---\r?\n(?:[\s\S]*?)\r?\n---\r?\n/;
 const ROOT_BUNDLES = new Set(['app.min.js', 'sw.min.js']);
 
+// Upstream's worker is cache-first for every request, navigations included, and
+// never calls skipWaiting. After a deploy the browser keeps serving the previous
+// HTML and bundles until every tab is closed, so a fixed site looks broken.
+// This wrapper (D-23) activates immediately, claims the clients, reloads them
+// once, and sends navigations to the network first.
+const SW_PATCH = `/* chirpy-hugo: update policy (D-23) */
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    await self.clients.claim();
+    const windows = await self.clients.matchAll({ type: 'window' });
+    for (const client of windows) client.navigate(client.url).catch(() => {});
+  })());
+});
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode !== 'navigate') return;
+  event.respondWith((async () => {
+    try {
+      const response = await fetch(event.request);
+      const cache = await caches.open(swconf.cacheName);
+      cache.put(event.request, response.clone());
+      return response;
+    } catch (error) {
+      return (await caches.match(event.request)) || Response.error();
+    }
+  })());
+});
+`;
+
 async function main() {
   const files = (await fs.readdir(SRC)).filter((f) => f.endsWith('.js')).sort();
   let written = 0;
@@ -40,9 +69,12 @@ async function main() {
 
     for (const target of targets) {
       await fs.mkdir(path.dirname(target), { recursive: true });
+      // Only the published service worker is patched; the gem artifact under
+      // assets/js/dist/ stays byte-identical to upstream.
+      const output = file === 'sw.min.js' && target === path.join(OUT, 'sw.min.js') ? SW_PATCH + code : code;
       const current = existsSync(target) ? await fs.readFile(target, 'utf8') : null;
-      if (current !== code) {
-        await fs.writeFile(target, code);
+      if (current !== output) {
+        await fs.writeFile(target, output);
         written += 1;
       }
     }

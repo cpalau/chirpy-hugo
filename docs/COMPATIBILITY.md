@@ -406,6 +406,36 @@ coupling.
 
 ---
 
+## D-23 — Service worker update policy
+
+| | |
+|---|---|
+| Status | declared (no pixel or HTML change) |
+| Affects | the published `/sw.min.js` |
+| Upstream | cache-first for every request, navigations included, and no `skipWaiting` |
+| This port | the same worker with an update wrapper prepended by `scripts/build-js.mjs` |
+| Blast radius | the worker's lifecycle only |
+
+Upstream's worker answers every request from the cache, including the HTML
+document, and never activates a waiting worker on its own. After a deploy the
+browser keeps serving the previous document and its bundles until every tab is
+closed, so a fixed site looks broken to anyone who visited the previous build:
+the old HTML references old asset paths, and the mobile menu and search die
+with them. That is exactly what happened after the self-host deploy.
+
+The published worker now:
+
+1. calls `self.skipWaiting()` on install;
+2. claims the clients on activate, deletes the old caches (upstream behaviour)
+   and reloads each window once, so the visitor lands on the new build;
+3. handles navigations network-first, falling back to the cache offline.
+
+Assets keep the upstream cache-first behaviour. The gem artifact under
+`assets/js/dist/sw.min.js` is untouched and still hash-verified; only the
+served copy is patched.
+
+---
+
 ## D-22 — Performance: self-hosted assets and non-blocking load
 
 | | |

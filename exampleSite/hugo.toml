@@ -143,7 +143,7 @@ enableGitInfo = false
 
   [params.social]
     name = "Cristian Palau"
-    email = ""
+    email = "cp@cristianpalau.com"
     links = ["https://github.com/cpalau/chirpy-hugo", "https://x.com/cristian_palau"]
 
   # The upstream demo ships giscus. It points at this repository's Discussions
