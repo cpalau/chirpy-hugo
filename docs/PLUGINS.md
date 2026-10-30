@@ -1,7 +1,7 @@
 # Jekyll plugins: module by module
 
-Chirpy is not only templates: six Jekyll plugins and one local plugin shape the
-output. Each one is validated on its own by **Gate 10**
+Chirpy is not only templates: five Jekyll plugins, the Jekyll framework and one
+local plugin shape the output. Each one is validated on its own by **Gate 10**
 (`npm run test:plugins`, `tests/plugins/check.mjs`); this page records what is
 covered and what is excluded because Jekyll and Hugo cannot express the same
 thing.

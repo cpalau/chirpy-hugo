@@ -404,7 +404,8 @@ Pixels are not enough: behaviour must match too.
 npm run test:plugins
 ```
 
-Validates the six Jekyll plugins and the local lastmod plugin module by module,
+Validates the five Jekyll plugins, the Jekyll framework and the local lastmod
+plugin module by module,
 against the parity builds. A module passes only when all its checks pass; an
 exclusion is a documented toolchain property. The matrix, the checks and the
 four exclusions are in [`PLUGINS.md`](PLUGINS.md).
