@@ -22,6 +22,28 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.5.3] - 2026-10-30
+
+### Added
+
+- **The starter ships a social preview image** (`static/img/social-preview.png`,
+  wired as `social_preview_image`), so a brand-new site has an `og:image` from
+  the first build instead of failing the Open Graph requirement.
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+- **No empty avatar link.** A site without `avatar` rendered an `<a id="avatar">`
+  with no content and no accessible name, which is an empty link. The anchor is
+  now rendered only when there is an avatar.
+
+### Security
+
 ## [1.5.2] - 2026-10-30
 
 ### Added

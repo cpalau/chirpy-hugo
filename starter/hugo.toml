@@ -126,6 +126,8 @@ theme = "chirpy-hugo"
 [params]
   description = "A site built with chirpy-hugo."
   tagline = ""
+  # Neutral social card for Open Graph and Twitter; replace it with your own.
+  social_preview_image = "/img/social-preview.png"
 
   [params.social]
     name = "Your Name"

@@ -4,11 +4,13 @@
 {{- $current := .RelPermalink -}}
 <aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end">
   <header class="profile-wrapper">
+    {{- /* Without an avatar the link would have no content and no accessible
+           name; upstream renders it anyway, which is an empty link. */ -}}
+    {{- with $params.avatar }}
     <a href="{{ "" | relURL }}" id="avatar" class="rounded-circle">
-      {{- with $params.avatar -}}
-        <img src="{{ partial "media-url.html" (dict "src" .) }}" width="112" height="112" alt="avatar" onerror="this.style.display='none'">
-      {{- end -}}
+      <img src="{{ partial "media-url.html" (dict "src" .) }}" width="112" height="112" alt="avatar" onerror="this.style.display='none'">
     </a>
+    {{- end }}
 
     <a class="site-title d-block" href="{{ "" | relURL }}">{{ .Site.Title }}</a>
     <p class="site-subtitle fst-italic mb-0">{{ $params.tagline }}</p>

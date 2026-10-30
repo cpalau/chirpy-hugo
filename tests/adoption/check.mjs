@@ -323,11 +323,32 @@ const fresh = path.join(WORK, 'fresh');
 fs.rmSync(fresh, { recursive: true, force: true });
 fs.mkdirSync(path.join(fresh, 'content', 'posts'), { recursive: true });
 fs.copyFileSync(path.join(ROOT, 'starter/hugo.toml'), path.join(fresh, 'hugo.toml'));
+// The starter is copied as shipped, including its static assets (the social
+// preview image), because that is what an adopter does.
+fs.cpSync(path.join(ROOT, 'starter/static'), path.join(fresh, 'static'), { recursive: true });
 fs.writeFileSync(
   path.join(fresh, 'content/posts/hello.md'),
   '---\ntitle: "Hello"\ndate: 2026-01-01T00:00:00Z\ncategories: ["Blogging"]\ntags: ["hello"]\n---\n\nA post.\n',
 );
-build('fresh site (empty params, one post)', fresh);
+const freshOut = build('fresh site (empty params, one post)', fresh);
+if (freshOut) {
+  const home = fs.readFileSync(path.join(freshOut, 'index.html'), 'utf8');
+  // The starter must carry a social card: Open Graph requires og:image, and a
+  // fresh site has no page images.
+  if (!/property="og:image" content="[^"]*\/img\/social-preview\.png"/.test(home)) {
+    fail('fresh site: starter does not emit the social preview in og:image');
+  } else if (!fs.existsSync(path.join(freshOut, 'img/social-preview.png'))) {
+    fail('fresh site: starter social preview asset is missing from the build');
+  } else {
+    console.log('  ok    fresh site: starter ships a social preview image');
+  }
+  // Without an avatar the link would have no content and no accessible name.
+  if (/<a [^>]*id="avatar"/.test(home)) {
+    fail('fresh site: empty avatar link rendered without an avatar');
+  } else {
+    console.log('  ok    fresh site: no empty avatar link');
+  }
+}
 
 // 2. Subdirectory deployment: every theme URL must carry the base path.
 const subdir = path.join(WORK, 'subdir');
