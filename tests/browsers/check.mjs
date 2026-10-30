@@ -101,6 +101,11 @@ for (const [name, type] of ENGINES) {
     const url = route.request().url();
     if (url.startsWith(`http://127.0.0.1:${PORT}/`)) return route.continue();
     if (ALLOWED.some((host) => url.includes(host))) return route.continue();
+    // The pageview counter expects JSON; an empty body makes its `.then` throw
+    // inside WebKit and looks like a theme error.
+    if (url.includes('goatcounter.com')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: '{"count":"1"}' });
+    }
     return route.fulfill({ status: 200, body: '', contentType: 'text/plain' });
   });
   const page = await context.newPage();
