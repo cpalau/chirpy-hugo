@@ -52,6 +52,7 @@ export default {
         'fixtures',
         'oracle',
         'parity',
+        'seo',
         'visual',
         'qa',
         'a11y',
