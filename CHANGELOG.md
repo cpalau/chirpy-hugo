@@ -22,6 +22,26 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.5.2] - 2026-10-30
+
+### Added
+
+### Changed
+
+- **Mobile post LCP: 6.4 s → 3.3–3.6 s (performance 68 → 90).** The four font
+  faces painted above the fold are preloaded (Source Sans Pro 400, 600 and 900,
+  plus Lato 400). Only the body face was preloaded, so the other three were
+  discovered after the stylesheet and swapped in late, moving the largest
+  paint. `test:build` now asserts the preloads, which Gate 4 cannot see (D-22).
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [1.5.1] - 2026-10-30
 
 ### Added

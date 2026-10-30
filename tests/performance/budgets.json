@@ -2,7 +2,7 @@
   "_comment": [
     "Budgets for Gate 6b (Lighthouse). Measured on 2026-10-30 against the",
     "pinned upstream theme. Upstream Chirpy itself does not reach 95 on mobile",
-    "(68 performance, 6.2 s LCP) or on accessibility (92, see D-20), so the",
+    "(its own build scores 67-76 and 6.7 s LCP here) or on accessibility (92, see D-20), so the",
     "absolute budgets apply to the desktop profile, where the port matches the",
     "original (99 vs 100 performance), and the mobile profile is compared with",
     "the Jekyll build instead. See D-21 in docs/COMPATIBILITY.md."

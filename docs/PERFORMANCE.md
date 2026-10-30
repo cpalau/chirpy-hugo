@@ -33,12 +33,14 @@ Throttled mobile profile, same content, measured on 2026-10-30:
 | Page | Perf before | Perf after | LCP before | LCP after |
 |---|---|---|---|---|
 | Home (fixture) | 66 | **97** | 6.3 s | **2.1 s** |
-| Code-heavy post (fixture) | 66 | **69** | 6.7 s | **6.5 s** |
+| Code-heavy post (fixture) | 66 | **91** | 6.7 s | **3.4 s** |
 | Home (demo) | 72 | **91** | 4.9 s | **3.2 s** |
 | Desktop (both) | 99 | **100** | 0.9 s | **0.6 s** |
 
 The Jekyll build, with the same self-host configuration, scores 76 on mobile
-home and 46 on the code post: the port is ahead, not behind.
+home and 67 on the code post (6.7 s LCP): the port is ahead, not behind. The
+post figure is the median of five runs; the first Lighthouse run on a cold
+machine can report 6+ seconds before the CPU settles.
 
 ## What changed (D-22)
 
@@ -51,7 +53,12 @@ home and 46 on the code post: the port is ahead, not behind.
    `onload`). The font stylesheet stays blocking on purpose: with `swap` text
    paints in the fallback face and re-lays out when the real one arrives, which
    measured 6.3 s LCP instead of 3.0 s. The font file itself is preloaded.
-3. **Preloads** for the LCP image and the body font.
+3. **Preloads** for the LCP image and the four faces painted above the fold:
+   Source Sans Pro 400, 600 and 900, plus Lato 400. Preloading only the body
+   face measured 5.0 s LCP on the post: the other three were discovered after
+   the stylesheet and swapped in late, which moved the largest paint. With all
+   four, first paint already uses the final faces (FCP 0.9 s, LCP 3.3–3.6 s).
+   The links are invisible to Gate 4 (D-22), so `test:build` asserts them.
 4. **MathJax and Mermaid stay on the CDN**: ~23 MB, only on pages that use
    them.
 

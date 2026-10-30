@@ -543,7 +543,7 @@ Measured on a throttled mobile profile, same content, before and after:
 | Page | Perf before | Perf after | LCP before | LCP after |
 |---|---|---|---|---|
 | Home | 66 | **97** | 6.3 s | **2.1 s** |
-| Code-heavy post | 66 | **69** | 6.7 s | **6.5 s** |
+| Code-heavy post | 66 | **91** | 6.7 s | **3.4 s** |
 | Desktop (both) | 99 | **100** | 0.9 s | **0.6 s** |
 
 What changed:
@@ -599,8 +599,9 @@ Jekyll build. That is the budget enforced by `npm run test:perf`.
 
 At the time of measurement both builds landed at 66 performance with LCP
 between 6 and 7 seconds: the blocker was the render-blocking CSS and the web
-fonts loaded from CDNs. D-22 fixed exactly that (self-host + non-blocking load)
-and the home page now measures 97 / 2.1 s. The mobile budget stays
+fonts loaded from CDNs. D-22 fixed exactly that (self-host + non-blocking load
+plus the four above-the-fold font preloads) and the pages now measure 97 / 2.1 s
+on the home page and 91 / 3.4 s on the code-heavy post. The mobile budget stays
 **comparative** so a future upstream page cannot regress silently: the port may
 not be more than 5 points slower or 1.5 s worse on LCP than the Jekyll build of
 the same page.

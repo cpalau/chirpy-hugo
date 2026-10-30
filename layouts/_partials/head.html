@@ -14,6 +14,22 @@
     content="width=device-width,&#32;user-scalable=no&#32;initial-scale=1,&#32;shrink-to-fit=no,&#32;viewport-fit=cover"
   >
 
+  {{- /* The LCP image and the body font are discovered first, before the two
+         blocking stylesheets and the bootstrap script. Gate 4 ignores
+         `link[rel=preload]` (D-22), so the order is free. */}}
+  {{- /* Load the image that will be the LCP element before the lazy loader
+         reaches it, and start the body font while the blocking CSS is still in
+         flight. Both are appended last so the DOM order is untouched. */ -}}
+  {{- with partial "lcp-image.html" . }}
+  <link rel="preload" as="image" href="{{ . }}">
+  {{- end }}
+  {{- if .Site.Params.assets.self_host.enabled }}
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Regular.woff2" | relURL }}" fetchpriority="high">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-SemiBold.woff2" | relURL }}">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Black.woff2" | relURL }}">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Lato/Lato-Regular.woff2" | relURL }}">
+  {{- end }}
+
   <!-- Setup Open Graph image -->
   {{ partial "seo.html" . }}
 
@@ -118,13 +134,4 @@
 
   {{ partial "metadata-hook.html" . }}
 
-  {{- /* Load the image that will be the LCP element before the lazy loader
-         reaches it, and start the body font while the blocking CSS is still in
-         flight. Both are appended last so the DOM order is untouched. */ -}}
-  {{- with partial "lcp-image.html" . }}
-  <link rel="preload" as="image" href="{{ . }}">
-  {{- end }}
-  {{- if .Site.Params.assets.self_host.enabled }}
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Regular.woff2" | relURL }}">
-  {{- end }}
 </head>

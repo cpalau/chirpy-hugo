@@ -146,5 +146,30 @@ for (const file of walk(BUILD)) {
 if (!residue) console.log('  ok    no Liquid or front matter in published files');
 if (!empty) console.log('  ok    no empty files');
 
+
+// The four fonts painted above the fold are preloaded by `head.html`. Without
+// them the browser discovers the faces after the CSS and the mobile post LCP
+// doubles (measured: 3.4 s -> 6.4 s on Lighthouse mobile). The links are
+// ignored by Gate 4 (D-22), so this is their only regression guard.
+{
+  const post = path.join(BUILD, 'posts/code/index.html');
+  if (fs.existsSync(post)) {
+    const html = fs.readFileSync(post, 'utf8');
+    const wanted = [
+      'SourceSansPro-Regular.woff2',
+      'SourceSansPro-SemiBold.woff2',
+      'SourceSansPro-Black.woff2',
+      'Lato-Regular.woff2',
+    ];
+    const missingPreload = wanted.filter(
+      (font) => !new RegExp(`<link rel="preload" as="font"[^>]*${font.replace('.', '\\.')}`).test(html),
+    );
+    if (missingPreload.length) fail(`font(s) not preloaded: ${missingPreload.join(', ')}`);
+    else console.log(`  ok    the ${wanted.length} above-the-fold fonts are preloaded`);
+  } else {
+    console.log('  skip  font preloads: no post build present');
+  }
+}
+
 console.log(failures ? `\n${failures} build failure(s)` : '\nbuild integrity verified');
 process.exit(failures ? 1 : 0);
