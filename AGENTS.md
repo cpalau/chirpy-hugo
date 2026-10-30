@@ -672,6 +672,10 @@ See `docs/PLAN.md` §6 for the phase checklist. Update the checkboxes there
 when a phase is completed; that file is the single source of truth for
 progress.
 
+At the time of writing: F0–F7 and the F9 tooling are complete, with Gates 1–9
+implemented as commands. F8 (final documentation pass, performance budget,
+cross-browser spot check) and the `v1.0.0` tag are open.
+
 ---
 
 ## 13. Hugo conventions (strict)

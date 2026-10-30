@@ -93,8 +93,20 @@ export function check(question, actual) {
   }
 
   const expected = fs.readFileSync(file, 'utf8');
+  // Versions are provenance, not the answer: the Hugo build metadata and the
+  // Liquid patch release differ between a workstation and CI, while the counts
+  // must not.
+  const payload = (text) => {
+    const data = JSON.parse(text);
+    delete data.versions;
+    return JSON.stringify(data);
+  };
   if (expected === serialized) {
     console.log(`ok: ${question} — answer unchanged`);
+    return true;
+  }
+  if (payload(expected) === payload(serialized)) {
+    console.log(`ok: ${question} — answer unchanged (toolchain versions differ)`);
     return true;
   }
 

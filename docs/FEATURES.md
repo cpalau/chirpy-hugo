@@ -1,5 +1,11 @@
 # Feature Inventory and Hugo Mapping
 
+> **The status column is stale.** It was written during F0, before the template
+> layer existed, and most rows still read pending. The authoritative proof of
+> what works is the gate suite: 47/47 pages identical to Jekyll after
+> canonicalization and 84/84 pixel pairs identical outside the declared boxes
+> (`docs/TESTING.md`). A row-by-row re-audit is part of F8.
+
 Complete inventory of everything `jekyll-theme-chirpy` v7.6.0 does, and how each
 feature is implemented in Hugo.
 

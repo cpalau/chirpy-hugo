@@ -8,7 +8,7 @@
 | Starter | `github.com/cpalau/chirpy-hugo-starter` |
 | License | MIT (original copyright preserved) |
 | Total estimate | ~30 working days |
-| Status | F0–F6 complete and green; F7 next |
+| Status | F0–F7 and F9 tooling complete; F8 docs/perf/cross-browser open |
 
 Related documents:
 
