@@ -22,6 +22,32 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.2.1] - 2026-10-30
+
+### Added
+
+- The deployment gate rejects whitespace before punctuation after an inline
+  `<code>` element, the signature of a shortcode template that ends with a
+  newline.
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+- **The `filepath` shortcode emitted a trailing newline**, which the browser
+  renders as a space: `` `assets/img/favicons/` `` followed by a period became
+  `assets/img/favicons/ .` in the body and in the meta description. Inline
+  shortcodes must not end with a newline.
+- The description of a post without `description` used `plainify`, which
+  inserts a space where an inline tag was. It now strips tags like Jekyll's
+  `strip_html` and unescapes the entities, so the text is byte-identical.
+
+### Security
+
 ## [1.2.0] - 2026-10-30
 
 ### Added

@@ -122,6 +122,20 @@ function checkDeployment(out) {
     console.log('  ok    deployment: viewport meta parses into separate directives');
   }
 
+  // A shortcode template that ends with a newline leaks it into the page: an
+  // inline element followed by punctuation renders as `favicons/ .`. It is
+  // invisible to Gate 4 (whitespace is canonicalised) and to the fixtures
+  // (none of them puts punctuation right after an inline shortcode), so the
+  // demo is the regression test.
+  const stray = walk(out)
+    .filter((file) => file.endsWith('.html'))
+    .filter((file) => /<\/code>\s+[.,;:!?]/.test(fs.readFileSync(path.join(out, file), 'utf8')));
+  if (stray.length) {
+    fail(`deployment: ${stray.length} page(s) have a space before punctuation after </code> (${stray[0]})`);
+  } else {
+    console.log('  ok    deployment: no stray whitespace after inline code');
+  }
+
   // A taxonomy index without terms is a rendering bug, not an empty site.
   for (const [file, pattern] of [
     ['categories/index.html', /\/chirpy-hugo\/categories\/[^/"']+\//],

@@ -462,7 +462,7 @@ built with `--panicOnWarning`: a warning is a failure.
 |---|---|
 | fresh site | `starter/hugo.toml` is the whole config; empty `[params]` works; one post renders |
 | subdirectory `baseURL` | every theme URL keeps the `/blog/` prefix (no dropped or doubled base path) |
-| demo, deployment shape (`--baseURL …/chirpy-hugo/ --minify`) | no doubled base path; every internal URL resolves; the minified viewport still parses; taxonomy indexes list terms |
+| demo, deployment shape (`--baseURL …/chirpy-hugo/ --minify`) | no doubled base path; every internal URL resolves; the minified viewport still parses; no stray whitespace after inline code; taxonomy indexes list terms |
 | provider matrix (`--features-only`) | all six analytics providers and the three comment providers render. Both are dispatched from configuration (`analytics/<name>.html`, `comments/<provider>.html`), so a missing partial only fails when a user enables it |
 | front matter and CDN (`--features-only`) | `image:` as a string and as a map both build, and `params.cdn` prefixes media in `og:image`, `twitter:image` and JSON-LD |
 | site-level SEO (`--features-only`) | legacy `google_site_verification`, site-wide `twitter_card`, `author` fallback and the JSON-LD publisher from `logo` |

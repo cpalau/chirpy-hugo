@@ -1,6 +1,6 @@
 {
   "name": "chirpy-hugo",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "Hugo port of jekyll-theme-chirpy — verification harness",
   "type": "module",

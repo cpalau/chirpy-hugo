@@ -24,7 +24,11 @@
 {{- else if eq (partial "page-kind.html" $page) "post" -}}
   {{- /* Jekyll's excerpt separator is the first blank line. */ -}}
   {{- $first := index (split $page.RawContent "\n\n") 0 -}}
-  {{- $text = $first | $page.RenderString | plainify -}}
+  {{- /* Jekyll's `strip_html` removes tags without inserting spaces, then
+         `escape_once` keeps the entities; unescaping here lets the template
+         escape the attribute exactly once. Hugo's `plainify` would insert a
+         space where an inline tag was (`favicons/ .`). */ -}}
+  {{- $text = $first | $page.RenderString | replaceRE `<[^>]+>` "" | htmlUnescape -}}
 {{- end -}}
 {{- if not $text }}{{ $text = site.Params.description }}{{ end -}}
 
