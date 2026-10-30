@@ -316,17 +316,23 @@ and break Gate 4 or Gate 5, so they are declared in D-20 instead. A violation
 that also exists in Jekyll is reported as inherited; a **new** serious or
 critical one fails the run.
 
-Lighthouse budgets are not part of the gate yet. The intended budgets remain:
+`npm run test:perf` runs Lighthouse over two pages in two profiles:
 
-| Metric | Budget |
+| Profile | Rule |
 |---|---|
-| Performance | ≥ 95 |
-| Accessibility | ≥ 95 |
-| Best practices | ≥ 95 |
-| SEO | ≥ 95 |
-| LCP | < 2.5 s |
-| CLS | < 0.1 |
-| Total blocking time | < 200 ms |
+| Desktop | performance / best practices / SEO ≥ 95, accessibility ≥ 90, LCP < 2.5 s, CLS < 0.1, TBT < 200 ms |
+| Mobile | no more than 5 performance points and 1.5 s LCP worse than the Jekyll build of the same page |
+
+The asymmetry is measured, not aspirational: upstream Chirpy scores 66
+performance and 6.3 s LCP on mobile, and 92 accessibility on post pages
+(D-20, D-21). The desktop profile is where the port proves parity (99 vs 100
+performance). Budgets live in `tests/performance/budgets.json`.
+
+`npm run test:browsers` is the cross-browser spot check: it loads the home page
+and a post in Firefox and WebKit, asserts the chrome is visible and the
+stylesheet applied, and writes screenshots to `.out/browsers/`. A browser that
+cannot launch is skipped locally; CI installs both with their dependencies and
+sets `REQUIRE_BROWSERS=1`, where a skip is a failure.
 
 ---
 

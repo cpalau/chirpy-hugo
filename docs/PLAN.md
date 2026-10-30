@@ -413,8 +413,13 @@ runs everything nightly.
 - [x] Fix or formally declare every remaining difference.
 - [ ] Finalize `COMPATIBILITY.md` (D-15 and D-16 closed; the `D-XX` template at
       the end of the file is still a template).
-- [ ] Performance budget check.
-- [ ] Cross-browser spot check (Firefox, WebKit).
+- [x] Performance budget check (`npm run test:perf`): desktop absolute,
+      mobile comparative. D-21 records the inherited mobile ceiling.
+- [x] Cross-browser spot check (Firefox, WebKit):
+      `npm run test:browsers` loads the home page and a post in both engines,
+      asserts the chrome is visible and the stylesheet applied, and writes a
+      screenshot. WebKit needs its system libraries; CI installs them and runs
+      in strict mode, a local host without them skips it.
 
 **Acceptance**: DoD items 1–3, 5–7.
 

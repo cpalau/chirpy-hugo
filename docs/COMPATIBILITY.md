@@ -406,6 +406,34 @@ coupling.
 
 ---
 
+## D-21 — Mobile performance and accessibility ceiling
+
+| | |
+|---|---|
+| Status | declared (inherited from upstream) |
+| Affects | mobile Lighthouse profile; accessibility score on post pages |
+| Upstream | Chirpy itself scores 66 performance / 6.3 s LCP on mobile, 92 accessibility |
+| This port | 66 / 6.3 s and 92, measured side by side against the same fixture |
+| Blast radius | none for the HTML or the pixels |
+
+Lighthouse, desktop profile, is where the port must prove it matches: 99
+performance, 96 best practices, 100 SEO, 0.85 s LCP, against 100/96/100 on the
+Jekyll build. That is the budget enforced by `npm run test:perf`.
+
+On a throttled mobile profile both builds land at 66 performance with LCP
+between 6 and 7 seconds: the blocker is upstream's render-blocking CSS and web
+fonts loaded from CDNs, plus the scripts the theme ships. Self-hosting or
+deferring them would change the asset contract (R1) and can move pixels, so the
+mobile budget is **comparative**: the port may not be more than 5 points slower
+or 1.5 s worse on LCP than the Jekyll build of the same page.
+
+Accessibility is 92 on post pages on both sides for the reasons in D-20; the
+absolute desktop budget is therefore 90, not 95.
+
+Fixing either number is an upstream decision, not a port decision.
+
+---
+
 ## D-20 — Inherited accessibility debt
 
 | | |
