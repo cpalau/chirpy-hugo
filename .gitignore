@@ -18,6 +18,7 @@ coverage/
 reports/
 
 # Ruby (Jekyll oracle)
+tests/oracle/assets/lib/
 tests/oracle/vendor/
 tests/oracle/.bundle/
 tests/oracle/_site/

@@ -15,6 +15,7 @@
 
 import { execFile } from 'node:child_process';
 import { createServer } from 'node:http';
+import { gzipSync } from 'node:zlib';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -52,7 +53,16 @@ function serve(root, port) {
       response.end();
       return;
     }
-    response.writeHead(200, { 'content-type': MIME[path.extname(file)] ?? 'application/octet-stream' });
+    const type = MIME[path.extname(file)] ?? 'application/octet-stream';
+    // GitHub Pages compresses text; an uncompressed test server would report a
+    // compression opportunity that production does not have.
+    if (/^(text\/|application\/(json|javascript|xml))/.test(type)) {
+      const body = gzipSync(fs.readFileSync(file));
+      response.writeHead(200, { 'content-type': type, 'content-encoding': 'gzip', 'content-length': body.length });
+      response.end(body);
+      return;
+    }
+    response.writeHead(200, { 'content-type': type });
     fs.createReadStream(file).pipe(response);
   });
   return new Promise((resolve) => server.listen(port, '127.0.0.1', () => resolve(server)));

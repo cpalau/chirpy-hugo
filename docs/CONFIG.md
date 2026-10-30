@@ -233,6 +233,33 @@ cascade:
 
 ---
 
+## 10. `params.assets.self_host`
+
+The theme ships the browser libraries it needs, so a page talks to one origin.
+
+| Key | Default | Meaning |
+|---|---|---|
+| `enabled` | `true` | `true`: serve fonts, icons and libraries from `static/assets/lib/`; `false`: use the upstream CDNs |
+| `env` | `""` | If set, self-host only when it equals `hugo.Environment` |
+
+Files come from `cotes2020/chirpy-static-assets` at a pinned commit, copied by
+`scripts/vendor.mjs` and verified by `npm run test:vendor`. MathJax and Mermaid
+are **not** vendored (23 MB together): they keep the CDN and only load on pages
+that declare `math` or `mermaid`.
+
+Turning it off restores the upstream behaviour byte for byte:
+
+```toml
+[params.assets]
+  [params.assets.self_host]
+    enabled = false
+```
+
+Measured effect (D-22): mobile Lighthouse 66 → 92 on the home page, LCP 6.3 s →
+3.0 s.
+
+---
+
 ## 11. Minimal user configuration
 
 Because `params` uses Hugo's `deep` merge strategy, **the theme ships every

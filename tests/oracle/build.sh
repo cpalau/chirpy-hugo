@@ -32,6 +32,13 @@ if ! bundle check >/dev/null 2>&1; then
 fi
 
 rm -rf "$OUT"
+
+# Self-hosted vendor files: the same bytes the theme ships, so both builds
+# render with the same fonts and libraries.
+rm -rf "$HERE/assets/lib"
+mkdir -p "$HERE/assets/lib"
+cp -R "$ROOT/static/assets/lib/." "$HERE/assets/lib/"
+
 bundle exec jekyll build --quiet --destination "$OUT"
 
 # A build without the compiled stylesheet means the gem did not ship the

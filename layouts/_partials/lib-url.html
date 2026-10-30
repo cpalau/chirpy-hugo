@@ -1,0 +1,9 @@
+{{- /* Resolve a vendor URL for a subdirectory deployment.
+       Hugo's relURL drops the base path when the input starts with "/", and
+       `data/origin` stores every path that way. Absolute CDN URLs pass through
+       untouched. Returns a string. */ -}}
+{{- $url := printf "%v" . -}}
+{{- if hasPrefix $url "/" -}}
+  {{- $url = strings.TrimPrefix "/" $url -}}
+{{- end -}}
+{{- return ($url | relURL) -}}

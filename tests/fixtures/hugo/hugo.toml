@@ -192,7 +192,7 @@ enableGitInfo = false
     reactions_enabled = "1"
 
   [params.assets.self_host]
-    enabled = false
+    enabled = true
 
   [params.pwa]
     enabled = true

@@ -78,6 +78,9 @@ jobs:
       - name: Verify the generated translation catalogue
         run: npm run test:i18n
 
+      - name: Verify the vendored libraries
+        run: npm run test:vendor
+
       - name: Configuration contract
         run: npm run test:config
 

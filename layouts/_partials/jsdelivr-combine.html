@@ -14,7 +14,7 @@
   {{- else if strings.Contains $url "//" -}}
     <script defer src="{{ $url }}"></script>
   {{- else -}}
-    <script defer src="{{ $url | relURL }}"></script>
+    <script defer src="{{ partial "lib-url.html" $url }}"></script>
   {{- end -}}
 {{- end -}}
 {{- with $combined }}

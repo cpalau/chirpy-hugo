@@ -71,6 +71,44 @@ function readIgnore() {
 }
 
 /** Tiny selector matcher: tag, #id, .class, [attr], [attr=value], and compounds. */
+/**
+ * Split a compound selector at `.`, `#` and `[` only outside brackets and
+ * quotes: an attribute value may contain dots (`theme.min.js`) or slashes.
+ */
+function splitCompound(selector) {
+  const parts = [];
+  let buffer = '';
+  let depth = 0;
+  let quote = null;
+  for (const char of selector) {
+    if (quote) {
+      buffer += char;
+      if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+      buffer += char;
+      continue;
+    }
+    if (char === '[') {
+      if (depth === 0 && buffer) {
+        parts.push(buffer);
+        buffer = '';
+      }
+      depth += 1;
+    } else if (char === ']') {
+      depth = Math.max(0, depth - 1);
+    } else if (depth === 0 && (char === '.' || char === '#')) {
+      if (buffer) parts.push(buffer);
+      buffer = '';
+    }
+    buffer += char;
+  }
+  if (buffer) parts.push(buffer);
+  return parts;
+}
+
 function matches(node, selector) {
   const parts = selector.split(/\s+(?![^\[]*\])/);
   if (parts.length > 1) {
@@ -92,7 +130,7 @@ function matches(node, selector) {
     if (sameTag.indexOf(node) + 1 !== wanted) return false;
     selector = selector.replace(/:nth-of-type\(\d+\)/, '');
   }
-  const compound = selector.split(/(?=[.[#])/);
+  const compound = splitCompound(selector);
   return compound.every((part) => {
     if (part.startsWith('#')) return attr(node, 'id') === part.slice(1);
     if (part.startsWith('.')) return (attr(node, 'class') || '').split(/\s+/).includes(part.slice(1));

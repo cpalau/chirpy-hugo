@@ -91,7 +91,7 @@ twitter_username = ""
   static_url = false
 
 [assets.self_host]
-  enabled = false
+  enabled = true
   env = ""
 
 [pwa]

@@ -51,23 +51,23 @@
   <link rel="stylesheet" href="{{ $file | relURL }}">
 
   <!-- Web Font -->
-  <link rel="stylesheet" href="{{ $origin.webfonts }}">
+  <link rel="stylesheet" href="{{ partial "lib-url.html" $origin.webfonts }}" media="print" onload="this.media='all'">
 
   <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="{{ $origin.fontawesome.css }}">
+  <link rel="stylesheet" href="{{ partial "lib-url.html" $origin.fontawesome.css }}" media="print" onload="this.media='all'">
 
   <!-- 3rd-party Dependencies -->
   {{- if and .Site.Params.toc .Params.toc }}
-  <link rel="stylesheet" href="{{ $origin.toc.css }}">
+  <link rel="stylesheet" href="{{ partial "lib-url.html" $origin.toc.css }}" media="print" onload="this.media='all'">
   {{- end }}
 
   {{- if in (slice "post" "page" "home") $kind }}
-  <link rel="stylesheet" href="{{ (index $origin "lazy-polyfill").css }}">
+  <link rel="stylesheet" href="{{ partial "lib-url.html" (index $origin "lazy-polyfill").css }}" media="print" onload="this.media='all'">
   {{- end }}
 
   {{- if in (slice "page" "post") $kind }}
   <!-- Image Popup -->
-  <link rel="stylesheet" href="{{ $origin.glightbox.css }}">
+  <link rel="stylesheet" href="{{ partial "lib-url.html" $origin.glightbox.css }}" media="print" onload="this.media='all'">
   {{- end }}
 
   <!-- Scripts -->
@@ -94,4 +94,14 @@
   {{- end }}
 
   {{ partial "metadata-hook.html" . }}
+
+  {{- /* Load the image that will be the LCP element before the lazy loader
+         reaches it, and start the body font while the blocking CSS is still in
+         flight. Both are appended last so the DOM order is untouched. */ -}}
+  {{- with partial "lcp-image.html" . }}
+  <link rel="preload" as="image" href="{{ . }}">
+  {{- end }}
+  {{- if .Site.Params.assets.self_host.enabled }}
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Regular.woff2" | relURL }}">
+  {{- end }}
 </head>

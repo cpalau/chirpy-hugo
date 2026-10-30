@@ -100,7 +100,7 @@ comments:
 
 assets:
   self_host:
-    enabled: false
+    enabled: true
 
 pwa:
   enabled: true

@@ -192,7 +192,37 @@ async function main() {
           // Force the theme attribute the same way the toggle does, instead of
           // relying on localStorage + matchMedia.
           await page.evaluate((t) => document.documentElement.setAttribute('data-bs-theme', t), theme);
+          // Async stylesheets (font icons, lightbox, polyfill) are applied on
+          // load; wait for the sheet before waiting for its fonts.
+          await page.evaluate(async () => {
+            const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
+            await Promise.all(
+              links.map((link) =>
+                link.sheet
+                  ? Promise.resolve()
+                  : new Promise((resolve) => {
+                      link.addEventListener('load', resolve, { once: true });
+                      link.addEventListener('error', resolve, { once: true });
+                    }),
+              ),
+            );
+          });
           await page.evaluate(() => document.fonts.ready);
+          // Async stylesheets (font icons, lightbox, polyfill) are applied on
+          // load; wait for the sheet before waiting for its fonts.
+          await page.evaluate(async () => {
+            const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
+            await Promise.all(
+              links.map((link) =>
+                link.sheet
+                  ? Promise.resolve()
+                  : new Promise((resolve) => {
+                      link.addEventListener('load', resolve, { once: true });
+                      link.addEventListener('error', resolve, { once: true });
+                    }),
+              ),
+            );
+          });
           await page.evaluate(() => document.fonts.ready);
           if (WITH_RENDERERS) {
             await page.evaluate(async () => {

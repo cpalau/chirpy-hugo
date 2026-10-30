@@ -50,6 +50,8 @@ const REQUIRED = [
   'assets/js/data/swconf.js',
   'assets/js/data/mathjax.js',
   'assets/css/jekyll-theme-chirpy.css',
+  'assets/lib/fonts/main.css',
+  'assets/lib/fontawesome-free/css/all.min.css',
   'assets/img/favicons/favicon.ico',
   'assets/img/favicons/site.webmanifest',
   'sw.min.js',

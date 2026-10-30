@@ -23,6 +23,7 @@ These directories are byte-for-byte copies of the upstream sources and
 | `data/origin/` | `_data/origin/` |
 | `i18n/` (generated) | `_data/locales/` |
 | `static/assets/img/favicons/` | `assets/img/favicons/` |
+| `static/assets/lib/` | `chirpy-static-assets` (fonts, icons, JS libraries) |
 
 Their purpose is to keep upstream CSS and JavaScript working without
 modification, so that upstream bug fixes and features can be adopted by

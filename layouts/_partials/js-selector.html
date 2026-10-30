@@ -4,32 +4,42 @@
 {{- $type := partial "origin-type.html" . -}}
 {{- $origin := index hugo.Data.origin $type -}}
 {{- $dayjs := $origin.dayjs.js -}}
-{{- $urls := slice $origin.search.js -}}
+{{- /* MathJax and Mermaid are ~23 MB together and only load on the pages
+       that use them, so they are not vendored. In self-host mode their CDN
+       URLs come from the `cors` origin. */ -}}
+{{- $mathjax := $origin.mathjax.js -}}
+{{- $mermaid := $origin.mermaid.js -}}
+{{- if eq $type "basic" -}}
+  {{- $cdn := index hugo.Data.origin "cors" -}}
+  {{- $mathjax = $cdn.mathjax.js -}}
+  {{- $mermaid = $cdn.mermaid.js -}}
+{{- end -}}
+{{- $urls := slice (partial "lib-url.html" $origin.search.js) -}}
 
 {{- if in (slice "post" "page" "home") $kind -}}
-  {{- $urls = $urls | append (index $origin "lazy-polyfill").js -}}
+  {{- $urls = $urls | append (partial "lib-url.html" (index $origin "lazy-polyfill").js) -}}
   {{- if ne $kind "home" -}}
-    {{- $urls = $urls | append $origin.glightbox.js -}}
-    {{- $urls = $urls | append $origin.clipboard.js -}}
+    {{- $urls = $urls | append (partial "lib-url.html" $origin.glightbox.js) -}}
+    {{- $urls = $urls | append (partial "lib-url.html" $origin.clipboard.js) -}}
   {{- end -}}
 {{- end -}}
 
 {{- if in (slice "home" "post" "archives" "category" "tag") $kind -}}
   {{- $locale := index (split .Lang "-") 0 -}}
-  {{- $urls = $urls | append $dayjs.common -}}
-  {{- $urls = $urls | append (replace $dayjs.locale ":LOCALE" $locale) -}}
-  {{- $urls = $urls | append $dayjs.relativeTime -}}
-  {{- $urls = $urls | append $dayjs.localizedFormat -}}
+  {{- $urls = $urls | append (partial "lib-url.html" $dayjs.common) -}}
+  {{- $urls = $urls | append (partial "lib-url.html" (replace $dayjs.locale ":LOCALE" $locale)) -}}
+  {{- $urls = $urls | append (partial "lib-url.html" $dayjs.relativeTime) -}}
+  {{- $urls = $urls | append (partial "lib-url.html" $dayjs.localizedFormat) -}}
 {{- end -}}
 
 {{- /* Upstream: `h2 or h3 and site.toc and page.toc` evaluates as
        `h2 OR (h3 AND toc)`. Parity includes the bug (G-05). */ -}}
 {{- if or (strings.Contains .Content "<h2") (and (strings.Contains .Content "<h3") .Site.Params.toc .Params.toc) -}}
-  {{- $urls = $urls | append $origin.toc.js -}}
+  {{- $urls = $urls | append (partial "lib-url.html" $origin.toc.js) -}}
 {{- end -}}
 
 {{- if .Params.mermaid -}}
-  {{- $urls = $urls | append $origin.mermaid.js -}}
+  {{- $urls = $urls | append $mermaid -}}
 {{- end -}}
 
 {{ partial "jsdelivr-combine.html" (dict "urls" (delimit $urls ",")) }}
@@ -45,7 +55,7 @@
 {{- if .Params.math }}
 <!-- MathJax -->
 <script src="{{ "assets/js/data/mathjax.js" | relURL }}"></script>
-<script id="MathJax-script" async src="{{ $origin.mathjax.js | relURL }}"></script>
+<script id="MathJax-script" async src="{{ $mathjax }}"></script>
 {{- end }}
 
 {{- if eq $kind "post" }}

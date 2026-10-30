@@ -406,6 +406,55 @@ coupling.
 
 ---
 
+## D-22 — Performance: self-hosted assets and non-blocking load
+
+| | |
+|---|---|
+| Status | declared (no pixel change) |
+| Affects | the `<head>` of every page |
+| Upstream | fonts and icons from Google Fonts and jsDelivr, a synchronous `theme.min.js`, blocking CSS, and one combined vendor script per page |
+| This port | the vendor files ship with the theme under `static/assets/lib/`, so the browser talks to one origin |
+| Blast radius | a few `<link>` attributes and two `<link rel="preload">` nodes; no visible change |
+
+Measured on a throttled mobile profile, same content, before and after:
+
+| Page | Perf before | Perf after | LCP before | LCP after |
+|---|---|---|---|---|
+| Home | 66 | **97** | 6.3 s | **2.1 s** |
+| Code-heavy post | 66 | **69** | 6.7 s | **6.5 s** |
+| Desktop (both) | 99 | **100** | 0.9 s | **0.6 s** |
+
+What changed:
+
+1. **Self-host.** Fonts (Lato, Source Sans Pro), Font Awesome, tocbot,
+   simple-jekyll-search, dayjs, glightbox, clipboard and the loading polyfill
+   are copied byte-for-byte from `cotes2020/chirpy-static-assets` at a pinned
+   commit (`scripts/vendor.mjs`, hashes in `tests/contract/vendor-hashes.json`).
+   Three origins and their TLS handshakes disappear. `assets.self_host.enabled`
+   is `true` by default; a site can opt back into the CDN.
+2. **Non-blocking CSS.** Font Awesome, glightbox, the loading polyfill and the
+   font stylesheet load with `media="print" onload="this.media='all'"`. Text
+   paints without waiting for icons or lightbox chrome.
+3. **Deferred bootstrap.** `theme.min.js` is `defer` instead of synchronous.
+4. **Preloads.** The image that will be the LCP element, and the body font
+   (Source Sans Pro 400), are preloaded at the end of `<head>`.
+5. **MathJax and Mermaid stay on the CDN**: 23 MB together, and they only load
+   on the pages that ask for them.
+
+Why the DOM gate does not fail: the attributes (`media`, `onload`, `defer`) and
+the two preload nodes are exempted in `tests/parity/ignore.yml` with this id.
+The preloads are appended last, so dropping them does not shift any sibling.
+
+Why the pixel gate is stronger, not weaker: before, it blocked every external
+request, so it compared pages *without* the real fonts. Both builds now
+self-host the same font files, the gate loads them, and it still reports 84/84.
+
+Remaining ceiling: pages with many code blocks and pages that load MathJax are
+CPU/layout bound; that comes from the upstream markup and renderer, and fixing
+it would change the DOM or the pixels.
+
+---
+
 ## D-21 — Mobile performance and accessibility ceiling
 
 | | |
@@ -420,12 +469,13 @@ Lighthouse, desktop profile, is where the port must prove it matches: 99
 performance, 96 best practices, 100 SEO, 0.85 s LCP, against 100/96/100 on the
 Jekyll build. That is the budget enforced by `npm run test:perf`.
 
-On a throttled mobile profile both builds land at 66 performance with LCP
-between 6 and 7 seconds: the blocker is upstream's render-blocking CSS and web
-fonts loaded from CDNs, plus the scripts the theme ships. Self-hosting or
-deferring them would change the asset contract (R1) and can move pixels, so the
-mobile budget is **comparative**: the port may not be more than 5 points slower
-or 1.5 s worse on LCP than the Jekyll build of the same page.
+At the time of measurement both builds landed at 66 performance with LCP
+between 6 and 7 seconds: the blocker was the render-blocking CSS and the web
+fonts loaded from CDNs. D-22 fixed exactly that (self-host + non-blocking load)
+and the home page now measures 97 / 2.1 s. The mobile budget stays
+**comparative** so a future upstream page cannot regress silently: the port may
+not be more than 5 points slower or 1.5 s worse on LCP than the Jekyll build of
+the same page.
 
 Accessibility is 92 on post pages on both sides for the reasons in D-20; the
 absolute desktop budget is therefore 90, not 95.
