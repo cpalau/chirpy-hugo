@@ -57,6 +57,20 @@ home and 46 on the code post: the port is ahead, not behind.
 Pixels are still measured with the real fonts: both builds self-host the same
 files and the gate reports 84/84 (see D-22).
 
+### Deployed site
+
+Lighthouse against <https://cpalau.github.io/chirpy-hugo/> on 2026-10-30, real
+network rather than localhost:
+
+| Page | Performance | FCP | LCP | CLS |
+|---|---|---|---|---|
+| Home | 77 | 3.4 s | 4.5 s | 0 |
+| Writing a New Post | 73 | 3.9 s | 4.9 s | 0 |
+
+The gap with the local gate is the round trip to GitHub Pages, not the theme;
+the gate compares both builds on the same local server so the number is about
+the port, not the hosting.
+
 ## What is still slow
 
 - **Code-heavy posts.** Many Rouge tables are layout work the browser cannot
