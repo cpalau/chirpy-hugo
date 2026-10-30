@@ -13,6 +13,10 @@
  * A browser that cannot launch on the host is reported as skipped. CI installs
  * both with their system dependencies and sets `REQUIRE_BROWSERS=1`, which
  * turns a skip into a failure.
+ *
+ * Third-party hosts (analytics, comments) are answered with an empty 200
+ * instead of an aborted request: WebKit surfaces an abort as an uncaught
+ * `TypeError: Load failed` inside the page, which says nothing about the theme.
  */
 
 import { createServer } from 'node:http';
@@ -85,7 +89,7 @@ for (const [name, type] of ENGINES) {
   } catch (error) {
     skipped += 1;
     const lines = String(error.message).split('\n').map((line) => line.trim()).filter(Boolean);
-    const reason = lines.at(-1) ?? 'launch failed';
+    const reason = lines.find((line) => /missing|dependencies|cannot|lib/i.test(line)) ?? lines.at(-1) ?? 'launch failed';
     if (STRICT) fail(`${name}: cannot launch (${reason})`);
     else console.log(`  skip  ${name}: cannot launch on this host (${reason.trim()})`);
     continue;
@@ -97,7 +101,7 @@ for (const [name, type] of ENGINES) {
     const url = route.request().url();
     if (url.startsWith(`http://127.0.0.1:${PORT}/`)) return route.continue();
     if (ALLOWED.some((host) => url.includes(host))) return route.continue();
-    return route.abort();
+    return route.fulfill({ status: 200, body: '', contentType: 'text/plain' });
   });
   const page = await context.newPage();
   const errors = [];
