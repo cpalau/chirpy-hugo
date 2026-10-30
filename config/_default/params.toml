@@ -72,6 +72,12 @@ google_site_verification = ""
   # Add the post cover to the sitemap with the image extension.
   image_sitemap = false
 
+# Site-owned footer line. `:author` is `social.name` (linked to the first
+# social link), `:year` is the current year. Empty keeps the upstream
+# "© year author. Some rights reserved." line.
+[footer]
+  copyright = ""
+
 [social]
   name = ""
   email = ""

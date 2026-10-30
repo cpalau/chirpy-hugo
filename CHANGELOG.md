@@ -22,6 +22,25 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.5.1] - 2026-10-30
+
+### Added
+
+- **`params.footer.copyright`**: a site-owned footer line. `:author` becomes
+  `params.social.name` (linked to the first social link) and `:year` the current
+  year; empty keeps upstream's "© year author. Some rights reserved." The demo
+  uses "Made with ❤️ by :author".
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [1.5.0] - 2026-10-30
 
 ### Added

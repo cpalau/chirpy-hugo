@@ -59,6 +59,7 @@ Rules:
 | `social.email` | `params.social.email` | string |
 | `social.fediverse_handle` | `params.social.fediverse_handle` | string — emits `fediverse:creator` |
 | `social.links[]` | `params.social.links[]` | list of URLs; the first is the copyright link |
+| — | `params.footer.copyright` | site-owned footer line; `:author` becomes `social.name` (linked to the first social link), `:year` the current year. Empty keeps upstream's "© year author. Some rights reserved." |
 
 ---
 
@@ -66,12 +67,9 @@ Rules:
 
 | Jekyll | Hugo | Notes |
 |---|---|---|
-| `theme.version` (Ruby gem) | `params.theme_version` | used only in the footer tooltip |
+| `theme.version` (Ruby gem) | `params.theme_version` | the upstream Chirpy version this port reproduces; checked against the pin |
+| — | `data/theme.yaml` | this theme's own version, rendered in the footer tooltip and linked to its GitHub release; `scripts/release.mjs --prepare` bumps it with `package.json` |
 | `site.theme` | — | upstream interpolates the gem name into the CSS path; our build emits a fixed path |
-
-Hugo has no notion of "the theme's own version" at render time, so it is an
-explicit parameter. `scripts/check-config.mjs` keeps it in sync with `theme.toml`
-and the module tag.
 
 ---
 

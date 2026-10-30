@@ -261,6 +261,33 @@ function seoConfig() {
   }
 }
 
+/** Footer copy is site-owned: the upstream copyright, or a line with `:author`
+ *  and `:year`. */
+function footerConfig() {
+  const dir = featureSite('footer', '');
+  const config = path.join(dir, 'hugo.toml');
+  fs.writeFileSync(
+    config,
+    fs
+      .readFileSync(config, 'utf8')
+      .replace(
+        '  description = "A site built with chirpy-hugo."',
+        '  description = "A site built with chirpy-hugo."\n\n  [params.footer]\n    copyright = "Made with love by :author"',
+      ),
+  );
+  const out = build('footer: site-owned copyright', dir);
+  if (!out) return;
+  const home = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
+  const checks = [
+    ['custom footer line', /Made with love by (?:<a [^>]*>)?Your Name/],
+    ['no upstream copyright', !home.includes('Some rights reserved')],
+  ];
+  if (checks[0][1].test(home)) console.log('  ok    ' + checks[0][0]);
+  else fail('footer: custom footer line');
+  if (checks[1][1]) console.log('  ok    ' + checks[1][0]);
+  else fail('footer: upstream copyright should be replaced');
+}
+
 /** Build once, then prove every marker is in the output. */
 function expectMarkers(name, source, file, markers) {
   const out = build(name, source);
@@ -379,6 +406,7 @@ if (process.argv.includes('--features-only')) {
   providerMatrix();
   frontMatterMatrix();
   seoConfig();
+  footerConfig();
   console.log(failures ? `\n${failures} feature failure(s)` : '\nfeatures verified');
   process.exit(failures ? 1 : 0);
 }
@@ -386,6 +414,7 @@ if (process.argv.includes('--features-only')) {
 providerMatrix();
 frontMatterMatrix();
 seoConfig();
+footerConfig();
 
 // 5. HugoBasicExample, cloned once.
 if (!fs.existsSync(BASIC)) {

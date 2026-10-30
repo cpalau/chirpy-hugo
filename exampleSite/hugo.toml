@@ -144,6 +144,9 @@ enableGitInfo = false
   # without a cover would fall back to the `summary` twitter card.
   social_preview_image = "/commons/devices-mockup.png"
 
+  [params.footer]
+    copyright = "Made with ❤️ by :author"
+
   [params.social]
     name = "Cristian Palau"
     email = "cp@cristianpalau.com"

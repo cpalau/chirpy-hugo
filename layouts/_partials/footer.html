@@ -8,18 +8,30 @@
 >
   {{- $social := .Site.Params.social }}
   <p>
-    © <time>{{ now.Year }}</time>
-    {{ if $social.links -}}
-      <a href="{{ index $social.links 0 }}">{{ $social.name }}</a>.
-    {{- else -}}
-      <em class="fst-normal">{{ $social.name }}</em>.
-    {{- end }}
-    {{ with T "copyright.brief" -}}
-      <span
-        data-bs-toggle="tooltip"
-        data-bs-placement="top"
-        title="{{ T "copyright.verbose" }}"
-      >{{ . }}</span>
+    {{- with .Site.Params.footer.copyright }}
+      {{- /* Site-owned footer line. `:author` becomes `params.social.name`
+             (linked to the first social link when there is one), `:year` the
+             current year. Empty keeps the upstream copyright. */ -}}
+      {{- $text := replace . ":author" $social.name -}}
+      {{- $text = replace $text ":year" (printf "%d" now.Year) -}}
+      {{- if $social.links -}}
+        {{- $text = replace $text $social.name (printf `<a href="%s">%s</a>` (index $social.links 0) $social.name) -}}
+      {{- end -}}
+      {{- $text | safeHTML }}
+    {{- else }}
+      © <time>{{ now.Year }}</time>
+      {{ if $social.links -}}
+        <a href="{{ index $social.links 0 }}">{{ $social.name }}</a>.
+      {{- else -}}
+        <em class="fst-normal">{{ $social.name }}</em>.
+      {{- end }}
+      {{ with T "copyright.brief" -}}
+        <span
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          title="{{ T "copyright.verbose" }}"
+        >{{ . }}</span>
+      {{- end }}
     {{- end }}
   </p>
 

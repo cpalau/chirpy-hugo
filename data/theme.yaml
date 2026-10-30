@@ -1,5 +1,5 @@
 # Version of THIS theme, shown in the footer and linked to its GitHub release.
 # `scripts/release.mjs --prepare` updates it together with package.json; the
 # Jekyll/Chirpy version this port reproduces lives in `params.theme_version`.
-version: "1.5.0"
+version: "1.5.1"
 upstream: "7.6.0"
