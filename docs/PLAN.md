@@ -420,19 +420,28 @@ runs everything nightly.
 
 ---
 
-### F9 — Tooling, starter and docs (2 d)
+### F9 — Tooling, starter and docs (2 d) — tooling done
 
-- [ ] `sync-upstream.mjs` v2: classification, report, `--check`.
-- [ ] `check-config.mjs`.
-- [ ] `convert-content.mjs`: IAL → shortcodes, `--dry-run`, idempotent.
-- [ ] `starter/` with `params.toml`, example content, Pagefind option.
-- [ ] `exampleSite/` finalized as living documentation.
-- [ ] Gallery assets (`images/screenshot.png`, `images/tn.png`) and
-      `theme.toml` metadata verified.
-- [ ] Consumer README: install as module, as submodule, and locally.
-- [ ] `scripts/release.mjs` (version bump, changelog promotion, consistency checks).
-- [ ] Release notes template and checklist exercised on `v1.0.0`.
-- [ ] Documentation complete and accurate.
+- [x] `sync-upstream.mjs` v2: report by mode (copy / manual / transform /
+      retired), `--apply`, `--check`, and no writes without `--apply`.
+- [x] `check-config.mjs`: every `params.*` a template reads has a default and is
+      documented; the mandatory non-merging settings are declared. It found
+      that `params.toml` nested everything under `params.params.*`, so no theme
+      default was actually applied.
+- [x] `convert-content.mjs`: IAL → shortcodes, `--dry-run`, `--write`,
+      idempotent, and it reports what it cannot convert instead of guessing.
+- [x] `starter/`: config with the mandatory sections, one post, the tab pages
+      and the site-owned data. A Pagefind option is not shipped; the upstream
+      search is the default.
+- [x] `exampleSite/` finalized as living documentation.
+- [x] Gallery assets captured from the demo (`scripts/screenshot.mjs`) and
+      `theme.toml` verified.
+- [x] Consumer README: module, submodule and local installation.
+- [x] `scripts/release.mjs`: `--check`, `--notes`, `--prepare`.
+- [ ] Release notes template and checklist exercised on a real tag. It waits on
+      the two DoD items that are still open: Lighthouse budgets and the
+      cross-browser spot check.
+- [ ] Documentation complete and accurate (final pass).
 - [ ] Tag `v1.0.0`.
 
 **Acceptance**: DoD items 4, 8, 9.

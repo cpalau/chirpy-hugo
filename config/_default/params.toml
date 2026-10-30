@@ -27,13 +27,13 @@ toc = true
 github_username = ""
 twitter_username = ""
 
-[params.social]
+[social]
   name = ""
   email = ""
   fediverse_handle = ""
   links = []
 
-[params.webmaster_verifications]
+[webmaster_verifications]
   google = ""
   bing = ""
   alexa = ""
@@ -41,40 +41,40 @@ twitter_username = ""
   baidu = ""
   facebook = ""
 
-[params.analytics.google]
+[analytics.google]
   id = ""
 
-[params.analytics.goatcounter]
+[analytics.goatcounter]
   id = ""
 
-[params.analytics.umami]
-  id = ""
-  domain = ""
-
-[params.analytics.matomo]
+[analytics.umami]
   id = ""
   domain = ""
 
-[params.analytics.cloudflare]
+[analytics.matomo]
+  id = ""
+  domain = ""
+
+[analytics.cloudflare]
   id = ""
 
-[params.analytics.fathom]
+[analytics.fathom]
   id = ""
 
-[params.pageviews]
+[pageviews]
   provider = ""
 
-[params.comments]
+[comments]
   provider = ""
 
-[params.comments.disqus]
+[comments.disqus]
   shortname = ""
 
-[params.comments.utterances]
+[comments.utterances]
   repo = ""
   issue_term = ""
 
-[params.comments.giscus]
+[comments.giscus]
   repo = ""
   repo_id = ""
   category = ""
@@ -85,18 +85,18 @@ twitter_username = ""
   lang = ""
   reactions_enabled = "1"
 
-[params.edit_post]
+[edit_post]
   enabled = false
   url = ""
   static_url = false
 
-[params.assets.self_host]
+[assets.self_host]
   enabled = false
   env = ""
 
-[params.pwa]
+[pwa]
   enabled = true
 
-[params.pwa.cache]
+[pwa.cache]
   enabled = true
   deny_paths = []

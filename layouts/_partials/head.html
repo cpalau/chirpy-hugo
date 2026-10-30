@@ -78,7 +78,10 @@
   {{- if eq hugo.Environment "production" }}
     {{- if .Site.Params.pwa.enabled }}
   <!-- PWA -->
-  <script defer src="{{ "app.min.js" | relURL }}?baseurl={{ .Site.Params.baseurl | default "" }}&register={{ .Site.Params.pwa.cache.enabled }}"></script>
+  {{- /* `baseurl` is not a parameter: it is the path of the site (empty at the
+         root, `/blog` under a subdirectory), which is what upstream reads from
+         `site.baseurl`. */ -}}
+  <script defer src="{{ "app.min.js" | relURL }}?baseurl={{ relURL "" | strings.TrimSuffix "/" }}&register={{ (.Site.Params.pwa.cache.enabled | default false) }}"></script>
     {{- end }}
 
   <!-- Web Analytics -->

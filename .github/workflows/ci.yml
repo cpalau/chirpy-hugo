@@ -56,6 +56,12 @@ jobs:
       - name: Verify the generated translation catalogue
         run: npm run test:i18n
 
+      - name: Configuration contract
+        run: npm run test:config
+
+      - name: Release consistency
+        run: npm run test:release
+
       - name: Build the demo site (warnings are errors)
         run: |
           hugo -s exampleSite --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \

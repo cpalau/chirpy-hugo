@@ -281,17 +281,19 @@ npm run dev                  # hugo server (demo site)
 npm run build                # hugo --panicOnWarning --gc --minify
 
 # Quality gates (run before every commit)
-npm run lint                 # eslint + stylelint
-npm run test:build           # Gate 1
-npm run test:html            # Gate 2
-npm run test:contract        # Gate 3
-npm run test:parity          # Gate 4 (builds Jekyll oracle)
-npm run test:visual          # Gate 5 (Playwright, Jekyll vs Hugo)
-npm run test:a11y            # Gate 6
-npm run test:i18n            # Gate 7
-npm run test:upstream        # Gate 8 (asset hashes + ports coverage)
-npm run test:adoption        # Gate 9 (fresh site + HugoBasicExample)
-npm run test:all             # everything except :update
+npm run test:build           # Gate 1: file set, required outputs, Liquid residue
+npm run test:html            # Gate 2: html-validate vs Jekyll + links/anchors
+npm run test:contract        # Gate 3: selectors upstream JS needs
+npm run test:parity          # Gate 4: DOM (builds the Jekyll oracle)
+npm run test:outputs         # feed, sitemap, search, swconf, manifest
+npm run test:visual          # Gate 5: pixels (Playwright, Jekyll vs Hugo)
+npm run test:interactive     # Gate 5b: toc, search, theme toggle, copy
+npm run test:a11y            # Gate 6: axe vs Jekyll
+npm run test:i18n            # Gate 7: 33 locales, same key tree
+npm run test:upstream        # Gate 8: asset hashes + ports coverage
+npm run test:adoption        # Gate 9: fresh site, subdir, HugoBasicExample
+npm run test:config          # params defaults and mandatory settings
+npm run test:release         # changelog/version/pin consistency
 
 # Updating golden files (only with a reviewed justification)
 npm run test:visual:update
@@ -300,11 +302,15 @@ npm run test:visual:update
 node scripts/fetch-upstream.mjs --fetch       # download tag + gem into .out/upstream/
 node scripts/fetch-upstream.mjs --check       # pin, coverage and hashes
 node scripts/extract-params.mjs --check        # every site.* root is documented
-node scripts/sync-upstream.mjs --check
+node scripts/sync-upstream.mjs                 # report: copy / manual / transform
 node scripts/sync-upstream.mjs --apply
-node scripts/i18n.mjs
+node scripts/sync-upstream.mjs --check
+node scripts/i18n.mjs --check
 node scripts/check-config.mjs
 node scripts/convert-content.mjs --dry-run <path>
+node scripts/convert-content.mjs --write <path>
+node scripts/release.mjs --check
+node scripts/release.mjs --notes <version>
 
 # Jekyll oracle (the HTML reference)
 bash tests/oracle/build.sh                     # → .out/oracle

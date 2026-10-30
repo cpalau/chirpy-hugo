@@ -25,9 +25,10 @@ hugo server --themesDir ../.. --theme chirpy-hugo
 - the archive page, grouped by year;
 - a post with code, math and a diagram.
 
-> **Tip**: the theme ships the upstream stylesheet and JavaScript unchanged, so
-> everything behaves like the Jekyll original.
-{: .prompt-tip }
+{{< prompt tip >}}
+**Tip**: the theme ships the upstream stylesheet and JavaScript unchanged, so
+everything behaves like the Jekyll original.
+{{< /prompt >}}
 
 ## A table
 

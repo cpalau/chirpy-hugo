@@ -86,10 +86,12 @@ Compare the newest tag with the `tag` recorded in `ports.yml`.
 ### 4.2 Inspect
 
 ```bash
-node scripts/sync-upstream.mjs --check --tag v7.7.0
+node scripts/sync-upstream.mjs
 ```
 
-Produces `reports/upstream-v7.7.0.md`:
+Prints the classification (copy / manual / transform / retired) and, in report
+mode, the files that would change. Nothing is written. After bumping the pin,
+the same report is the checklist for the release:
 
 ```markdown
 # Upstream v7.7.0 — 2026-09-01
@@ -240,7 +242,8 @@ Estimated annual cost: **8–16 hours**.
 
 1. `git revert` the sync commit (never `reset --hard` on shared branches).
 2. Restore the previous `tag`/`sha` in `ports.yml`.
-3. Run `node scripts/sync-upstream.mjs --apply --force` to restore copied files.
+3. Run `node scripts/sync-upstream.mjs --apply` to restore the copied files
+   (it overwrites, so a revert is enough).
 4. Re-run the gates.
 
 Snapshots are versioned, so a bad visual change is visible in the revert diff.
