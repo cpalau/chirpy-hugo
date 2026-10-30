@@ -236,6 +236,35 @@ For every Hugo page:
 - JSON-LD that parses, uses `https://schema.org`, a known `@type`, an absolute
   `url`, and never has `dateModified` before `datePublished`.
 
+### 6.7 Gate 4b — standards
+
+The same script validates the output against the specifications, not just
+against Jekyll:
+
+- **Open Graph** (`ogp.me`): `og:title`, `og:type`, absolute `og:image` and
+  `og:url`, `og:url` equal to the canonical, a valid `og:locale`; `article:*`
+  dates in ISO 8601 with an offset and in order.
+- **Twitter cards**: a valid card type, `twitter:title`, an image for
+  `summary_large_image` (in either `name` or `property`, which is how upstream
+  emits the fallback), and well-formed `@handle`s.
+- **JSON-LD**: a known `@type`, its required properties, no unknown properties,
+  absolute `url`/`image`/`mainEntityOfPage`, ISO dates, an author of a valid
+  type with a name, a `publisher` whose logo is an absolute `ImageObject`, and a
+  `headline` within 110 characters.
+
+It runs over the fixtures (in the comparison mode) and over the deployed demo:
+
+```bash
+npm run test:seo                                  # fixtures vs oracle + standards
+npm run test:seo:demo                             # build the demo and validate it
+node tests/seo/check.mjs --standards .out/example-deploy
+```
+
+The gate must stay warning-free. The fixtures give the site-wide author both a
+name and a handle; a site whose fallback author is only a display name would
+emit an invalid `twitter:creator` (upstream falls back to the name), which the
+gate reports as a warning and the owner fixes in `data/authors.yaml`.
+
 Finally it asserts the SEO fixture knobs explicitly: `title_category`,
 `locale: es-ES` → `es_ES`, image dimensions, page-level `twitter.card`,
 `@orgauthor`, `canonical_url`, 8-word description, `CreativeWork`, `name`,

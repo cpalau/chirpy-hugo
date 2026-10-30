@@ -30,7 +30,9 @@ twitter:
 
 # jekyll-seo-tag publisher logo and the site-wide author fallback.
 logo: "/assets/img/fixtures/cover.png"
-author: "Chirpy Authors"
+author:
+  name: "Chirpy Authors"
+  twitter: chirpyauthors
 facebook:
   admins: "1234567890"
   publisher: "https://www.facebook.com/example"

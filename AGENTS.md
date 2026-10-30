@@ -469,7 +469,7 @@ A release that only touches `copy` files should take minutes.
 | 2 | `test:html` | Valid HTML, unique ids, working links and anchors |
 | 3 | `test:contract` | Our DOM still satisfies upstream JavaScript selectors |
 | 4 | `test:parity` | Our HTML equals Jekyll's, after canonicalization |
-| 4b | `test:seo` | Every SEO tag equals Jekyll's, field by field, and passes the SEO invariants |
+| 4b | `test:seo` | Every SEO tag equals Jekyll's, field by field, and passes the SEO invariants plus the Open Graph, Twitter and JSON-LD standards |
 | 5 | `test:visual` | Our pixels equal Jekyll's (Playwright + pixelmatch) |
 | 6 | `test:a11y` | No serious/critical axe violations; Lighthouse budgets |
 | 7 | `test:i18n` | 33 locales, identical key sets, no empty values |

@@ -102,6 +102,9 @@ jobs:
           hugo -s exampleSite --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
             --panicOnWarning --gc --minify -d "$RUNNER_TEMP/example"
 
+      - name: SEO standards on the demo
+        run: node tests/seo/check.mjs --standards "$RUNNER_TEMP/example"
+
       - name: Build the empty site (adoption smoke test)
         run: |
           mkdir -p "$RUNNER_TEMP/empty/content"

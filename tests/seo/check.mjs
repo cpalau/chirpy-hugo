@@ -46,6 +46,10 @@ const fail = (message) => {
 const ok = () => {
   checks += 1;
 };
+const warnings = new Map();
+const warn = (message) => {
+  warnings.set(message, (warnings.get(message) ?? 0) + 1);
+};
 
 const walk = (dir, root = dir, acc = []) => {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -203,6 +207,107 @@ function invariants(rel, page, site) {
   }
 }
 
+/* --------------------------------------------------------------------------
+ * Standards
+ *
+ * Equality proves the port reproduces Jekyll; it does not prove the result is
+ * valid. These rules come from the Open Graph protocol, the Twitter card
+ * documentation and Google's structured-data guidance.
+ * ------------------------------------------------------------------------ */
+
+const OG_TYPES = new Set(['article', 'website', 'profile', 'book', 'music.album', 'video.movie']);
+const TWITTER_CARDS = new Set(['summary', 'summary_large_image', 'app', 'player']);
+const HANDLE = /^@[A-Za-z0-9_]{1,15}$/;
+const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$/;
+const LD_TYPES = {
+  WebSite: ['name', 'url'],
+  WebPage: ['url'],
+  BlogPosting: ['headline', 'datePublished', 'author', 'url'],
+  CreativeWork: ['headline', 'datePublished', 'author', 'url'],
+};
+const LD_PROPERTIES = new Set([
+  '@context', '@type', 'author', 'dateModified', 'datePublished', 'description',
+  'headline', 'image', 'mainEntityOfPage', 'name', 'publisher', 'sameAs', 'url',
+]);
+
+function standards(rel, page) {
+  const where = rel === '' ? '/' : `/${rel}/`;
+  const require = (condition, message) => {
+    if (condition) ok();
+    else fail(`${where} ${message}`);
+  };
+  const meta = (key) => page.metas.get(key) ?? '';
+  const canonical = page.links.get('canonical') ?? '';
+
+  // Open Graph: ogp.me requires title, type, image and url.
+  require(meta('property:og:title').length > 0, 'OG: missing og:title');
+  require(OG_TYPES.has(meta('property:og:type')), `OG: invalid og:type (${meta('property:og:type')})`);
+  require(/^https?:\/\//.test(meta('property:og:url')), 'OG: og:url is not absolute');
+  require(meta('property:og:url') === canonical, 'OG: og:url differs from the canonical');
+  require(/^https?:\/\//.test(meta('property:og:image')), 'OG: missing or relative og:image');
+  require(/^[a-z]{2,3}(_[A-Z]{2})?$/.test(meta('property:og:locale')), `OG: invalid og:locale (${meta('property:og:locale')})`);
+
+  // Article metadata, when the page has a date.
+  if (meta('property:og:type') === 'article') {
+    const published = meta('property:article:published_time');
+    const modified = meta('property:article:modified_time');
+    require(ISO.test(published), `Article: invalid published_time (${published})`);
+    require(ISO.test(modified), `Article: invalid modified_time (${modified})`);
+    require(!published || !modified || modified >= published, 'Article: modified_time is before published_time');
+  }
+
+  // Twitter cards: the card type decides which fields are required.
+  const card = meta('name:twitter:card');
+  require(TWITTER_CARDS.has(card), `Twitter: invalid card (${card})`);
+  require(meta('name:twitter:title').length > 0, 'Twitter: missing twitter:title');
+  /* Chirpy emits the fallback image as `property="twitter:image"`, the rest as
+     `name="twitter:image"`; both are the same tag for a consumer. */
+  const twitterImage = meta('name:twitter:image') || meta('property:twitter:image');
+  if (card === 'summary_large_image') {
+    require(/^https?:\/\//.test(twitterImage), 'Twitter: summary_large_image without an image');
+  }
+  const site = meta('name:twitter:site');
+  if (site) require(HANDLE.test(site), `Twitter: invalid site handle (${site})`);
+  /* `jekyll-seo-tag` falls back to the author *name* for the creator, so a
+     display name produces an invalid handle. It is upstream behaviour, so it is
+     reported as a warning: the owner has to set a twitter handle per author. */
+  const creator = meta('name:twitter:creator');
+  if (creator && !HANDLE.test(creator)) warn(`twitter:creator "${creator}" is not a handle (the SEO tag falls back to the author name)`);
+
+  // JSON-LD, per type.
+  if (page.ld) {
+    const ld = page.ld;
+    const required = LD_TYPES[ld['@type']] ?? [];
+    for (const property of required) {
+      require(ld[property] !== undefined && ld[property] !== '', `JSON-LD: ${ld['@type']} needs ${property}`);
+    }
+    for (const property of Object.keys(ld)) {
+      if (!LD_PROPERTIES.has(property)) fail(`${where} JSON-LD: unknown property ${property}`);
+      else ok();
+    }
+    require(/^https?:\/\//.test(ld.url ?? ''), 'JSON-LD: url is not absolute');
+    if (ld.datePublished) require(ISO.test(ld.datePublished), `JSON-LD: invalid datePublished (${ld.datePublished})`);
+    if (ld.dateModified) require(ISO.test(ld.dateModified), `JSON-LD: invalid dateModified (${ld.dateModified})`);
+    if (ld.author) {
+      require(['Person', 'Organization'].includes(ld.author['@type']), 'JSON-LD: author must be Person or Organization');
+      require((ld.author.name ?? '').length > 0, 'JSON-LD: author needs a name');
+      if (ld.author.url) require(/^https?:\/\//.test(ld.author.url), 'JSON-LD: author.url is not absolute');
+    }
+    if (ld.publisher) {
+      require(ld.publisher['@type'] === 'Organization', 'JSON-LD: publisher must be an Organization');
+      const logo = ld.publisher.logo;
+      require(logo?.['@type'] === 'ImageObject' && /^https?:\/\//.test(logo?.url ?? ''), 'JSON-LD: publisher needs an absolute logo');
+    }
+    if (typeof ld.image === 'string') require(/^https?:\/\//.test(ld.image), 'JSON-LD: image is not absolute');
+    if (ld.image && typeof ld.image === 'object') {
+      require(ld.image['@type'] === 'imageObject', 'JSON-LD: image must be an imageObject');
+      require(/^https?:\/\//.test(ld.image.url ?? ''), 'JSON-LD: image.url is not absolute');
+    }
+    if (ld.mainEntityOfPage) require(/^https?:\/\//.test(ld.mainEntityOfPage['@id'] ?? ''), 'JSON-LD: mainEntityOfPage needs an absolute @id');
+    require((ld.headline ?? '').length <= 110, `JSON-LD: headline is longer than 110 characters (${(ld.headline ?? '').length})`);
+  }
+}
+
 /** Intent of the SEO fixtures, written down. */
 function knobs(hugo) {
   const expect = (rel, label, actual, wanted) => {
@@ -237,6 +342,19 @@ function knobs(hugo) {
   expect('/posts/seo-images/', 'string image in JSON-LD', typeof images?.ld?.image, 'string');
 }
 
+/* `--standards [dir]` validates a build without an oracle (the deployed demo). */
+const standardsOnly = process.argv.includes('--standards');
+if (standardsOnly) {
+  const dirArg = process.argv[process.argv.indexOf('--standards') + 1];
+  const dir = path.resolve(ROOT, dirArg && !dirArg.startsWith('-') ? dirArg : '.out/example-deploy');
+  const pages = new Map(walk(dir).map((rel) => [rel, parseHead(path.join(dir, rel, 'index.html'))]));
+  const params = path.join(ROOT, 'exampleSite/hugo.toml');
+  const twitter = /twitter_username\s*=\s*"[^"]+"/.test(fs.readFileSync(params, 'utf8'));
+  for (const [rel, page] of pages) standards(rel, page);
+  console.log(`\n${checks} SEO standard checks over ${pages.size} pages, ${failures} failure(s)`);
+  process.exit(failures ? 1 : 0);
+}
+
 if (!fs.existsSync(HUGO)) {
   console.error(`missing Hugo build: ${path.relative(ROOT, HUGO)}`);
   process.exit(2);
@@ -267,9 +385,11 @@ for (const [rel, hugoPage] of canonicalHugo) {
   const oraclePage = canonicalOracle.get(rel);
   if (oraclePage) comparePage(rel, hugoPage, oraclePage);
   invariants(rel, hugoPage, site);
+  standards(rel, hugoPage);
 }
 knobs(hugoPages);
 
-const pages = hugoPages.size * 2 + 16;
-console.log(`\n${checks} SEO checks over ${hugoPages.size} pages, ${failures} failure(s)`);
+const pages = hugoPages.size;
+for (const [message, count] of warnings) console.log(`  WARN  ${message} (${count} page(s))`);
+console.log(`\n${checks} SEO checks over ${pages} pages, ${failures} failure(s), ${warnings.size} warning kind(s)`);
 process.exit(failures ? 1 : 0);

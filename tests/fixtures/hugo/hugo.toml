@@ -126,7 +126,7 @@ enableGitInfo = false
 
   # jekyll-seo-tag publisher logo and the site-wide author fallback.
   logo = "/assets/img/fixtures/cover.png"
-  author = "Chirpy Authors"
+  author = { name = "Chirpy Authors", twitter = "chirpyauthors" }
 
   social_preview_image = "/assets/img/social-preview.png"
 

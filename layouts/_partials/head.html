@@ -5,9 +5,13 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e">
+  {{- /* The exact upstream value. `&#32;` instead of a literal space keeps the
+         directives separate through the HTML minifier, which collapses spaces
+         inside attribute values and used to produce `user-scalable=noinitial-
+         scale=1` (an invalid viewport). Browsers decode the entities. */}}
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
+    content="width=device-width,&#32;user-scalable=no&#32;initial-scale=1,&#32;shrink-to-fit=no,&#32;viewport-fit=cover"
   >
 
   <!-- Setup Open Graph image -->

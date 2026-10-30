@@ -22,6 +22,34 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.2.2] - 2026-10-30
+
+### Added
+
+- **SEO standards validation.** Gate 4b now checks the output against the
+  specifications, not only against Jekyll: Open Graph required properties and
+  `article:*` dates, Twitter card types, images and `@handle` format, and the
+  JSON-LD type, required properties, property allowlist, dates, author,
+  publisher logo, absolute URLs and headline length. It also runs on the
+  deployed demo (`npm run test:seo:demo`), where the fixtures do not reach.
+
+### Changed
+
+- **D-24 is closed: the viewport meta is byte-identical to Jekyll.** The
+  upstream value is emitted with `&#32;` for the spaces, which survives the HTML
+  minifier that used to merge `user-scalable=no initial-scale=1` into an invalid
+  value. Gate 4 now compares the attribute with no exemption. Blocking
+  pinch-zoom is upstream's behaviour and is covered by the inherited
+  accessibility debt in D-20.
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [1.2.1] - 2026-10-30
 
 ### Added

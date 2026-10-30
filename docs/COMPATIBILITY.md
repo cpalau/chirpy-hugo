@@ -457,28 +457,27 @@ itself.
 
 ---
 
-## D-24 — Viewport meta uses commas between directives
+## D-24 — Viewport meta *(closed)*
 
 | | |
 |---|---|
-| Status | declared (identical semantics) |
+| Status | closed |
 | Affects | the `<meta name="viewport">` of every page |
-| Upstream | `width=device-width, user-scalable=no initial-scale=1, ...` |
-| This port | `width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover` |
-| Blast radius | none visually; it fixes a mobile rescale |
+| Upstream | `width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover` |
+| This port | the same value; `&#32;` is used for the spaces so the minifier cannot merge the directives |
+| Blast radius | none: Gate 4 compares the attribute with no exemption |
 
-Hugo's `--minify` removes spaces inside attribute values. It turned
-`user-scalable=no initial-scale=1` into `user-scalable=noinitial-scale=1`, an
-invalid viewport: the browser dropped `initial-scale` and rescaled the whole
-page when the fixed sidebar (260 px) opened. The development build keeps the
-space, which is why the pixel and interaction gates did not see it; the
-deployment-shape check now parses the minified value and fails if the
-directives are merged.
+The HTML minifier collapses whitespace inside attribute values, so the upstream
+string became `user-scalable=noinitial-scale=1`: the browser dropped
+`initial-scale` and a phone rescaled the page when the off-canvas sidebar
+opened. Emitting `&#32;` instead of a literal space keeps the directives
+separate through minification and decodes back to the upstream value in the
+DOM. Gate 4 compares it without an exemption, and the deployment gate still
+rejects a merged value.
 
-Commas are equivalent in the viewport grammar. The port also drops
-`user-scalable=no`: blocking pinch-zoom is an accessibility violation that
-Lighthouse flags (`meta-viewport`), and it costs nothing visually. Gate 4 ignores
-this one attribute value; every other head attribute is still compared.
+Blocking pinch-zoom is an accessibility defect (Lighthouse `meta-viewport`,
+upstream has the same one). It is declared in D-20 with the rest of the
+inherited debt; parity wins here because the value is part of the document.
 
 ---
 

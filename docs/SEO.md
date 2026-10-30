@@ -17,7 +17,9 @@ Nothing here is "inspired by": every branch below is taken from the gem's
 | `npm run test:parity` (G4) | the whole `<head>` of 51 pages is identical to a real Jekyll build |
 | `npm run test:seo` (G4b) | every meta/link/JSON-LD field matches, with field-level messages, plus invariants that equality cannot catch |
 | `npm run test:features` (G9b) | site-level settings that are not in the corpus: legacy verification, site-wide card, author fallback, publisher logo |
+| `npm run test:seo:demo` | the deployed demo passes the same standards checks (17 pages) |
 | `npm run test:html` (G2) | the emitted metadata is valid HTML |
+| standards (part of G4b) | Open Graph, Twitter card and JSON-LD requirements, independent of Jekyll |
 
 The SEO fixtures are four hidden posts (`seo-knobs`, `seo-excerpt`,
 `seo-images` and the site-wide cases in Gate 9b). They are hidden so they do not
@@ -93,7 +95,10 @@ adds one.
 | `page.authors` (array) | same front matter, first entry |
 
 `type` is used by the JSON-LD (`Person` by default, `Organization` accepted; any
-other value suppresses the JSON-LD author, like the gem).
+other value suppresses the JSON-LD author, like the gem). Give the fallback
+author a `twitter` handle: the gem falls back to the *name* for
+`twitter:creator`, and a display name is not a valid handle. The SEO gate
+reports that case as a warning.
 
 ## 6. Dates and article metadata
 
@@ -165,7 +170,6 @@ off the URL, so its type is `WebPage` and it has no `name`/`sameAs`/`WebSite`.
 |---|---|
 | D-06 | `generator` says Hugo, not Jekyll |
 | D-14 | paginated URLs are `/page/N/` instead of `/pageN/` |
-| D-24 | the viewport meta is comma-separated and allows zoom |
 | D-26 | an image map with no `path` (only `facebook`/`twitter`): Jekyll's post header interpolates the hash and emits invalid markup; this port resolves the same path the SEO tag uses |
 | — | JSON object key order is not preserved by Hugo's maps; both gates compare JSON-LD as parsed data, which is what the key order means |
 
