@@ -407,12 +407,12 @@ runs everything nightly.
 
 ---
 
-### F8 — Convergence to zero diff (3 d) — parity reached
+### F8 — Convergence to zero diff (3 d) — done
 
 - [x] Iterate Gates 4 and 5 until zero diffs on all 12 fixtures.
 - [x] Fix or formally declare every remaining difference.
-- [ ] Finalize `COMPATIBILITY.md` (D-15 and D-16 closed; the `D-XX` template at
-      the end of the file is still a template).
+- [x] Finalize `COMPATIBILITY.md`: D-15 and D-16 closed, D-19–D-21 added, and
+      the `D-XX` template kept for future entries.
 - [x] Performance budget check (`npm run test:perf`): desktop absolute,
       mobile comparative. D-21 records the inherited mobile ceiling.
 - [x] Cross-browser spot check (Firefox, WebKit):
