@@ -8,7 +8,7 @@
 | Starter | `github.com/cpalau/chirpy-hugo-starter` |
 | License | MIT (original copyright preserved) |
 | Total estimate | ~30 working days |
-| Status | F0–F10 complete; v1.2.0 released |
+| Status | F0–F11 complete; v1.3.0 released |
 
 Related documents:
 
@@ -470,6 +470,19 @@ runs everything nightly.
 - [x] Fixture 13 (`seo-knobs`, `seo-excerpt`, `seo-images`) and the
       site-level cases in the adoption matrix.
 - [x] `docs/SEO.md` and `FEATURES` §9 rewritten from the gem source.
+
+---
+
+### F11 — SEO beyond upstream (1 d) — done
+
+- [x] `hreflang` + `x-default` and `dir="rtl"`, silent on monolingual LTR sites.
+- [x] `noindex` for hidden posts and per-page opt-out.
+- [x] Opt-in feed discovery, breadcrumbs, description character cap, JSON-LD
+      image fallback, article metadata, image metadata and sitemap limit guard.
+- [x] Gate 4c (`test:seo:ext`) with a multilingual RTL fixture, plus standards
+      validation of the result.
+- [x] Documented as additions in `SEO.md`, `CONFIG.md`, `FEATURES.md` and the
+      README.
 
 ---
 

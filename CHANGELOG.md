@@ -22,6 +22,46 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.3.0] - 2026-10-30
+
+### Added
+
+- **SEO additions that upstream does not have**, all off by default so the
+  rendered HTML stays byte-identical until a site opts in:
+  - `hreflang` alternates and `x-default` for translated pages, and `dir="rtl"`
+    from the language direction — silent on monolingual LTR sites;
+  - `noindex` for posts marked `hidden: true` (`params.seo.noindex_hidden`) and
+    per-page `noindex: true`;
+  - feed autodiscovery (`params.seo.feed_discovery`);
+  - `BreadcrumbList` structured data (`params.seo.breadcrumbs`);
+  - a character cap for the meta description
+    (`params.seo.description_max_chars`);
+  - a JSON-LD image fallback to the social preview
+    (`params.seo.image_fallback`);
+  - `article:section`, `article:tag` and `article:author`
+    (`params.seo.article_meta`);
+  - `og:image:type` and width/height from the image asset
+    (`params.seo.image_metadata`);
+  - a warning when the sitemap passes the 50,000-URL protocol limit
+    (`params.seo.sitemap_limit`).
+- **Gate 4c (`npm run test:seo:ext`)**: a multilingual fixture (English,
+  Spanish, Arabic RTL) with every switch on, asserting each feature and running
+  the standards gate over the build.
+
+### Changed
+
+- `docs/SEO.md` documents the additions as "Beyond upstream", `CONFIG.md` lists
+  the switches, `FEATURES.md` has a new section for them, and the README
+  summarises them.
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [1.2.2] - 2026-10-30
 
 ### Added

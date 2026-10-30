@@ -4,7 +4,7 @@
 {{- $lang := or .Params.lang .Site.Params.alt_lang .Site.Language.Lang -}}
 {{- partialCached "check-config.html" . -}}
 <!-- `alt_lang` can specify a language different from the UI -->
-<html lang="{{ $lang }}"{{ if in (slice "light" "dark") $mode }} data-bs-theme="{{ $mode }}"{{ end }}>
+<html lang="{{ $lang }}"{{ with .Site.Language.Direction }} dir="{{ . }}"{{ end }}{{ if in (slice "light" "dark") $mode }} data-bs-theme="{{ $mode }}"{{ end }}>
   {{ partial "head.html" . }}
   <body>
     {{ partial "sidebar.html" . }}

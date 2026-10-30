@@ -1,8 +1,8 @@
 {
   "name": "chirpy-hugo",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "private": true,
-  "description": "Hugo port of jekyll-theme-chirpy \u2014 verification harness",
+  "description": "Hugo port of jekyll-theme-chirpy — verification harness",
   "type": "module",
   "scripts": {
     "build": "hugo --panicOnWarning --gc --minify",
@@ -25,7 +25,7 @@
     "test:config": "node scripts/check-config.mjs",
     "test:contract": "node tests/contract/selectors.mjs",
     "test:deploy": "node tests/adoption/check.mjs --deploy-only",
-    "test:fast": "npm run -s test:build && npm run -s test:deploy && npm run -s test:ui && npm run -s test:html && npm run -s test:outputs && npm run -s test:seo:demo",
+    "test:fast": "npm run -s test:build && npm run -s test:deploy && npm run -s test:ui && npm run -s test:html && npm run -s test:outputs && npm run -s test:seo:demo && npm run -s test:seo:ext",
     "test:features": "node tests/adoption/check.mjs --features-only",
     "test:html": "node tests/html/check.mjs",
     "test:i18n": "node scripts/i18n.mjs --check",
@@ -37,6 +37,7 @@
     "test:release": "node scripts/release.mjs --check",
     "test:seo": "node tests/seo/check.mjs",
     "test:seo:demo": "hugo -s exampleSite --themesDir ../.. --theme chirpy-hugo --baseURL https://example.com/chirpy-hugo/ --minify --panicOnWarning -d .out/example-deploy && node tests/seo/check.mjs --standards .out/example-deploy",
+    "test:seo:ext": "node tests/seo/extensions.mjs",
     "test:ui": "node tests/ui/check.mjs",
     "test:ui:fast": "node tests/ui/check.mjs --fast",
     "test:upstream": "node scripts/fetch-upstream.mjs --check && node scripts/extract-params.mjs --check",

@@ -175,3 +175,31 @@ off the URL, so its type is `WebPage` and it has no `name`/`sameAs`/`WebSite`.
 
 Nothing else is left out: `_partials/seo.html` covers every field and branch of
 the gem's template, and the tables above name the gate for each one.
+
+## 11. Beyond upstream
+
+These are additions: the Jekyll theme does not have them. **All are off by
+default**, so a site that does not opt in renders exactly the upstream HTML and
+the parity gates stay green.
+
+| Feature | Default | Why | Test |
+|---|---|---|---|
+| `hreflang` + `x-default` | automatic | a translated page must name its siblings; Google otherwise picks one | G4c |
+| `dir="rtl"` | automatic | Hugo exposes the language direction; without it RTL text is indexed and laid out wrong | G4c |
+| `params.seo.noindex_hidden` | `false` | `hidden: true` removes a post from the listings but search engines still index it | G4c |
+| `noindex: true` (front matter) | honoured | per-page opt-out | G4c |
+| `params.seo.feed_discovery` | `false` | `<link rel="alternate" type="application/atom+xml">` for readers and crawlers | G4c |
+| `params.seo.breadcrumbs` | `false` | `BreadcrumbList` rich result from the page hierarchy | G4c |
+| `params.seo.description_max_chars` | `0` | the gem cuts at 100 words (~600 characters); Google shows ~160 | G4c |
+| `params.seo.image_fallback` | `false` | Google asks for `image` in Article data; a post without a cover gets the social preview | G4c |
+| `params.seo.article_meta` | `false` | `article:section`, `article:tag`, `article:author` | G4c |
+| `params.seo.image_metadata` | `false` | `og:image:type`, plus width/height from the asset when Hugo can resolve it | G4c |
+| `params.seo.sitemap_limit` | `50000` | a sitemap above the protocol limit is invalid; the build warns with the count | G4c |
+
+`hreflang` and `dir` need no switch because they only render when the site has
+translations or a language direction; a monolingual LTR site is unaffected.
+
+Gate 4c (`npm run test:seo:ext`) builds a multilingual fixture (English,
+Spanish, Arabic RTL) with every switch on and asserts each feature, then runs
+the standards gate over the result. `npm run test:seo:demo` applies the same
+standards to the built demo.

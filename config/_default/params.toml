@@ -43,6 +43,28 @@ google_site_verification = ""
   publisher = ""
   app_id = ""
 
+# Beyond-upstream SEO. Everything here is off by default so the rendered HTML
+# stays byte-identical to the Jekyll original; enable a key to opt in.
+[seo]
+  # Add `noindex` to posts marked `hidden: true` (upstream only hides them from
+  # the listings, search engines still index them).
+  noindex_hidden = false
+  # <link rel="alternate" type="application/atom+xml"> in the head.
+  feed_discovery = false
+  # BreadcrumbList structured data built from the page hierarchy.
+  breadcrumbs = false
+  # Hard cap for the meta description in characters (0 = upstream: 100 words).
+  description_max_chars = 0
+  # Use `social_preview_image` as the JSON-LD image when a page has none.
+  image_fallback = false
+  # article:section, article:tag and article:author.
+  article_meta = false
+  # og:image:type, and width/height read from the image asset when available.
+  image_metadata = false
+  # Warn when the sitemap grows past this many URLs (50,000 is the protocol
+  # limit). The warning tells the owner which configuration splits it.
+  sitemap_limit = 50000
+
 [social]
   name = ""
   email = ""

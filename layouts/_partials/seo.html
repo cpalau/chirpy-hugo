@@ -95,8 +95,34 @@
 {{- with $site.Params.logo -}}
   {{- if strings.Contains . "://" }}{{ $logo = . }}{{ else }}{{ $logo = . | absURL }}{{ end -}}
 {{- end -}}
+{{- /* Beyond upstream (opt-in): noindex for hidden posts and per-page opt-in. */ -}}
+{{- $noindex := eq (printf "%v" .Params.noindex) "true" -}}
+{{- if not $noindex -}}
+  {{- $hidden := eq (printf "%v" .Params.hidden) "true" -}}
+  {{- $noindex = and $site.Params.seo.noindex_hidden $hidden -}}
+{{- end -}}
+{{- /* Beyond upstream (opt-in): image metadata, read from the asset when Hugo
+       can resolve it, otherwise from the extension. */ -}}
+{{- $ogWidth := $image.meta.width -}}
+{{- $ogHeight := $image.meta.height -}}
+{{- $ogType := "" -}}
+{{- if $site.Params.seo.image_metadata -}}
+  {{- $raw := printf "%v" ($image.meta.path | default ($image.meta.facebook | default ($image.meta.twitter | default ""))) -}}
+  {{- with resources.Get (strings.TrimPrefix "/" $raw) -}}
+    {{- $ogType = .MediaType.Type -}}
+    {{- if not $ogWidth }}{{ $ogWidth = .Width }}{{ end -}}
+    {{- if not $ogHeight }}{{ $ogHeight = .Height }}{{ end -}}
+  {{- end -}}
+  {{- if not $ogType -}}
+    {{- $ext := lower (path.Ext $raw) -}}
+    {{- $ogType = index (dict ".png" "image/png" ".jpg" "image/jpeg" ".jpeg" "image/jpeg" ".webp" "image/webp" ".gif" "image/gif" ".svg" "image/svg+xml" ".avif" "image/avif") $ext -}}
+  {{- end -}}
+{{- end -}}
 <!-- Begin Jekyll SEO tag v2.9.1 -->
 <meta name="generator" content="{{ printf "Hugo %s" hugo.Version }}" />
+{{- if $noindex }}
+<meta name="robots" content="noindex, follow" />
+{{- end }}
 <meta property="og:title" content="{{ $title }}" />
 {{- with $author.name }}
 <meta name="author" content="{{ . }}" />
@@ -111,11 +137,14 @@
 <meta property="og:site_name" content="{{ $site.Title }}" />
 {{- with $image.path }}
 <meta property="og:image" content="{{ . }}" />
-  {{- with $image.meta.height }}
+  {{- with $ogHeight }}
 <meta property="og:image:height" content="{{ . }}" />
   {{- end }}
-  {{- with $image.meta.width }}
+  {{- with $ogWidth }}
 <meta property="og:image:width" content="{{ . }}" />
+  {{- end }}
+  {{- with $ogType }}
+<meta property="og:image:type" content="{{ . }}" />
   {{- end }}
   {{- with $image.meta.alt }}
 <meta property="og:image:alt" content="{{ . }}" />
@@ -125,6 +154,19 @@
 {{- if $hasDate }}
 <meta property="article:published_time" content="{{ $published.Format $iso }}" />
 <meta property="article:modified_time" content="{{ $modified.Format $iso }}" />
+  {{- if $site.Params.seo.article_meta }}
+    {{- $cats := .Params.categories -}}
+    {{- if not (reflect.IsSlice $cats) }}{{ $cats = slice $cats }}{{ end -}}
+    {{- range first 1 $cats }}
+<meta property="article:section" content="{{ . }}" />
+    {{- end }}
+    {{- range .Params.tags }}
+<meta property="article:tag" content="{{ . }}" />
+    {{- end }}
+    {{- with $author.url }}
+<meta property="article:author" content="{{ . }}" />
+    {{- end }}
+  {{- end }}
 {{- end }}
 {{- if eq $kind "home" }}
   {{- with (.Paginate (partial "posts-visible.html" $)).Next }}
@@ -216,8 +258,14 @@
 {{- end -}}
 {{- with $desc }}{{ $ld = $ld | append (printf `"description":%s` (partial "jsonify.html" .)) }}{{ end -}}
 {{- $ld = $ld | append (printf `"headline":%s` (partial "jsonify.html" $title)) -}}
-{{- with $image.path -}}
-  {{- if eq (len $image.meta) 1 -}}
+{{- $ldImage := $image.path -}}
+{{- if and (not $ldImage) $site.Params.seo.image_fallback -}}
+  {{- with $site.Params.social_preview_image -}}
+    {{- $ldImage = partial "media-url.html" (dict "src" . "absolute" true) -}}
+  {{- end -}}
+{{- end -}}
+{{- with $ldImage -}}
+  {{- if or (eq $image.path "") (eq (len $image.meta) 1) -}}
     {{- $ld = $ld | append (printf `"image":%s` (partial "jsonify.html" .)) -}}
   {{- else -}}
     {{- $img := slice -}}
@@ -248,4 +296,11 @@
 {{- with $links }}{{ $ld = $ld | append (printf `"sameAs":%s` (partial "jsonify.html" .)) }}{{ end -}}
 {{- $ld = $ld | append (printf `"url":%s` (partial "jsonify.html" $canonical)) -}}
 <script type="application/ld+json">{{ printf "{%s}" (delimit $ld ",") | safeJS }}</script>
+{{- if and $site.Params.seo.breadcrumbs (ne $kind "home") }}
+  {{- $items := slice -}}
+  {{- range $i, $item := (partial "seo/breadcrumbs.html" .) -}}
+    {{- $items = $items | append (printf `{"@type":"ListItem","position":%d,"name":%s,"item":%s}` (add $i 1) (partial "jsonify.html" $item.name) (partial "jsonify.html" $item.url)) -}}
+  {{- end }}
+<script type="application/ld+json">{{ printf `{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[%s]}` (delimit $items ",") | safeJS }}</script>
+{{- end }}
 <!-- End Jekyll SEO tag -->

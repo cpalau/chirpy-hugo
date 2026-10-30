@@ -47,6 +47,23 @@ Everything above is the upstream feature set. What this port adds is proof: a
 [Jekyll oracle](tests/oracle) builds the same content, and the two outputs are
 compared page by page.
 
+### SEO beyond the original (opt-in)
+
+The Jekyll original predates several things search engines now expect. This port
+adds them **off by default**, so the rendered HTML stays byte-identical until a
+site turns one on (see [`docs/SEO.md`](docs/SEO.md#11-beyond-upstream)):
+
+- `hreflang` alternates and `x-default` for translated pages, and `dir="rtl"`
+  for right-to-left languages — automatic, silent on monolingual LTR sites.
+- `noindex` for hidden posts and for pages that ask for it.
+- Feed autodiscovery, `BreadcrumbList` structured data, `article:section/tag/author`,
+  an Open Graph image type and dimensions read from the asset, a character cap
+  for the meta description, a JSON-LD image fallback, and a warning when the
+  sitemap outgrows the 50,000-URL protocol limit.
+
+Every one is validated against the Open Graph, Twitter card and schema.org
+requirements, not only against Jekyll.
+
 ## Quick start
 
 Requirements: **Hugo extended ≥ 0.150** (tested with 0.168). Node is only

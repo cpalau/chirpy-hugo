@@ -38,4 +38,16 @@
   {{- $text = printf "%s…" (delimit (first $max $words) " ") -}}
 {{- end -}}
 
+{{- /* Beyond upstream: a hard character cap, for sites that prefer Google's
+       ~160-character snippet over the gem's 100-word excerpt. */ -}}
+{{- with site.Params.seo.description_max_chars -}}
+  {{- $limit := int . -}}
+  {{- if and (gt $limit 0) (gt (len $text) $limit) -}}
+    {{- $cut := substr $text 0 (sub $limit 1) -}}
+    {{- /* Do not cut a word in half: drop whatever follows the last space. */ -}}
+    {{- if not (strings.HasSuffix $cut " ") }}{{ $cut = replaceRE `\s+\S*$` "" $cut }}{{ end -}}
+    {{- $text = printf "%s…" (strings.TrimSpace $cut) -}}
+  {{- end -}}
+{{- end -}}
+
 {{- return $text -}}

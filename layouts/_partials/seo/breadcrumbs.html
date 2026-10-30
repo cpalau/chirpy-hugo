@@ -1,0 +1,22 @@
+{{- /*
+  Beyond upstream (opt-in): the breadcrumb trail as structured data.
+
+  Mirrors what the top bar already shows: the home page, the taxonomy index for
+  a term, and the page itself. Returns a slice of dicts with `name` and `url`.
+*/ -}}
+{{- $items := slice (dict "name" (T "tabs.home" | default "Home") "url" site.Home.Permalink) -}}
+{{- $kind := partial "page-kind.html" . -}}
+{{- if eq $kind "taxonomy" -}}
+  {{- $label := T (printf "tabs.%s" .Type) | default (strings.FirstUpper .Type) -}}
+  {{- $items = $items | append (dict "name" $label "url" .Permalink) -}}
+{{- else if eq $kind "category" "tag" -}}
+  {{- $parent := .Parent -}}
+  {{- if $parent -}}
+    {{- $label := T (printf "tabs.%s" $parent.Type) | default (strings.FirstUpper $parent.Type) -}}
+    {{- $items = $items | append (dict "name" $label "url" $parent.Permalink) -}}
+  {{- end -}}
+  {{- $items = $items | append (dict "name" .Title "url" .Permalink) -}}
+{{- else -}}
+  {{- $items = $items | append (dict "name" (partial "display-title.html" .) "url" .Permalink) -}}
+{{- end -}}
+{{- return $items -}}

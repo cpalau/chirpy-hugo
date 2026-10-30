@@ -105,6 +105,9 @@ jobs:
       - name: SEO standards on the demo
         run: node tests/seo/check.mjs --standards "$RUNNER_TEMP/example"
 
+      - name: SEO extensions (hreflang, RTL, noindex, breadcrumbs, opt-in metadata)
+        run: node tests/seo/extensions.mjs
+
       - name: Build the empty site (adoption smoke test)
         run: |
           mkdir -p "$RUNNER_TEMP/empty/content"

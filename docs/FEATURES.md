@@ -23,6 +23,7 @@ feature is implemented in Hugo.
 Legend
 
 - ✅ direct parity
+- ➕ addition, not part of the upstream theme (opt-in, see §15)
 - 🟡 parity with a declared divergence (see `COMPATIBILITY.md`)
 - ⬜ not yet implemented
 - ❌ out of scope
@@ -350,3 +351,26 @@ are in [`I18N.md`](I18N.md).
 | §10 PWA | G2, G4, G5, G6 | `TESTING.md` |
 | §11 i18n | G7, G4 | `I18N.md` |
 | §12 Build pipeline and distribution | G1, G3, G5, G8, G9 | `UPSTREAM.md`, `CONFIG.md` |
+
+## 15. Beyond upstream (additions)
+
+Not present in Chirpy. All are opt-in except the first two, which only render
+when the site has translations or a language direction, so a monolingual LTR
+site is byte-identical.
+
+| # | Feature | Why | Default | Verify |
+|---|---|---|---|---|
+| B1 | `hreflang` + `x-default` | translated pages must name each other | automatic when translated | G4c |
+| B2 | `dir="rtl"` | RTL languages need the document direction | automatic when declared | G4c |
+| B3 | `noindex` for hidden posts | `hidden` only hides from listings | `params.seo.noindex_hidden` | G4c |
+| B4 | per-page `noindex` | opt a single page out of the index | front matter | G4c |
+| B5 | feed autodiscovery | readers and crawlers find `/feed.xml` | `params.seo.feed_discovery` | G4c |
+| B6 | `BreadcrumbList` | breadcrumb rich result | `params.seo.breadcrumbs` | G4c |
+| B7 | description character cap | Google shows ~160 characters, the gem emits 100 words | `params.seo.description_max_chars` | G4c |
+| B8 | JSON-LD image fallback | Article data wants an image | `params.seo.image_fallback` | G4c |
+| B9 | `article:section/tag/author` | richer article metadata | `params.seo.article_meta` | G4c |
+| B10 | `og:image:type` + auto dimensions | correct card rendering | `params.seo.image_metadata` | G4c |
+| B11 | sitemap limit warning | a sitemap over 50,000 URLs is invalid | `params.seo.sitemap_limit` | G4c |
+
+They are documented in [`SEO.md`](SEO.md#11-beyond-upstream) and
+[`CONFIG.md`](CONFIG.md#121-beyond-upstream-opt-in).

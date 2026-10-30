@@ -275,6 +275,30 @@ Current size: 51 pages, ~2.4 k assertions.
 
 ---
 
+### 6.8 Gate 4c — SEO extensions
+
+```bash
+npm run test:seo:ext
+```
+
+Builds `tests/fixtures/seo-ext` (English, Spanish and Arabic RTL, every opt-in
+switch on, a sitemap limit of 3) and asserts:
+
+- `hreflang` for the three languages plus `x-default` on every translation;
+- `dir="rtl"` on the Arabic pages and no `dir` on the English ones;
+- `noindex` for a hidden post and for a `noindex: true` page, and no `robots`
+  tag on a normal post;
+- feed autodiscovery;
+- the description character cap, ending on a word boundary with `…`;
+- `article:section`, `article:tag` and `article:author`;
+- `og:image:type` and dimensions read from the asset;
+- the JSON-LD image fallback to the social preview;
+- a `BreadcrumbList` with two levels on a post and three on a term;
+- the sitemap limit warning;
+- no other warning, and the standards gate over the whole build.
+
+---
+
 ## 7. Gate 5 — Visual parity (Playwright)
 
 This is the literal pixel proof. It compares **the Jekyll build against the

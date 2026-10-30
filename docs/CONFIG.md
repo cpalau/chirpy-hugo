@@ -355,6 +355,26 @@ have a default in `config/_default/params.toml`.
 | `params.facebook.app_id` | `""` | `fb:app_id` |
 | `params.google_site_verification` | `""` | legacy verification, used when `webmaster_verifications` has no value |
 
+### 12.1 Beyond upstream (opt-in)
+
+These are additions, not part of the Jekyll theme. All are off by default, so the
+rendered HTML stays byte-identical to the original until a site enables one.
+
+| Key | Default | Effect |
+|---|---|---|
+| `params.seo.noindex_hidden` | `false` | add `noindex` to posts with `hidden: true` (upstream still lets search engines index them) |
+| `params.seo.feed_discovery` | `false` | `<link rel="alternate" type="application/atom+xml">` for readers and crawlers |
+| `params.seo.breadcrumbs` | `false` | `BreadcrumbList` JSON-LD from the page hierarchy |
+| `params.seo.description_max_chars` | `0` | hard cap for the meta description (0 keeps the gem's 100-word excerpt) |
+| `params.seo.image_fallback` | `false` | use `social_preview_image` as the JSON-LD image when a page has none |
+| `params.seo.article_meta` | `false` | `article:section`, `article:tag` and `article:author` |
+| `params.seo.image_metadata` | `false` | `og:image:type`, plus width/height read from the image asset when Hugo can resolve it |
+| `params.seo.sitemap_limit` | `50000` | warn when the sitemap grows past the protocol limit |
+
+`dir="rtl"` and `hreflang` need no switch: they only render when the site
+declares a language direction or has translations, so a monolingual LTR site is
+unaffected.
+
 Front matter keys the templates honour, with the same meaning as upstream:
 
 ```yaml

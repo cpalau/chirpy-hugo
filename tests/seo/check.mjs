@@ -101,18 +101,18 @@ function parseHead(file) {
   }
 
   const title = decode(/<title>([^<]*)<\/title>/.exec(head)?.[1] ?? '');
-  const ldMatch = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(head);
-  let ld = null;
+  const lds = [];
   let ldError = '';
-  if (ldMatch) {
+  for (const match of head.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
     try {
-      ld = JSON.parse(ldMatch[1]);
+      lds.push(JSON.parse(match[1]));
     } catch (error) {
       ldError = error.message;
     }
   }
 
-  return { metas, links, title, ld, ldError, duplicates };
+  const redirect = /http-equiv=["']?refresh/i.test(head);
+  return { metas, links, title, lds, ld: lds[0] ?? null, ldError, duplicates, redirect };
 }
 
 /** Differences we declare: they are not SEO defects. */
@@ -224,10 +224,12 @@ const LD_TYPES = {
   WebPage: ['url'],
   BlogPosting: ['headline', 'datePublished', 'author', 'url'],
   CreativeWork: ['headline', 'datePublished', 'author', 'url'],
+  BreadcrumbList: ['itemListElement'],
 };
 const LD_PROPERTIES = new Set([
   '@context', '@type', 'author', 'dateModified', 'datePublished', 'description',
-  'headline', 'image', 'mainEntityOfPage', 'name', 'publisher', 'sameAs', 'url',
+  'headline', 'image', 'itemListElement', 'mainEntityOfPage', 'name', 'publisher',
+  'sameAs', 'url',
 ]);
 
 function standards(rel, page) {
@@ -274,9 +276,8 @@ function standards(rel, page) {
   const creator = meta('name:twitter:creator');
   if (creator && !HANDLE.test(creator)) warn(`twitter:creator "${creator}" is not a handle (the SEO tag falls back to the author name)`);
 
-  // JSON-LD, per type.
-  if (page.ld) {
-    const ld = page.ld;
+  // JSON-LD, per block and per type.
+  for (const ld of page.lds ?? (page.ld ? [page.ld] : [])) {
     const required = LD_TYPES[ld['@type']] ?? [];
     for (const property of required) {
       require(ld[property] !== undefined && ld[property] !== '', `JSON-LD: ${ld['@type']} needs ${property}`);
@@ -285,7 +286,7 @@ function standards(rel, page) {
       if (!LD_PROPERTIES.has(property)) fail(`${where} JSON-LD: unknown property ${property}`);
       else ok();
     }
-    require(/^https?:\/\//.test(ld.url ?? ''), 'JSON-LD: url is not absolute');
+    if (ld.url !== undefined) require(/^https?:\/\//.test(ld.url), 'JSON-LD: url is not absolute');
     if (ld.datePublished) require(ISO.test(ld.datePublished), `JSON-LD: invalid datePublished (${ld.datePublished})`);
     if (ld.dateModified) require(ISO.test(ld.dateModified), `JSON-LD: invalid dateModified (${ld.dateModified})`);
     if (ld.author) {
@@ -305,6 +306,16 @@ function standards(rel, page) {
     }
     if (ld.mainEntityOfPage) require(/^https?:\/\//.test(ld.mainEntityOfPage['@id'] ?? ''), 'JSON-LD: mainEntityOfPage needs an absolute @id');
     require((ld.headline ?? '').length <= 110, `JSON-LD: headline is longer than 110 characters (${(ld.headline ?? '').length})`);
+    if (ld['@type'] === 'BreadcrumbList') {
+      const items = Array.isArray(ld.itemListElement) ? ld.itemListElement : [];
+      require(items.length >= 2, 'JSON-LD: BreadcrumbList needs at least two items');
+      items.forEach((item, index) => {
+        require(item['@type'] === 'ListItem', 'JSON-LD: breadcrumb item must be a ListItem');
+        require(item.position === index + 1, `JSON-LD: breadcrumb position ${item.position} != ${index + 1}`);
+        require(typeof item.name === 'string' && item.name.length > 0, 'JSON-LD: breadcrumb item needs a name');
+        require(/^https?:\/\//.test(item.item ?? ''), 'JSON-LD: breadcrumb item needs an absolute url');
+      });
+    }
   }
 }
 
@@ -350,7 +361,7 @@ if (standardsOnly) {
   const pages = new Map(walk(dir).map((rel) => [rel, parseHead(path.join(dir, rel, 'index.html'))]));
   const params = path.join(ROOT, 'exampleSite/hugo.toml');
   const twitter = /twitter_username\s*=\s*"[^"]+"/.test(fs.readFileSync(params, 'utf8'));
-  for (const [rel, page] of pages) standards(rel, page);
+  for (const [rel, page] of pages) if (!page.redirect) standards(rel, page);
   console.log(`\n${checks} SEO standard checks over ${pages.size} pages, ${failures} failure(s)`);
   process.exit(failures ? 1 : 0);
 }

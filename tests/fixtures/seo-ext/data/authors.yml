@@ -1,0 +1,13 @@
+# Author identities referenced from post front matter (`author: example`).
+#
+# Replace with your own. The shape mirrors upstream `_data/authors.yml`:
+#
+#   {author_id}:
+#     name: {full name}
+#     twitter: {twitter handle, without @}
+#     url: {homepage}
+
+example:
+  name: Example Author
+  twitter: example
+  url: "https://example.com/author"

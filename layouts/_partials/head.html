@@ -28,6 +28,22 @@
   {{- end }}
   <title>{{ $titleText }}</title>
 
+  {{- /* Beyond upstream: translations and feed discovery. Silent unless the
+         site actually has them, so a monolingual site is byte-identical. */}}
+  {{- if .IsTranslated }}
+    {{- range .AllTranslations }}
+  <link rel="alternate" hreflang="{{ or .Language.Locale .Language.Lang }}" href="{{ .Permalink }}" />
+    {{- end }}
+    {{- with where .AllTranslations "Language.Lang" (index hugo.Sites 0).Language.Lang }}
+      {{- with index . 0 }}
+  <link rel="alternate" hreflang="x-default" href="{{ .Permalink }}" />
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if .Site.Params.seo.feed_discovery }}
+  <link rel="alternate" type="application/atom+xml" href="{{ "feed.xml" | absURL }}" title="{{ .Site.Title }}" />
+  {{- end }}
+
   {{ partial "favicons.html" . }}
 
   <!-- Resource Hints -->

@@ -288,6 +288,7 @@ npm run test:html            # Gate 2: html-validate vs Jekyll + links/anchors
 npm run test:contract        # Gate 3: selectors upstream JS needs
 npm run test:parity          # Gate 4: DOM (builds the Jekyll oracle)
 npm run test:seo             # Gate 4b: SEO metadata field by field + invariants
+npm run test:seo:ext         # Gate 4c: hreflang, RTL, noindex, breadcrumbs, opt-in metadata
 npm run test:outputs         # feed, sitemap, search, swconf, manifest
 npm run test:visual          # Gate 5: pixels (Playwright, Jekyll vs Hugo)
 npm run test:ui              # Gate 5b: desktop/tablet/mobile/small UI matrix
@@ -470,6 +471,7 @@ A release that only touches `copy` files should take minutes.
 | 3 | `test:contract` | Our DOM still satisfies upstream JavaScript selectors |
 | 4 | `test:parity` | Our HTML equals Jekyll's, after canonicalization |
 | 4b | `test:seo` | Every SEO tag equals Jekyll's, field by field, and passes the SEO invariants plus the Open Graph, Twitter and JSON-LD standards |
+| 4c | `test:seo:ext` | The opt-in SEO additions (hreflang, RTL, noindex, breadcrumbs, feed discovery, image metadata, sitemap limit) |
 | 5 | `test:visual` | Our pixels equal Jekyll's (Playwright + pixelmatch) |
 | 6 | `test:a11y` | No serious/critical axe violations; Lighthouse budgets |
 | 7 | `test:i18n` | 33 locales, identical key sets, no empty values |

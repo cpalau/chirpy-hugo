@@ -36,6 +36,13 @@
     {{- end -}}
   {{- end -}}
 {{- end -}}
+{{- /* Beyond upstream (opt-in guard): a sitemap may contain at most 50,000
+       URLs. There is no supported way for a theme to split one automatically,
+       so fail loudly with the count and the documented options. */ -}}
+{{- $limit := site.Params.seo.sitemap_limit | default 50000 -}}
+{{- if gt (len $urls) (int $limit) -}}
+  {{- warnf "sitemap.xml has %d URLs, over the configured limit of %d. Split it (per-section sitemaps plus a sitemapindex, or Hugo's per-language sitemapindex) before publishing; see docs/CONFIG.md §12." (len $urls) (int $limit) -}}
+{{- end -}}
 {{- range $urls }}
   <url>
     <loc>{{ .loc | safeHTML }}</loc>
