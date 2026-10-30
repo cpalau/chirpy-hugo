@@ -31,10 +31,13 @@ const flag = (name) => {
 const changelog = read('CHANGELOG.md');
 const paramsToml = read('config/_default/params.toml');
 const ports = read('tests/contract/ports.yml');
+const themeData = read('data/theme.yaml');
 
-// The theme's own version lives in package.json; `params.theme_version` tracks
-// the upstream Chirpy release the footer credits, not this project.
+// The theme's own version lives in package.json and is mirrored into
+// `data/theme.yaml` (what the footer renders). `params.theme_version` tracks
+// the upstream Chirpy release this port reproduces.
 const themeVersion = JSON.parse(read('package.json')).version;
+const dataVersion = /^version:\s*"([^"]+)"/m.exec(themeData)?.[1];
 const paramVersion = /^theme_version\s*=\s*"([^"]+)"/m.exec(paramsToml)?.[1];
 const upstreamTag = /^  tag:\s*(\S+)/m.exec(ports)?.[1];
 
@@ -46,6 +49,10 @@ const fail = (message) => {
 
 function check() {
   if (!themeVersion) fail('package.json has no version');
+  if (!dataVersion) fail('data/theme.yaml has no version');
+  if (dataVersion && themeVersion && dataVersion !== themeVersion) {
+    fail(`data/theme.yaml ${dataVersion} does not match package.json ${themeVersion}`);
+  }
   if (!paramVersion) fail('params.toml has no theme_version');
   if (paramVersion && upstreamTag && paramVersion !== upstreamTag.replace(/^v/, '')) {
     fail(`params.theme_version ${paramVersion} does not match upstream ${upstreamTag}`);
@@ -97,7 +104,9 @@ function prepare(version, date) {
   pkg.version = version;
   write('package.json', `${JSON.stringify(pkg, null, 2)}\n`);
 
-  console.log(`prepared ${version} (${today}): CHANGELOG and package.json`);
+  write('data/theme.yaml', themeData.replace(/^version:\s*"[^"]+"/m, `version: "${version}"`));
+
+  console.log(`prepared ${version} (${today}): CHANGELOG, package.json and data/theme.yaml`);
   console.log('next: review the diff, run the gates, commit, tag, push the tag');
 }
 

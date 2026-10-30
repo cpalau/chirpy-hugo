@@ -135,8 +135,13 @@ SemVer, with theme-specific rules:
 The version appears in three places and must match:
 
 1. the git tag (`vX.Y.Z`),
-2. `theme.toml` (`min_version` is separate; the theme version goes in the module tag),
-3. `params.theme_version` in `config/_default/params.toml` (footer tooltip).
+2. `package.json`, the source of truth,
+3. `data/theme.yaml`, which the footer renders and links to the GitHub release
+   (`scripts/release.mjs --prepare` writes both).
+
+`params.theme_version` is **not** this theme's version: it records the upstream
+Chirpy release the port reproduces, and `release.mjs --check` keeps it equal to
+the pin in `ports.yml`.
 
 ---
 
@@ -246,20 +251,21 @@ Upstream work by Cotes Chung and the Chirpy contributors.
 - [ ] `main` is green: Gates G1–G9.
 - [ ] `CHANGELOG.md` `[Unreleased]` is complete.
 - [ ] `ports.yml` records the current upstream tag and sha.
-- [ ] `params.theme_version` and the tag match.
+- [ ] `data/theme.yaml` and the tag match (checked by `test:release`).
+- [ ] `params.theme_version` still matches the upstream pin.
 - [ ] The visual snapshots in the PR were reviewed.
 
 ### 5.2 Cut the release
 
 ```bash
 # 1. Move Unreleased to a version section
-node scripts/release.mjs --version X.Y.Z   # updates CHANGELOG, params, theme.toml
+node scripts/release.mjs --prepare X.Y.Z   # CHANGELOG, package.json, data/theme.yaml
 
 # 2. Verify
-npm run test:all
+npm run test:fast && npm run test:parity && npm run test:plugins
 
 # 3. Commit and tag
-git add CHANGELOG.md config/_default/params.toml theme.toml
+git add CHANGELOG.md package.json data/theme.yaml
 git commit -m "chore(release): vX.Y.Z"
 git tag -a vX.Y.Z -m "vX.Y.Z"
 git push origin main --follow-tags
@@ -322,7 +328,7 @@ Until then, releases are manual and gated by the checklist in §5.
 
 - [ ] Complete release notes (all nine sections).
 - [ ] `CHANGELOG.md` updated and linked.
-- [ ] Version consistent in tag, `params.theme_version` and `theme.toml`.
+- [ ] Version consistent in tag, `package.json` and `data/theme.yaml`.
 - [ ] Gates G1–G9 green on the tag.
 - [ ] Upgrade instructions tested on a clean site.
 - [ ] Upstream pin recorded.

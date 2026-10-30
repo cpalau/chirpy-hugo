@@ -1,6 +1,6 @@
 {
   "name": "chirpy-hugo",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "description": "Hugo port of jekyll-theme-chirpy — verification harness",
   "type": "module",
@@ -33,6 +33,7 @@
     "test:outputs": "node tests/outputs/check.mjs",
     "test:parity": "node tests/parity/diff.mjs",
     "test:perf": "node tests/performance/check.mjs",
+    "test:plugins": "node tests/plugins/check.mjs",
     "test:qa": "node tests/qa/q1-word-count.mjs && node tests/qa/q2-jsonify.mjs && node tests/qa/q3-page-order.mjs && node tests/qa/q4-sort-natural.mjs",
     "test:release": "node scripts/release.mjs --check",
     "test:seo": "node tests/seo/check.mjs",

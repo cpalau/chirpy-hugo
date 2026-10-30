@@ -112,6 +112,17 @@ function checkDeployment(out) {
   // `user-scalable=noinitial-scale=1`, an invalid viewport that makes a phone
   // rescale the page when the sidebar opens.
   const home = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
+
+  // The footer must credit this theme's release, not the upstream Chirpy one.
+  const version = /^version:\s*"([^"]+)"/m.exec(fs.readFileSync(path.join(ROOT, 'data/theme.yaml'), 'utf8'))?.[1];
+  if (!version) {
+    fail('deployment: data/theme.yaml has no version');
+  } else if (!new RegExp(`title="?v${version.replaceAll('.', '\\.')}"?`).test(home)) {
+    fail(`deployment: footer does not show v${version}`);
+  } else {
+    console.log(`  ok    deployment: footer shows the theme release v${version}`);
+  }
+
   const viewport = /<meta[^>]*name=["']?viewport["']?[^>]*content=["']?([^"'>]+)/i.exec(home)?.[1] ?? '';
   const directives = viewport.split(/[,\s]+/).filter(Boolean);
   if (!directives.includes('initial-scale=1') || !directives.includes('width=device-width')) {

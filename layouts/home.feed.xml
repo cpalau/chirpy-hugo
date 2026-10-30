@@ -28,6 +28,9 @@
   {{- $url := .Permalink -}}
   {{- $updated := .Lastmod -}}
   {{- $summary := partial "post-summary.html" (dict "post" . "max_length" 400) -}}
+  {{- /* Upstream escapes the link title attribute with `xml_escape`; the rest of
+         the document is escaped once, at the end, with the `&` replacement. */ -}}
+  {{- $titleAttr := partial "xml-escape.html" .Title -}}
   {{- $categories := "" -}}
   {{- with .Params.categories -}}
     {{- range . -}}{{- $categories = printf `%s
@@ -46,6 +49,6 @@
     </author>%s
     <summary>%s</summary>
 
-  </entry>` $body .Title $url .Title (.Date.Format "2006-01-02T15:04:05-07:00") ($updated.Format "2006-01-02T15:04:05-07:00") $url $url (.Params.author | default $author) $categories $summary -}}
+  </entry>` $body .Title $url $titleAttr (.Date.Format "2006-01-02T15:04:05-07:00") ($updated.Format "2006-01-02T15:04:05-07:00") $url $url (.Params.author | default $author) $categories $summary -}}
 {{- end -}}
 {{- printf "%s\n</feed>" (replace $body "&" "&amp;") | safeHTML -}}

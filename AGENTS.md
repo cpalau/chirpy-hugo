@@ -289,6 +289,7 @@ npm run test:contract        # Gate 3: selectors upstream JS needs
 npm run test:parity          # Gate 4: DOM (builds the Jekyll oracle)
 npm run test:seo             # Gate 4b: SEO metadata field by field + invariants
 npm run test:seo:ext         # Gate 4c: hreflang, RTL, noindex, breadcrumbs, opt-in metadata
+npm run test:plugins         # Gate 10: each Jekyll plugin module
 npm run test:outputs         # feed, sitemap, search, swconf, manifest
 npm run test:visual          # Gate 5: pixels (Playwright, Jekyll vs Hugo)
 npm run test:ui              # Gate 5b: desktop/tablet/mobile/small UI matrix
@@ -478,6 +479,7 @@ A release that only touches `copy` files should take minutes.
 | 8 | `test:upstream` | Copied assets match the pinned tag and gem (`scripts/fetch-upstream.mjs --check`); ports.yml is complete |
 | 9 | `test:adoption` | The theme builds any fresh site and `HugoBasicExample` with no config |
 | 9b | `test:features` | Every analytics/comment provider renders; `image` as string and map; media on a CDN |
+| 10 | `test:plugins` | Every Jekyll plugin module: pagination, archives, sitemap, lastmod, cache, filters, MathJax |
 
 Gate 4 and Gate 5 are the definition of "pixel perfect". They compare against
 a **real Jekyll build of the same content**, not against a hand-made mock.

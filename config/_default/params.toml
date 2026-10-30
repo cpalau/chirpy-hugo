@@ -8,6 +8,8 @@ tagline = ""
 description = ""
 
 # Footer tooltip. Hugo has no notion of the theme's own version at render time.
+# The upstream Chirpy version this port reproduces (docs and release checks).
+# The footer shows this theme's own version, from `data/theme.yaml`.
 theme_version = "7.6.0"
 
 # Identity and media

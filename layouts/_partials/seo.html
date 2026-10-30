@@ -40,13 +40,17 @@
 {{- $hasDate := and (not .Date.IsZero) (not (in (slice "home" "term") .Kind)) -}}
 {{- $published := .Date -}}
 {{- $modified := .Date -}}
+{{- /* Jekyll's `posts-lastmod-hook.rb` writes `last_modified_at`; Hugo writes
+       `.Lastmod` from `lastmod` or, with `enableGitInfo`, from git. Both are
+       accepted, and the SEO date, the page label, the sitemap, the feed and the
+       sidebar read the same value. */ -}}
 {{- with .Params.seo.date_modified -}}
   {{- $modified = time.AsTime . -}}
 {{- else -}}
   {{- with .Params.last_modified_at -}}
     {{- $modified = time.AsTime . -}}
   {{- else -}}
-    {{- with .Params.lastmod }}{{ $modified = time.AsTime . }}{{ end -}}
+    {{- if not .Lastmod.IsZero }}{{ $modified = .Lastmod }}{{ end -}}
   {{- end -}}
 {{- end -}}
 {{- $iso := "2006-01-02T15:04:05-07:00" -}}

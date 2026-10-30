@@ -1,7 +1,7 @@
 # Feature Inventory and Hugo Mapping
 
-> **Audited on 2026-10-30** against the code and the gate suite: **172** rows
-> at parity, **16** with a declared divergence, **0** pending and **7** out of
+> **Audited on 2026-10-30** against the code and the gate suite: **171** rows
+> at parity, **17** with a declared divergence, **0** pending and **7** out of
 > scope. Every parity row is proved by at least one gate (G1–G9, see
 > `TESTING.md`); the divergences are the `D-xx` entries in
 > `COMPATIBILITY.md`.
@@ -91,7 +91,7 @@ Legend
 | F14 | Math flag | `math` | `math` | ✅ | G4 |
 | F15 | Mermaid flag | `mermaid` | `mermaid` | ✅ | G4 |
 | F16 | Drafts | `_drafts` + `--drafts` | `draft: true` | 🟡 Hugo semantics, not a port gap | G1 |
-| F17 | Last modified | `posts-lastmod-hook.rb` | `.Lastmod` + `enableGitInfo` | ✅ | G4 |
+| F17 | Last modified | `posts-lastmod-hook.rb` | `.Lastmod` + `enableGitInfo` | 🟡 D-27 | G4, G10 |
 | F18 | Tab pages | `_tabs/*.md` | content pages + menu | ✅ | G4 |
 | F19 | Redirects | `redirect_from` | `aliases` | ✅ | G2 |
 | F20 | Multiple authors | `authors: [id]` (array) | same, `data/authors.yaml` | ✅ | G4 |

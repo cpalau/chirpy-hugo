@@ -408,6 +408,23 @@ coupling.
 
 ---
 
+## D-27 — Git-based last modified for a file with one commit
+
+| | |
+|---|---|
+| Status | declared (toolchain limitation) |
+| Affects | `article:modified_time`, JSON-LD `dateModified`, the sitemap, the feed and the "updated" label |
+| Upstream | `_plugins/posts-lastmod-hook.rb` writes `last_modified_at` only when the file has **more than one commit** |
+| This port | `.Lastmod`, filled by `enableGitInfo` from the last commit, for every file |
+| Blast radius | a single-commit post shows the commit date in Hugo and the publication date in Jekyll |
+
+Hugo's GitInfo does not expose a commit count, and a template cannot run
+`git rev-list --count`. A site that wants the upstream behaviour can leave
+`enableGitInfo = false` (the default) and write `lastmod` in the front matter,
+or accept the extra precision. Validated by Gate 10 (`docs/PLUGINS.md` §5).
+
+---
+
 ## D-26 — An image without a path in the post header
 
 | | |

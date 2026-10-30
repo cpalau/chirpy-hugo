@@ -189,3 +189,6 @@ jobs:
 
       - name: Non-HTML outputs (feed, sitemap, search, swconf, manifest)
         run: npm run test:outputs
+
+      - name: Gate 10 - Jekyll plugins, module by module
+        run: npm run test:plugins

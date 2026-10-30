@@ -1,8 +1,21 @@
-{{- /* Jekyll's `uri_escape` = Addressable::URI.normalize_component: it encodes
-       spaces but leaves `:` and `-`. `urlquery` is the closest primitive, so the
-       two sequences where they differ are mapped back. Returns a string.
-       Limitation: non-ASCII and reserved characters are unverified (F4 test). */ -}}
+{{- /* Jekyll's `uri_escape` = Addressable::URI.normalize_component with no
+       scheme: it encodes spaces, quotes, angle brackets, braces, pipe,
+       backslash, caret and backtick, and leaves the rest of the reserved and
+       sub-delimiter set (`: / ? = & + # @ , ; ! $ ' ( ) * [ ] %`) untouched.
+       `urlquery` encodes everything, so the sequences it added are undone.
+
+       Non-ASCII is percent-encoded as UTF-8 by both sides.
+       Context: a string. Returns a string. */ -}}
 {{- $s := . | urlquery -}}
 {{- $s = replace $s "+" "%20" -}}
-{{- $s = replace $s "%3A" ":" -}}
+{{- $unescape := dict
+  "%2F" "/" "%3F" "?" "%3D" "=" "%26" "&" "%2B" "+" "%23" "#" "%40" "@"
+  "%2C" "," "%3B" ";" "%21" "!" "%24" "$" "%27" "'" "%28" "(" "%29" ")"
+  "%2A" "*" "%5B" "[" "%5D" "]" "%3A" ":" "%7E" "~"
+-}}
+{{- range $code, $char := $unescape -}}
+  {{- $s = replace $s $code $char -}}
+{{- end -}}
+{{- /* A literal `%` must stay literal, so it is undone last. */ -}}
+{{- $s = replace $s "%25" "%" -}}
 {{- return $s -}}

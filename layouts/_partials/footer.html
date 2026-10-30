@@ -25,7 +25,11 @@
 
   <p>
     {{- $platform := `<a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>` -}}
-    {{- $theme := printf `<a data-bs-toggle="tooltip" data-bs-placement="top" title="v%s" href="%s" target="_blank" rel="noopener">Chirpy Hugo</a>` .Site.Params.theme_version "https://github.com/cpalau/chirpy-hugo" -}}
+    {{- /* The tooltip is the version of this theme (data/theme.yaml, bumped by
+           the release script) and links to that GitHub release. The Chirpy
+           version this port reproduces is `params.theme_version`. */ -}}
+    {{- $version := hugo.Data.theme.version | default .Site.Params.theme_version -}}
+    {{- $theme := printf `<a data-bs-toggle="tooltip" data-bs-placement="top" title="v%s" href="https://github.com/cpalau/chirpy-hugo/releases/tag/v%s" target="_blank" rel="noopener">Chirpy Hugo</a>` $version $version -}}
     {{- $meta := T "meta" -}}
     {{- $meta = replace $meta ":PLATFORM" $platform -}}
     {{- $meta = replace $meta ":THEME" $theme -}}

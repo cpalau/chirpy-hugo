@@ -398,6 +398,19 @@ Pixels are not enough: behaviour must match too.
 
 ---
 
+## 7b. Gate 10 — Jekyll plugins
+
+```bash
+npm run test:plugins
+```
+
+Validates the six Jekyll plugins and the local lastmod plugin module by module,
+against the parity builds. A module passes only when all its checks pass; an
+exclusion is a documented toolchain property. The matrix, the checks and the
+four exclusions are in [`PLUGINS.md`](PLUGINS.md).
+
+---
+
 ## 8. Gate 6 — Accessibility and performance
 
 ```bash

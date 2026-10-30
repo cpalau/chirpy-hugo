@@ -22,6 +22,40 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.5.0] - 2026-10-30
+
+### Added
+
+- **Gate 10 (`npm run test:plugins`)**: the six Jekyll plugins and the local
+  lastmod plugin validated module by module, with explicit exclusions. See
+  [`docs/PLUGINS.md`](docs/PLUGINS.md).
+- **The footer shows this theme's release version**, read from
+  `data/theme.yaml` and linked to the matching GitHub release. It used to show
+  `params.theme_version`, which is the upstream Chirpy version this port
+  reproduces. `scripts/release.mjs --prepare` now bumps `package.json` and
+  `data/theme.yaml` together, and `--check` enforces it.
+
+### Changed
+
+- Last modified is read from `.Lastmod` (front matter or `enableGitInfo`) in the
+  SEO dates and in the page label, the same source the sitemap, the feed and the
+  sidebar already used. The Jekyll plugin's git dates now reach every consumer.
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+- **`uri_escape` was too aggressive**: `urlquery` encodes the reserved set
+  (`:/?=&+#@,;`, sub-delimiters and `%`) that Addressable leaves alone, so share
+  links for titles containing `&`, `+` or `%` differed from Jekyll.
+- **`xml_escape`**: added a partial that matches Ruby's entity names
+  (`&quot;`, `&apos;`, not `&#34;`/`&#39;`) and used it where upstream does, the
+  feed link title attribute.
+
+### Security
+
 ## [1.4.0] - 2026-10-30
 
 ### Added
