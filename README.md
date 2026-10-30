@@ -19,7 +19,9 @@ can be adopted in hours instead of weeks.
 ## Principles
 
 1. **Assets are read-only.** `assets/scss/`, `assets/js/`, `data/origin/` and
-   `i18n/` are copies of upstream. They are never edited.
+   `static/assets/img/favicons/` are copies of upstream. `i18n/` is generated
+   from the upstream locales by `scripts/i18n.mjs`. None of them is edited by
+   hand.
 2. **The DOM is a contract.** Class names, ids, `data-*` attributes and nesting
    match Jekyll output, so upstream JavaScript keeps working untouched.
 3. **Parity is measured.** A template is done when a real Jekyll build of the
@@ -75,9 +77,20 @@ hugo mod init example.com/my-blog
 hugo mod get github.com/cpalau/chirpy-hugo
 ```
 
-Then add the module import and the mandatory settings listed in
-[docs/CONFIG.md](docs/CONFIG.md). Everything else is optional and has defaults
-in the theme.
+Then import the theme and copy the mandatory settings from
+[`starter/hugo.toml`](starter/hugo.toml):
+
+```toml
+[module]
+  [[module.imports]]
+    path = "github.com/cpalau/chirpy-hugo"
+```
+
+Those settings (`outputs`, `outputFormats`, `markup`) are the ones Hugo does not
+merge from a theme (D-07). Everything else is optional and has a default.
+
+A complete, minimal site lives in [`starter/`](starter/): config, one post and
+the site-owned data files.
 
 The theme ships:
 
@@ -94,7 +107,8 @@ The theme ships:
 
 ```
 theme.toml          theme metadata for the Hugo gallery
-hugo.toml           theme defaults (merged into the user's config)
+go.mod              Hugo Module definition
+config/_default/    theme configuration (merged into the user's config)
 archetypes/         content templates for `hugo new`
 images/             screenshot.png + tn.png for the theme gallery
 exampleSite/        self-contained demo site
@@ -104,10 +118,11 @@ layouts/            Hugo templates (the only original rendering code)
 ├── _shortcodes/    prompt, filepath, embeds
 └── _markup/        render hooks (codeblock, image, heading, link, table)
 
-assets/scss/        COPY of upstream _sass/        DO NOT EDIT
-assets/js/          COPY of upstream _javascript/  DO NOT EDIT
-data/origin/        COPY of upstream _data/origin  DO NOT EDIT
-i18n/               GENERATED from _data/locales   DO NOT EDIT
+assets/scss/        COPY of upstream _sass/                  DO NOT EDIT
+assets/js/          COPY of upstream _javascript/            DO NOT EDIT
+data/origin/        COPY of upstream _data/origin             DO NOT EDIT
+static/assets/...   COPY of upstream images and favicons     DO NOT EDIT
+i18n/               GENERATED from _data/locales (i18n.mjs)   DO NOT EDIT
 
 config/_default/    configuration contract
 scripts/            sync, i18n, content conversion, config checks
@@ -122,10 +137,15 @@ starter/            minimal site template for end users
 
 ```bash
 npm run build          # hugo --panicOnWarning --gc --minify
+npm run build:example  # the demo site, warning-free
+npm run test:qa        # Q1-Q4 contract tests
+npm run test:i18n      # 33 locales, identical key trees
+npm run test:upstream  # pin, coverage and asset hashes
 npm run test:parity    # Jekyll build vs Hugo build, DOM diff
-npm run test:visual    # Playwright pixel comparison, 12 fixtures
-npm run test:all       # all gates
+npm run test:visual    # Playwright pixel comparison (build both sides first)
 ```
+
+Gates 1-3, 6-7 and 9 are still being implemented; `docs/PLAN.md` tracks them.
 
 The test suite builds the **real Jekyll theme** locally and compares both
 outputs. That is the definition of "pixel perfect" used by this project.

@@ -1,0 +1,11 @@
+# Hugo Module definition and minimum version.
+#
+# Declared here instead of `hugo.toml` so the contract is visible on its own:
+# a consumer reading only the module configuration knows what the theme needs.
+# `extended = true` is required by the SCSS pipeline (`css.Sass`), and `min`
+# is the floor the templates are tested against.
+
+[module]
+  [module.hugoVersion]
+    min = "0.150.0"
+    extended = true

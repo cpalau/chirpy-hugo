@@ -1,0 +1,14 @@
+# Author identities referenced from post front matter (`author: example`).
+#
+# Every value is a parameter a site overrides; none of it is theme data.
+# The shape mirrors upstream `_data/authors.yml` (jekyll-seo-tag advanced usage):
+#
+#   {author_id}:
+#     name: {full name}
+#     twitter: {twitter handle, without @}
+#     url: {homepage}
+
+example:
+  name: Example Author
+  twitter: example
+  url: https://example.com/author

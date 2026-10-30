@@ -2,8 +2,8 @@
 #
 # Hugo merges configuration per category. `params` is deep, so everything in
 # params.toml can be overridden key by key. `markup`, `outputs`, `module`,
-# `languages` and `permalinks` are REPLACED, not merged (D-07): docs/CONFIG.md
-# lists the ones a site must declare itself.
+# `languages`, `permalinks` and `menus` are REPLACED, not merged (D-07):
+# docs/CONFIG.md lists the ones a site must declare itself.
 
 baseURL = "https://example.com/"
 title = ""
@@ -42,8 +42,3 @@ enableGitInfo = false
 [css.sass]
   transpiler = "dartsass"
   outputStyle = "compressed"
-
-[module]
-  [module.hugoVersion]
-    min = "0.150.0"
-    extended = true

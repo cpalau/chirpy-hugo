@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  HUGO_VERSION: 0.168.0
+  NODE_VERSION: 24
+
+jobs:
+  commitlint:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npx commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}"
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Cache the pinned upstream tree
+        uses: actions/cache@v4
+        with:
+          path: .out/upstream
+          key: upstream-${{ hashFiles('tests/contract/ports.yml') }}
+
+      - name: Fetch and verify the upstream pin
+        run: |
+          node scripts/fetch-upstream.mjs --fetch
+          node scripts/fetch-upstream.mjs --check
+          node scripts/extract-params.mjs --check
+
+      - name: Verify the generated translation catalogue
+        run: npm run test:i18n
+
+      - name: Q1-Q4 contract tests
+        run: npm run test:qa
+
+      - name: Build the demo site (warnings are errors)
+        run: |
+          hugo -s exampleSite --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
+            --panicOnWarning --gc --minify -d "$RUNNER_TEMP/example"
+
+      - name: Build the empty site (adoption smoke test)
+        run: |
+          mkdir -p "$RUNNER_TEMP/empty/content"
+          cp starter/hugo.toml "$RUNNER_TEMP/empty/hugo.toml"
+          hugo -s "$RUNNER_TEMP/empty" --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
+            --panicOnWarning --gc --minify
+
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+          working-directory: tests/oracle
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Build the Jekyll oracle
+        run: bash tests/oracle/build.sh
+
+      - name: Build the same content with Hugo
+        run: |
+          hugo -s tests/fixtures/hugo --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
+            -d "$GITHUB_WORKSPACE/.out/hugo"
+
+      - name: Gate 4 - HTML parity
+        run: npm run test:parity

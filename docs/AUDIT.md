@@ -508,7 +508,7 @@ files:
   "_data/contact.yml":      { target: "data/contact.yaml",       mode: copy }
   "_data/share.yml":        { target: "data/share.yaml",         mode: copy }
   "_data/authors.yml":      { target: "data/authors.yaml",       mode: copy }
-  "assets/img/favicons/":   { target: "assets/img/favicons/",    mode: copy }
+  "assets/img/favicons/":   { target: "static/assets/img/favicons/", mode: copy }
   "assets/js/data/mathjax.js": { target: "assets/js/data/mathjax.js", mode: copy }
 
   # generated

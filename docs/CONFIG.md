@@ -7,8 +7,7 @@ taking priority:
 | Category | Merge strategy | Meaning for this theme |
 |---|---|---|
 | `params` | `deep` | Safe to ship defaults; users override individual keys |
-| `menus`, `outputformats`, `mediatypes` | `shallow` | New keys added, existing ones kept from the project |
-| `markup`, `outputs`, `permalinks`, `module`, `languages`, `pagination` | `none` | If the project defines the category, the theme's version is replaced |
+| `markup`, `outputs`, `permalinks`, `module`, `languages`, `pagination`, `menus` | `none` | If the project defines the category, the theme's version is replaced. Measured: a theme menu disappears as soon as the site declares `[menus]`, and appears only when the site declares none |
 
 This document is therefore the single source of truth for everything the theme
 reads, and the reference used by `scripts/check-config.mjs`.

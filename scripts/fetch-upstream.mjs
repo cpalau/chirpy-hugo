@@ -300,11 +300,18 @@ async function check(u, ports) {
   }
   console.log(`hashes: ${hashChecked}/${Object.keys(manifest.files).length} manifest entries verified`);
 
-  // 4. Local copies, when they exist, must still match the pin.
+  // 4. Local copies, when they exist, must still match the pin. A `transform`
+  //    target does not: by definition it is generated from the source, so its
+  //    own generator verifies it (Gate 7 for i18n).
   let present = 0;
   let drift = 0;
+  let transformed = 0;
   const pendingDirs = new Set();
   for (const [rel, entry] of Object.entries(manifest.files)) {
+    if (entry.mode === 'transform') {
+      transformed += 1;
+      continue;
+    }
     const abs = path.join(ROOT, entry.target);
     if (!existsSync(abs)) {
       pendingDirs.add(entry.target.split('/')[0]);
@@ -318,7 +325,9 @@ async function check(u, ports) {
   }
   console.log(
     `local copies: ${present} verified, ${drift} drifted, ` +
-      `${Object.keys(manifest.files).length - present} pending (${[...pendingDirs].sort().join(', ') || 'none'})`,
+      `${Object.keys(manifest.files).length - present - transformed} pending ` +
+      `(${[...pendingDirs].sort().join(', ') || 'none'}), ` +
+      `${transformed} transform target(s) verified by their generator`,
   );
 
   return failures;

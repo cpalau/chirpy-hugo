@@ -1,0 +1,108 @@
+# Demo site for `chirpy-hugo`.
+#
+# Run it with:
+#
+#   hugo server --themesDir ../.. --theme chirpy-hugo
+#
+# It is a *consumer*: only what a real site would declare lives here. The theme
+# ships the parameters and the defaults; this file declares the categories Hugo
+# does not merge (D-07) and the content of the demo.
+#
+# Nothing in this file is personal: `example.com`, neutral author, no analytics.
+
+baseURL = "https://example.com/"
+title = "Chirpy Hugo"
+locale = "en"
+timeZone = "UTC"
+
+theme = "chirpy-hugo"
+
+enableGitInfo = false
+
+[pagination]
+  pagerSize = 5
+
+[permalinks]
+  posts = "/posts/:contentbasename/"
+
+[taxonomies]
+  category = "categories"
+  tag = "tags"
+
+# `outputs` and `outputFormats` do not merge from the theme: the project
+# replaces the section, so the demo lists them (D-07).
+[outputFormats.search]
+  mediaType = "application/json"
+  baseName = "search"
+  isPlainText = true
+  notAlternative = true
+
+[outputs]
+  home = ["HTML", "RSS", "search"]
+  section = ["HTML", "RSS"]
+  taxonomy = ["HTML"]
+  term = ["HTML"]
+
+# Mandatory markup settings (D-07).
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.goldmark.parser.attribute]
+  block = true
+
+[markup.goldmark.extensions.passthrough]
+  enable = true
+
+[markup.goldmark.extensions.passthrough.delimiters]
+  block = [['$$', '$$']]
+  inline = [['$', '$']]
+
+[markup.highlight]
+  noClasses = false
+
+[[cascade]]
+  [cascade.params]
+    toc = true
+    comments = true
+  [cascade.target]
+    path = "/posts/**"
+
+[menus]
+  [[menus.main]]
+    name = "Categories"
+    pageRef = "/categories/"
+    weight = 1
+    [menus.main.params]
+      icon = "fas fa-stream"
+  [[menus.main]]
+    name = "Tags"
+    pageRef = "/tags/"
+    weight = 2
+    [menus.main.params]
+      icon = "fas fa-tags"
+  [[menus.main]]
+    name = "Archives"
+    pageRef = "/archives/"
+    weight = 3
+    [menus.main.params]
+      icon = "fas fa-archive"
+  [[menus.main]]
+    name = "About"
+    pageRef = "/about/"
+    weight = 4
+    [menus.main.params]
+      icon = "fas fa-info-circle"
+
+[params]
+  description = "A demo of the Chirpy theme ported to Hugo."
+  tagline = "Parity with the Jekyll original"
+  theme_mode = ""
+
+  # Neutral identity. Replace with your own in a real site.
+  avatar = "/assets/img/avatar.svg"
+  social_preview_image = ""
+
+  [params.social]
+    name = "Example Author"
+    email = "author@example.com"
+    links = ["https://example.com/author"]

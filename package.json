@@ -5,15 +5,28 @@
   "description": "Hugo port of jekyll-theme-chirpy — verification harness",
   "type": "module",
   "scripts": {
+    "prepare": "husky",
+    "build": "hugo --panicOnWarning --gc --minify",
+    "build:css": "bash scripts/build-css.sh",
+    "build:js": "node scripts/build-js.mjs",
+    "build:example": "hugo -s exampleSite --themesDir ../.. --theme chirpy-hugo --panicOnWarning -d ../.out/example",
+    "i18n": "node scripts/i18n.mjs --apply",
+    "screenshot": "node scripts/screenshot.mjs",
     "test:parity": "node tests/parity/diff.mjs",
+    "test:visual": "node tests/visual/capture.mjs oracle && node tests/visual/capture.mjs hugo && node tests/visual/compare.mjs",
     "test:qa": "node tests/qa/q1-word-count.mjs && node tests/qa/q2-jsonify.mjs && node tests/qa/q3-page-order.mjs && node tests/qa/q4-sort-natural.mjs",
+    "test:i18n": "node scripts/i18n.mjs --check",
     "test:upstream": "node scripts/fetch-upstream.mjs --check && node scripts/extract-params.mjs --check",
-    "build:css": "bash scripts/build-css.sh"
+    "test:commit": "commitlint --from origin/main --to HEAD"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "husky": "^9.1.7",
     "parse5": "^7.2.1",
     "pixelmatch": "^8.0.0",
     "playwright-core": "^1.64.1",
-    "pngjs": "^7.0.0"
+    "pngjs": "^7.0.0",
+    "yaml": "^2.9.1"
   }
 }
