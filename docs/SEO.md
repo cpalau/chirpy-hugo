@@ -195,6 +195,10 @@ the parity gates stay green.
 | `params.seo.article_meta` | `false` | `article:section`, `article:tag`, `article:author` | G4c |
 | `params.seo.image_metadata` | `false` | `og:image:type`, plus width/height from the asset when Hugo can resolve it | G4c |
 | `params.seo.sitemap_limit` | `50000` | a sitemap above the protocol limit is invalid; the build warns with the count | G4c |
+| `params.seo.max_image_preview` | `""` | Google Discover requires `max-image-preview:large` for large thumbnails | G4c |
+| `params.seo.image_sitemap` | `false` | image sitemap entries for post covers, which Google still recommends | G4c |
+| `llms.txt` (output format) | off | a concise, machine-readable summary for AI agents (Lighthouse audits for it) | G4c |
+| `og:locale:alternate` | automatic | translations advertise each other's locale | G4c |
 
 `hreflang` and `dir` need no switch because they only render when the site has
 translations or a language direction; a monolingual LTR site is unaffected.

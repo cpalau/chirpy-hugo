@@ -371,6 +371,10 @@ site is byte-identical.
 | B9 | `article:section/tag/author` | richer article metadata | `params.seo.article_meta` | G4c |
 | B10 | `og:image:type` + auto dimensions | correct card rendering | `params.seo.image_metadata` | G4c |
 | B11 | sitemap limit warning | a sitemap over 50,000 URLs is invalid | `params.seo.sitemap_limit` | G4c |
+| B12 | `max-image-preview:large` | Google Discover requires it for large thumbnails | `params.seo.max_image_preview` | G4c |
+| B13 | image sitemap | helps Google Images discover the covers | `params.seo.image_sitemap` | G4c |
+| B14 | `llms.txt` | a concise summary for AI agents; Lighthouse audits it | `llms` output format | G4c |
+| B15 | `og:locale:alternate` | translations advertise each other | automatic when translated | G4c |
 
 They are documented in [`SEO.md`](SEO.md#11-beyond-upstream) and
 [`CONFIG.md`](CONFIG.md#121-beyond-upstream-opt-in).

@@ -7,11 +7,16 @@
        Jekyll's `/page2/` is declared as D-14. Order is not significant in a
        sitemap; the set is what this gate compares. */ -}}
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  {{- if site.Params.seo.image_sitemap }} xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"{{ end }}
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 {{- $urls := slice -}}
 {{- range sort (where .Site.RegularPages "Section" "posts") "Date" "asc" -}}
-  {{- $urls = $urls | append (dict "loc" .Permalink "lastmod" (.Lastmod.Format "2006-01-02T15:04:05-07:00")) -}}
+  {{- $entry := dict "loc" .Permalink "lastmod" (.Lastmod.Format "2006-01-02T15:04:05-07:00") -}}
+  {{- if site.Params.seo.image_sitemap -}}
+    {{- with (partial "seo/image.html" .).path }}{{ $entry = merge $entry (dict "image" .) }}{{ end -}}
+  {{- end -}}
+  {{- $urls = $urls | append $entry -}}
 {{- end -}}
 {{- range sort (where .Site.Pages "Kind" "taxonomy") "Permalink" "asc" -}}
   {{- $urls = $urls | append (dict "loc" .Permalink "lastmod" (.Date.Format "2006-01-02T15:04:05-07:00")) -}}
@@ -48,6 +53,11 @@
     <loc>{{ .loc | safeHTML }}</loc>
     {{- with .lastmod }}
     <lastmod>{{ . | safeHTML }}</lastmod>
+    {{- end }}
+    {{- with .image }}
+    <image:image>
+      <image:loc>{{ . | safeHTML }}</image:loc>
+    </image:image>
     {{- end }}
   </url>
 {{- end }}

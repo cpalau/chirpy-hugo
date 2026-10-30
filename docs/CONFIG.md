@@ -370,10 +370,27 @@ rendered HTML stays byte-identical to the original until a site enables one.
 | `params.seo.article_meta` | `false` | `article:section`, `article:tag` and `article:author` |
 | `params.seo.image_metadata` | `false` | `og:image:type`, plus width/height read from the image asset when Hugo can resolve it |
 | `params.seo.sitemap_limit` | `50000` | warn when the sitemap grows past the protocol limit |
+| `params.seo.max_image_preview` | `""` | `max-image-preview:large\|standard\|none`; Google Discover requires `large` for big thumbnails |
+| `params.seo.image_sitemap` | `false` | add each post cover to the sitemap with the image extension |
 
 `dir="rtl"` and `hreflang` need no switch: they only render when the site
 declares a language direction or has translations, so a monolingual LTR site is
-unaffected.
+unaffected. The same applies to `og:locale:alternate`, which lists the other
+translations of a page.
+
+### 12.2 `llms.txt`
+
+The theme ships `layouts/llms.txt` but Hugo only renders it when the home page
+lists the format, so it costs nothing until a site opts in:
+
+```toml
+[outputs]
+  home = ["HTML", "feed", "search", "swconf", "manifest", "llms"]
+```
+
+The output is the site title, the site description and a link list of posts
+(hidden and `noindex` pages excluded). It is an emerging convention for AI
+agents; Lighthouse 12 audits for it and treats its absence as not applicable.
 
 Front matter keys the templates honour, with the same meaning as upstream:
 

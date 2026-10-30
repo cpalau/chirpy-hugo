@@ -101,6 +101,11 @@
   {{- $hidden := eq (printf "%v" .Params.hidden) "true" -}}
   {{- $noindex = and $site.Params.seo.noindex_hidden $hidden -}}
 {{- end -}}
+{{- $robots := slice -}}
+{{- if $noindex }}{{ $robots = $robots | append "noindex" "follow" }}{{ end -}}
+{{- with $site.Params.seo.max_image_preview -}}
+  {{- $robots = $robots | append (printf "max-image-preview:%v" .) -}}
+{{- end -}}
 {{- /* Beyond upstream (opt-in): image metadata, read from the asset when Hugo
        can resolve it, otherwise from the extension. */ -}}
 {{- $ogWidth := $image.meta.width -}}
@@ -120,14 +125,23 @@
 {{- end -}}
 <!-- Begin Jekyll SEO tag v2.9.1 -->
 <meta name="generator" content="{{ printf "Hugo %s" hugo.Version }}" />
-{{- if $noindex }}
-<meta name="robots" content="noindex, follow" />
+{{- with $robots }}
+<meta name="robots" content="{{ delimit . ", " }}" />
 {{- end }}
 <meta property="og:title" content="{{ $title }}" />
 {{- with $author.name }}
 <meta name="author" content="{{ . }}" />
 {{- end }}
 <meta property="og:locale" content="{{ $locale }}" />
+{{- if .IsTranslated }}
+  {{- range .Translations }}
+    {{- $alt := printf "%v" (or .Language.Locale .Language.Lang) -}}
+    {{- $alt = replace $alt "-" "_" -}}
+    {{- if ne $alt $locale }}
+<meta property="og:locale:alternate" content="{{ $alt }}" />
+    {{- end }}
+  {{- end }}
+{{- end }}
 {{- with $desc }}
 <meta name="description" content="{{ . }}" />
 <meta name="twitter:description" property="og:description" content="{{ . }}" />

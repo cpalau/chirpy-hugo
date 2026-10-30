@@ -1,0 +1,37 @@
+{{- /*
+  llms.txt — an opt-in, machine-readable summary for LLM agents.
+
+  The format is an emerging convention (llmstxt.org) and Lighthouse audits for
+  it. Hugo only renders this file when the site lists the `llms` output format
+  for the home page; the theme defines the format, the site opts in:
+
+    [outputs]
+      home = ["HTML", "feed", "search", "swconf", "manifest", "llms"]
+*/ -}}
+# {{ site.Title }}
+
+{{- with site.Params.description }}
+> {{ . }}
+{{- end }}
+{{- with site.Params.tagline }}
+
+{{ . }}
+{{- end }}
+
+## Posts
+
+{{- range sort (partial "posts-visible.html" .) "Date" "desc" }}
+- [{{ .Title }}]({{ .Permalink }}): {{ partial "seo/description.html" . | truncate 200 }}
+{{- end }}
+
+{{- $pages := slice -}}
+{{- range where site.RegularPages "Section" "" -}}
+  {{- if ne (printf "%v" .Params.noindex) "true" }}{{ $pages = $pages | append . }}{{ end -}}
+{{- end -}}
+{{- with $pages }}
+## Pages
+
+{{- range sort . "Title" "asc" }}
+- [{{ .Title }}]({{ .Permalink }})
+{{- end }}
+{{- end }}

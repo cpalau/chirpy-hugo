@@ -104,9 +104,32 @@ has('ar page sets dir=rtl', page('ar/posts/hello'), '<html lang="ar" dir="rtl"')
 expect('en page has no dir', !/<html lang="en"[^>]* dir=/.test(page('posts/hello')));
 
 /* noindex */
-has('hidden post is noindex', page('posts/secret'), '<meta name="robots" content="noindex, follow"');
-has('noindex front matter is honoured', page('secret'), '<meta name="robots" content="noindex, follow"');
-expect('normal post is indexable', !page('posts/hello').includes('name="robots"'));
+has('hidden post is noindex', page('posts/secret'), '<meta name="robots" content="noindex, follow, max-image-preview:large"');
+has('noindex front matter is honoured', page('secret'), '<meta name="robots" content="noindex, follow, max-image-preview:large"');
+expect(
+  'normal post is indexable and Discover-ready',
+  !page('posts/hello').includes('noindex') && page('posts/hello').includes('max-image-preview:large'),
+);
+
+/* og:locale:alternate */
+has('es page lists the other locales', page('es/posts/hello'), '<meta property="og:locale:alternate" content="en"');
+has('es page lists the RTL locale', page('es/posts/hello'), '<meta property="og:locale:alternate" content="ar"');
+expect('en page has no alternate of itself', !page('posts/hello').includes('og:locale:alternate" content="en"'));
+
+/* image sitemap */
+/* A multilingual build publishes one sitemap per language plus an index. */
+const sitemapFile = path.join(OUT, 'en/sitemap.xml');
+const sitemapXml = fs.existsSync(sitemapFile) ? fs.readFileSync(sitemapFile, 'utf8') : fs.readFileSync(path.join(OUT, 'sitemap.xml'), 'utf8');
+has('sitemap declares the image namespace', sitemapXml, 'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"');
+has('sitemap lists the cover of a post', sitemapXml, '<image:loc>http://127.0.0.1:4100/img/cover.png</image:loc>');
+
+/* llms.txt */
+const llmsFile = path.join(OUT, 'llms.txt');
+const llms = fs.existsSync(llmsFile) ? fs.readFileSync(llmsFile, 'utf8') : '';
+has('llms.txt starts with the site title', llms, '# My Site');
+has('llms.txt lists a post', llms, '[Hello SEO](http://127.0.0.1:4100/posts/hello/)');
+expect('llms.txt omits hidden posts', !llms.includes('Hidden post'));
+expect('llms.txt omits noindex pages', !llms.includes('Unlisted page'));
 
 /* feed discovery */
 has(

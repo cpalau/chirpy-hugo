@@ -22,6 +22,34 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.4.0] - 2026-10-30
+
+### Added
+
+- **`max-image-preview:large`** (`params.seo.max_image_preview`). Google
+  Discover lists it as the requirement for large thumbnails; it is merged with
+  `noindex` into a single `robots` meta.
+- **Image sitemap** (`params.seo.image_sitemap`): each post cover is listed with
+  the Google image extension, which Google still recommends for discovery.
+- **`llms.txt`**: an opt-in home output format with the site title, description
+  and a link list of posts and pages, excluding hidden and `noindex` content.
+  Lighthouse 12 audits for it.
+- **`og:locale:alternate`** on translated pages, so each translation advertises
+  the others.
+- Gate 4c now covers the four additions: locale alternates, the combined
+  `robots` meta, the image sitemap namespace and entries, and the content of
+  `llms.txt`.
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [1.3.0] - 2026-10-30
 
 ### Added

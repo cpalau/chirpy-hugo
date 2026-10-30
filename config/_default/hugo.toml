@@ -70,6 +70,13 @@ enableGitInfo = false
   isPlainText = true
   notAlternative = true
 
+# Opt-in: list "llms" in `outputs.home` to publish /llms.txt (agent summary).
+[outputFormats.llms]
+  mediaType = "text/plain"
+  baseName = "llms"
+  isPlainText = true
+  notAlternative = true
+
 [outputs]
   home = ["HTML", "feed", "search", "swconf", "manifest"]
   # Upstream has no per-section or per-taxonomy feeds: only /feed.xml.

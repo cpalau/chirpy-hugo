@@ -294,6 +294,11 @@ switch on, a sitemap limit of 3) and asserts:
 - `og:image:type` and dimensions read from the asset;
 - the JSON-LD image fallback to the social preview;
 - a `BreadcrumbList` with two levels on a post and three on a term;
+- `og:locale:alternate` on the translated pages;
+- `max-image-preview:large` and the combined `robots` directives;
+- the image sitemap namespace and entries;
+- `llms.txt` with the site summary, posts and pages, without hidden or
+  `noindex` content;
 - the sitemap limit warning;
 - no other warning, and the standards gate over the whole build.
 

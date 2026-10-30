@@ -67,7 +67,7 @@ theme = "chirpy-hugo"
   notAlternative = true
 
 [outputs]
-  home = ["HTML", "feed", "search", "swconf", "manifest"]
+  home = ["HTML", "feed", "search", "swconf", "manifest", "llms"]
   section = ["HTML"]
   taxonomy = ["HTML"]
   term = ["HTML"]
@@ -152,6 +152,8 @@ defaultContentLanguageInSubdir = false
     locale = "ar"
 
 [params.seo]
+  max_image_preview = "large"
+  image_sitemap = true
   noindex_hidden = true
   feed_discovery = true
   breadcrumbs = true

@@ -64,6 +64,11 @@ google_site_verification = ""
   # Warn when the sitemap grows past this many URLs (50,000 is the protocol
   # limit). The warning tells the owner which configuration splits it.
   sitemap_limit = 50000
+  # Google Discover requires `max-image-preview:large` for large thumbnails.
+  # Empty keeps upstream's robots meta; accepted values: large, standard, none.
+  max_image_preview = ""
+  # Add the post cover to the sitemap with the image extension.
+  image_sitemap = false
 
 [social]
   name = ""
