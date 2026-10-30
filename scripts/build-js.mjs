@@ -35,7 +35,10 @@ const SW_PATCH = `/* chirpy-hugo: update policy (D-23) */
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
+    const keys = await caches.keys();
+    const stale = keys.some((key) => key !== swconf.cacheName);
     await self.clients.claim();
+    if (!stale) return; // first install: nothing to recover from
     const windows = await self.clients.matchAll({ type: 'window' });
     for (const client of windows) client.navigate(client.url).catch(() => {});
   })());
