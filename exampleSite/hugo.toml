@@ -145,3 +145,19 @@ enableGitInfo = false
     name = "Cotes Chung"
     email = ""
     links = ["https://github.com/cotes2020", "https://twitter.com/cotes2020"]
+
+  # The upstream demo ships giscus. It points at this repository's Discussions
+  # (the demo's own threads must not collect comments meant for the port).
+  [params.comments]
+    provider = "giscus"
+
+  [params.comments.giscus]
+    repo = "cpalau/chirpy-hugo"
+    repo_id = "R_kgDOVb9aiQ"
+    category = "Announcements"
+    category_id = "DIC_kwDOVb9aic4DJ-5z"
+    mapping = "pathname"
+    strict = "0"
+    input_position = "top"
+    lang = "en"
+    reactions_enabled = "1"
