@@ -53,6 +53,7 @@ export default {
         'oracle',
         'parity',
         'seo',
+        'plugins',
         'visual',
         'qa',
         'a11y',
