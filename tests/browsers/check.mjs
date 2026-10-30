@@ -108,6 +108,24 @@ for (const [name, type] of ENGINES) {
     }
     return route.fulfill({ status: 200, body: '', contentType: 'text/plain' });
   });
+  // The pageview counter is the only request whose rejection WebKit surfaces as
+  // an uncaught error. Resolve it inside the page so the theme's own code path
+  // runs to completion, whatever the network layer does with the route stub.
+  await context.addInitScript(() => {
+    const original = window.fetch;
+    window.fetch = (input, init) => {
+      const url = typeof input === 'string' ? input : input?.url ?? '';
+      if (url.includes('goatcounter.com')) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ count: '1' }), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          }),
+        );
+      }
+      return original(input, init);
+    };
+  });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
