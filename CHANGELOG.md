@@ -22,6 +22,58 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.2.0] - 2026-10-30
+
+### Added
+
+- **The complete `jekyll-seo-tag` 2.9.1 surface.** Chirpy does not render SEO
+  itself: it delegates to the gem. The port now covers every branch of it:
+  - description from the excerpt (first block, rendered, stripped, 100 words
+    with an ellipsis, `seo_description_max_words`);
+  - `canonical_url`, `title_category`, `locale` (with `-` → `_`),
+    `twitter.card`, `twitter:site`/`creator` with `@` normalisation and the
+    author-name fallback;
+  - image `path`/`facebook`/`twitter` fallbacks, `width`, `height`, `alt`,
+    `lqip`;
+  - author maps, `authors[0]`, the site-wide `author` fallback, `type` and
+    `url`;
+  - `seo.type/name/links/date_modified`, `sameAs`, `mainEntityOfPage`;
+  - `logo` → JSON-LD `publisher`, `facebook.admins/publisher/app_id`, the
+    legacy `google_site_verification`;
+  - `last_modified_at` accepted alongside `lastmod`.
+- **Gate 4b (`npm run test:seo`)**: compares every meta/link/JSON-LD field to
+  the oracle with field-level messages, checks SEO invariants that equality
+  cannot catch, and asserts the fixture knobs explicitly. 51 pages, ~2.4 k
+  assertions.
+- **Fixture 13 (`seo`)**: `seo-knobs`, `seo-excerpt` and `seo-images`, mirrored
+  in Jekyll and Hugo, plus site-level SEO settings in the adoption matrix.
+- `docs/SEO.md`: every field, its rule, the configuration map and the declared
+  divergences.
+
+### Changed
+
+- The meta description is no longer Hugo's `.Summary`. Posts without a
+  `description` now publish the same text as Jekyll: the first paragraph,
+  rendered, stripped, cut to 100 words with `…`.
+- Home pagination excludes `hidden` posts, as `jekyll-paginate` does. The page
+  count used to be right only while the counts happened to round the same way.
+- The demo ships `social_preview_image` and the author identities of the
+  upstream demo, so its Open Graph and JSON-LD match.
+
+### Fixed
+
+- `og:locale` used the Hugo language key verbatim (`es-ES`); it now normalises
+  to `es_ES` like the gem.
+- `twitter:site`/`twitter:creator` produced `@@handle` for values that already
+  started with `@`.
+- A paginated home page was typed `WebSite` in JSON-LD; it is `WebPage`.
+- `params.cdn` is honoured in `og:image`, `twitter:image` and JSON-LD.
+- JSON-LD used an escaped string instead of an object when the page had an
+  image with dimensions.
+
+### Security
+
+
 ## [1.1.1] - 2026-10-30
 
 ### Added

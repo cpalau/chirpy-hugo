@@ -28,6 +28,14 @@ github:
 twitter:
   username: example
 
+# jekyll-seo-tag publisher logo and the site-wide author fallback.
+logo: "/assets/img/fixtures/cover.png"
+author: "Chirpy Authors"
+facebook:
+  admins: "1234567890"
+  publisher: "https://www.facebook.com/example"
+  app_id: "9876543210"
+
 social:
   name: "Example Author"
   email: "author@example.com"

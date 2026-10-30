@@ -55,9 +55,17 @@
             {{- if $authors -}}
               {{- range $i, $key := (cond (reflect.IsSlice $authors) $authors (slice $authors)) -}}
                 {{- if $i }}{{ "</em>, <em>" | safeHTML }}{{ end -}}
-                {{- with index hugo.Data.authors $key -}}
-                  {{- if .url }}<a href="{{ .url }}">{{ .name }}</a>{{ else }}{{ .name }}{{ end -}}
-                {{- else -}}{{ $key }}{{- end -}}
+                {{- /* Upstream indexes `data/authors` with the entry; a map has no
+                       data entry, so it renders empty. */ -}}
+                {{- $data := dict -}}
+                {{- if not (reflect.IsMap $key) -}}
+                  {{- with index hugo.Data.authors $key }}{{ $data = . }}{{ end -}}
+                {{- end -}}
+                {{- if $data.url -}}
+                  <a href="{{ $data.url }}">{{ $data.name }}</a>
+                {{- else -}}
+                  {{- $data.name -}}
+                {{- end -}}
               {{- end -}}
             {{- else -}}
               <a href="{{ index $params.social.links 0 }}">{{ $params.social.name }}</a>

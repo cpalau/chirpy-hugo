@@ -10,3 +10,9 @@ second:
   name: Second Author
   twitter: example2
   url: https://example.com/second
+
+org:
+  name: Org Author
+  twitter: orgauthor
+  url: https://example.com/org
+  type: Organization

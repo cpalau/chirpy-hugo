@@ -1,0 +1,19 @@
+{{- /*
+  Posts that take part in pagination.
+
+  `jekyll-paginate` rejects any post whose `hidden` key is truthy
+  (`lib/jekyll-paginate/pagination.rb`), so the port must paginate the same set
+  or the page count drifts as soon as a site has a hidden post. The home
+  template excluded hidden posts from the *listing* but paginated all of them,
+  which only looked right while the counts happened to round to the same number.
+
+  Returns: slice of pages.
+*/ -}}
+{{- $posts := slice -}}
+{{- range where site.RegularPages "Type" "posts" -}}
+  {{- $hidden := .Params.hidden -}}
+  {{- if not (or (eq $hidden true) (eq (printf "%v" $hidden) "true")) -}}
+    {{- $posts = $posts | append . -}}
+  {{- end -}}
+{{- end -}}
+{{- return $posts -}}

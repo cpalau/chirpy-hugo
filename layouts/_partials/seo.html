@@ -1,171 +1,251 @@
-{{- /* Reproduces the jekyll-seo-tag output (D-06).
-       Only the shapes the theme actually emits are implemented; anything else
-       is a bug to be measured by G4, not silently ignored. */ -}}
+{{- /* Reproduces the `jekyll-seo-tag` 2.9.1 output that Chirpy emits (D-06).
+       Every branch the gem can take is ported; the pieces that depend on a
+       Jekyll-only concept (the paginator) are derived from the Hugo equivalent
+       and documented in docs/SEO.md. Anything else is a bug to be measured by
+       G4, not silently ignored. */ -}}
 {{- $kind := partial "page-kind.html" . -}}
 {{- $site := .Site -}}
+{{- $author := partial "seo/author.html" . -}}
+{{- $image := partial "seo/image.html" . -}}
+{{- $desc := partial "seo/description.html" . -}}
+
+{{- /* page_title: the title, plus `title_category` when it adds information. */ -}}
 {{- $title := cond (eq $kind "home") $site.Title (partial "display-title.html" .) -}}
-{{- $desc := "" -}}
-{{- if .Description -}}
-  {{- $desc = .Description -}}
-{{- else if eq $kind "post" -}}
-  {{- $desc = .Summary | plainify | replaceRE `\s+` " " | strings.TrimSpace -}}
-{{- else -}}
-  {{- $desc = $site.Params.description -}}
-{{- end -}}
-{{- $author := "" -}}
-{{- $authorURL := "" -}}
-{{- $authorTwitter := "" -}}
-{{- with .Params.author -}}
-  {{- with index hugo.Data.authors . -}}
-    {{- $author = .name -}}
-    {{- $authorURL = .url | default "" -}}
-    {{- $authorTwitter = .twitter | default "" -}}
+{{- $titleCategory := "" -}}
+{{- with .Params.title_category -}}
+  {{- $titleCategory = printf "%v" . -}}
+  {{- if ne $titleCategory $title -}}
+    {{- $title = printf "%s | %s" $title $titleCategory -}}
   {{- end -}}
 {{- end -}}
-{{- $social := $site.Params.social -}}
-{{- $twitterSite := "" -}}
-{{- with $site.Params.twitter_username }}{{ $twitterSite = printf "@%s" . }}{{ end -}}
-{{- /* Hugo invents a `.Date` for term pages (the newest page in the term);
-       Jekyll's archive pages have none, so the kind decides. */ -}}
-{{- $hasDate := and (not .Date.IsZero) (ne .Kind "term") -}}
-{{- $isArticle := and (ne $kind "home") $hasDate -}}
-{{- /* jekyll-seo-tag decides the JSON-LD type from the page, not from the
-       layout: a page with a date is a BlogPosting, a page without one is a
-       WebPage, and the home and about pages are the site itself. */ -}}
-{{- $isAbout := eq .RelPermalink "/about/" -}}
-{{- $iso := "2006-01-02T15:04:05-07:00" -}}
+
+{{- /* og:locale: page locale, site locale, page lang, site lang, en_US. */ -}}
+{{- $locale := "" -}}
+{{- with .Params.locale -}}
+  {{- $locale = printf "%v" . -}}
+{{- else -}}
+  {{- with $site.Language.Locale -}}
+    {{- $locale = . -}}
+  {{- else -}}
+    {{- with .Params.lang -}}
+      {{- $locale = printf "%v" . -}}
+    {{- else -}}
+      {{- $locale = $site.Language.Lang -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $locale = strings.Replace $locale "-" "_" -}}
+
+{{- /* Dates. Jekyll uses `date`, `last_modified_at` and the seo override. */ -}}
+{{- $hasDate := and (not .Date.IsZero) (not (in (slice "home" "term") .Kind)) -}}
+{{- $published := .Date -}}
 {{- $modified := .Date -}}
-{{- with .Params.lastmod }}{{ $modified = time.AsTime . }}{{ end -}}
+{{- with .Params.seo.date_modified -}}
+  {{- $modified = time.AsTime . -}}
+{{- else -}}
+  {{- with .Params.last_modified_at -}}
+    {{- $modified = time.AsTime . -}}
+  {{- else -}}
+    {{- with .Params.lastmod }}{{ $modified = time.AsTime . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- $iso := "2006-01-02T15:04:05-07:00" -}}
+
+{{- /* Canonical: `canonical_url` wins; paginated home pages point at themselves. */ -}}
+{{- $canonical := .Permalink -}}
+{{- with .Params.canonical_url }}{{ $canonical = . }}{{ end -}}
+{{- if and (eq $kind "home") (not .Params.canonical_url) -}}
+  {{- with (.Paginate (partial "posts-visible.html" $)) -}}
+    {{- if gt .PageNumber 1 }}{{ $canonical = .URL | absURL }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* JSON-LD type and the page-level `seo` overrides. A paginated home page
+       is not the home page for jekyll-seo-tag: its URL is /pageN/. */ -}}
+{{- $seo := .Params.seo | default (dict) -}}
+{{- $pageNumber := 1 -}}
+{{- if eq $kind "home" -}}
+  {{- with (.Paginate (partial "posts-visible.html" $)) }}{{ $pageNumber = .PageNumber }}{{ end -}}
+{{- end -}}
+{{- $isHomeOrAbout := or (and (eq $kind "home") (eq $pageNumber 1)) (eq .RelPermalink "/about/") -}}
+{{- $type := "WebPage" -}}
+{{- if $seo.type -}}
+  {{- $type = printf "%v" $seo.type -}}
+{{- else if $isHomeOrAbout -}}
+  {{- $type = "WebSite" -}}
+{{- else if $hasDate -}}
+  {{- $type = "BlogPosting" -}}
+{{- end -}}
+{{- $authorName := $author.name -}}
+{{- $authorType := $author.type -}}
+{{- if not (in (slice "" "Person" "Organization") $authorType) -}}
+  {{- $authorName = "" -}}
+{{- end -}}
+{{- $links := slice -}}
+{{- with $seo.links }}{{ $links = . }}{{ else -}}
+  {{- if $isHomeOrAbout }}{{ with $site.Params.social.links }}{{ $links = . }}{{ end }}{{ end -}}
+{{- end -}}
+{{- $name := "" -}}
+{{- if $seo.name -}}
+  {{- $name = printf "%v" $seo.name -}}
+{{- else if $isHomeOrAbout -}}
+  {{- $name = or $site.Params.social.name $site.Title -}}
+{{- end -}}
+{{- $logo := "" -}}
+{{- with $site.Params.logo -}}
+  {{- if strings.Contains . "://" }}{{ $logo = . }}{{ else }}{{ $logo = . | absURL }}{{ end -}}
+{{- end -}}
 <!-- Begin Jekyll SEO tag v2.9.1 -->
 <meta name="generator" content="{{ printf "Hugo %s" hugo.Version }}" />
 <meta property="og:title" content="{{ $title }}" />
-{{- with $author }}
+{{- with $author.name }}
 <meta name="author" content="{{ . }}" />
 {{- end }}
-<meta property="og:locale" content="{{ $site.Language.Lang }}" />
+<meta property="og:locale" content="{{ $locale }}" />
 {{- with $desc }}
 <meta name="description" content="{{ . }}" />
 <meta name="twitter:description" property="og:description" content="{{ . }}" />
 {{- end }}
-{{- $canonical := .Permalink -}}
-{{- if eq $kind "home" -}}
-  {{- with (.Paginate (where $.Site.RegularPages "Type" "posts")) -}}
-    {{- if gt .PageNumber 1 }}{{ $canonical = .URL | absURL }}{{ end -}}
-  {{- end -}}
-{{- end }}
 <link rel="canonical" href="{{ $canonical }}" />
 <meta property="og:url" content="{{ $canonical }}" />
 <meta property="og:site_name" content="{{ $site.Title }}" />
-{{- $pageImage := "" -}}
-{{- $pageImageAlt := "" -}}
-{{- with .Params.image -}}
-  {{- $image := partial "image-data.html" . -}}
-  {{- with $image.src -}}
-    {{- $pageImage = partial "media-url.html" (dict "src" . "subpath" $.Params.media_subpath "absolute" true) -}}
-  {{- end -}}
-  {{- $pageImageAlt = $image.alt -}}
-{{- end }}
-{{- $socialImage := "" -}}
-{{- with $site.Params.social_preview_image -}}
-  {{- $socialImage = partial "media-url.html" (dict "src" . "absolute" true) -}}
-{{- end }}
-{{- with $pageImage }}
+{{- with $image.path }}
 <meta property="og:image" content="{{ . }}" />
-{{- with $pageImageAlt }}
+  {{- with $image.meta.height }}
+<meta property="og:image:height" content="{{ . }}" />
+  {{- end }}
+  {{- with $image.meta.width }}
+<meta property="og:image:width" content="{{ . }}" />
+  {{- end }}
+  {{- with $image.meta.alt }}
 <meta property="og:image:alt" content="{{ . }}" />
+  {{- end }}
 {{- end }}
+<meta property="og:type" content="{{ cond $hasDate "article" "website" }}" />
+{{- if $hasDate }}
+<meta property="article:published_time" content="{{ $published.Format $iso }}" />
+<meta property="article:modified_time" content="{{ $modified.Format $iso }}" />
 {{- end }}
-<meta property="og:type" content="{{ cond $isArticle "article" "website" }}" />
 {{- if eq $kind "home" }}
-  {{- with (.Paginate (where $.Site.RegularPages "Type" "posts")).Next }}
+  {{- with (.Paginate (partial "posts-visible.html" $)).Next }}
 <link rel="next" href="{{ .URL | absURL }}" />
   {{- end }}
-  {{- with (.Paginate (where $.Site.RegularPages "Type" "posts")).Prev }}
+  {{- with (.Paginate (partial "posts-visible.html" $)).Prev }}
 <link rel="prev" href="{{ .URL | absURL }}" />
   {{- end }}
 {{- end }}
-{{- if $isArticle }}
-<meta property="article:published_time" content="{{ .Date.Format $iso }}" />
-<meta property="article:modified_time" content="{{ $modified.Format $iso }}" />
-{{- end }}
-{{- with $pageImage }}
-<meta name="twitter:card" content="summary_large_image" />
+{{- $twitterCard := "summary" -}}
+{{- with .Params.twitter.card }}{{ $twitterCard = printf "%v" . }}{{ end -}}
+{{- if not .Params.twitter.card -}}
+  {{- with $site.Params.twitter_card }}{{ $twitterCard = printf "%v" . }}{{ end -}}
+{{- end -}}
+{{- with $image.path }}
+  {{- if not (or $.Params.twitter.card $site.Params.twitter_card) }}{{ $twitterCard = "summary_large_image" }}{{ end }}
+<meta name="twitter:card" content="{{ $twitterCard }}" />
 <meta name="twitter:image" content="{{ . }}" />
-{{- with $pageImageAlt }}
+  {{- with $image.meta.alt }}
 <meta name="twitter:image:alt" content="{{ . }}" />
-{{- end }}
+  {{- end }}
 {{- else }}
+  {{- $socialImage := "" -}}
+  {{- with $site.Params.social_preview_image -}}
+    {{- $socialImage = partial "media-url.html" (dict "src" . "absolute" true) -}}
+  {{- end -}}
   {{- with $socialImage }}
 <meta property="og:image" content="{{ . }}" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta property="twitter:image" content="{{ . }}" />
   {{- else }}
-<meta name="twitter:card" content="summary" />
+<meta name="twitter:card" content="{{ $twitterCard }}" />
   {{- end }}
 {{- end }}
 <meta name="twitter:title" content="{{ $title }}" />
-{{- with $twitterSite }}
-<meta name="twitter:site" content="{{ . }}" />
-{{- end }}
-{{- with $authorTwitter }}
+{{- with $site.Params.twitter_username }}
+<meta name="twitter:site" content="@{{ strings.TrimPrefix "@" . }}" />
+  {{- with $author.twitter }}
 <meta name="twitter:creator" content="@{{ . }}" />
+  {{- end }}
 {{- end }}
-{{- with $site.Params.webmaster_verifications }}
-{{- with .google }}
+{{- with $site.Params.facebook.admins }}
+<meta property="fb:admins" content="{{ . }}" />
+{{- end }}
+{{- with $site.Params.facebook.publisher }}
+<meta property="article:publisher" content="{{ . }}" />
+{{- end }}
+{{- with $site.Params.facebook.app_id }}
+<meta property="fb:app_id" content="{{ . }}" />
+{{- end }}
+{{- $verification := $site.Params.webmaster_verifications | default dict -}}
+{{- $verified := false -}}
+{{- range $key, $value := $verification }}{{ if $value }}{{ $verified = true }}{{ end }}{{ end -}}
+{{- if $verified }}
+  {{- with $verification.google }}
 <meta name="google-site-verification" content="{{ . }}" />
-{{- end }}
-{{- with .bing }}
+  {{- end }}
+  {{- with $verification.bing }}
 <meta name="msvalidate.01" content="{{ . }}" />
-{{- end }}
-{{- with .alexa }}
+  {{- end }}
+  {{- with $verification.alexa }}
 <meta name="alexaVerifyID" content="{{ . }}" />
-{{- end }}
-{{- with .yandex }}
+  {{- end }}
+  {{- with $verification.yandex }}
 <meta name="yandex-verification" content="{{ . }}" />
-{{- end }}
-{{- with .baidu }}
+  {{- end }}
+  {{- with $verification.baidu }}
 <meta name="baidu-site-verification" content="{{ . }}" />
-{{- end }}
-{{- with .facebook }}
+  {{- end }}
+  {{- with $verification.facebook }}
 <meta name="facebook-domain-verification" content="{{ . }}" />
+  {{- end }}
+{{- else }}
+  {{- with $site.Params.google_site_verification }}
+<meta name="google-site-verification" content="{{ . }}" />
+  {{- end }}
 {{- end }}
-{{- end }}
-{{- $ld := "" -}}
-{{- if and (eq $kind "home") (gt (.Paginate (where $.Site.RegularPages "Type" "posts")).PageNumber 1) -}}
-  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebPage","description":%s,"headline":%s,"url":%s}` (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $canonical) -}}
-{{- else if or (eq $kind "home") $isAbout -}}
-  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebSite"` -}}
-  {{- if $isArticle -}}
-    {{- $ld = printf `%s,"dateModified":%s,"datePublished":%s` $ld (partial "jsonify.html" ($modified.Format $iso)) (partial "jsonify.html" (.Date.Format $iso)) -}}
-  {{- end -}}
-  {{- $links := "[]" -}}
-  {{- with $social.links }}{{ $links = partial "jsonify.html" . }}{{ end -}}
-  {{- $ld = printf `%s,"description":%s,"headline":%s,"name":%s,"sameAs":%s,"url":%s}` $ld (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $social.name) $links (partial "jsonify.html" .Permalink) -}}
-{{- else if $isArticle -}}
-  {{- $ld = printf `{"@context":"https://schema.org","@type":"BlogPosting"` -}}
-  {{- with $author -}}
-    {{- $authorObj := printf `{"@type":"Person","name":%s` (partial "jsonify.html" .) -}}
-    {{- with $authorURL }}{{ $authorObj = printf `%s,"url":%s` $authorObj (partial "jsonify.html" .) }}{{ end -}}
-    {{- $ld = printf `%s,"author":%s}` $ld $authorObj -}}
-  {{- end -}}
-  {{- $ld = printf `%s,"dateModified":%s,"datePublished":%s,"description":%s,"headline":%s` $ld (partial "jsonify.html" ($modified.Format $iso)) (partial "jsonify.html" (.Date.Format $iso)) (partial "jsonify.html" $desc) (partial "jsonify.html" .Title) -}}
-  {{- $pageImage := "" -}}
-  {{- with .Params.image }}{{ with (partial "image-data.html" .).src }}{{ $pageImage = partial "media-url.html" (dict "src" . "subpath" $.Params.media_subpath "absolute" true) }}{{ end }}{{ end -}}
-  {{- with .Params.image -}}
-    {{- if reflect.IsMap . -}}
-      {{- $img := printf `{"alt":%s` (partial "jsonify.html" (.alt | default "")) -}}
-      {{- with .lqip }}{{ $img = printf `%s,"lqip":%s` $img (partial "jsonify.html" .) }}{{ end -}}
-      {{- with $pageImage }}{{ $img = printf `%s,"url":%s` $img (partial "jsonify.html" .) }}{{ end -}}
-      {{- $img = printf `%s,"@type":"imageObject"}` $img -}}
-      {{- $ld = printf `%s,"image":%s` $ld $img -}}
-    {{- else -}}
-      {{- /* A plain string is the image URL, as jekyll-seo-tag emits it. */ -}}
-      {{- with $pageImage }}{{ $ld = printf `%s,"image":%s` $ld (partial "jsonify.html" .) }}{{ end -}}
+{{- /* JSON-LD. Keys are emitted in jekyll-seo-tag's sorted order. */ -}}
+{{- $ld := slice (printf `"@context":%s` (partial "jsonify.html" "https://schema.org")) (printf `"@type":%s` (partial "jsonify.html" $type)) -}}
+{{- with $authorName -}}
+  {{- $authorObj := printf `{"@type":%s,"name":%s` (partial "jsonify.html" (or $authorType "Person")) (partial "jsonify.html" .) -}}
+  {{- with $author.url }}{{ $authorObj = printf `%s,"url":%s` $authorObj (partial "jsonify.html" .) }}{{ end -}}
+  {{- $authorObj = printf `%s}` $authorObj -}}
+  {{- $ld = $ld | append (printf `"author":%s` $authorObj) -}}
+{{- end -}}
+{{- if $hasDate -}}
+  {{- $ld = $ld | append (printf `"dateModified":%s` (partial "jsonify.html" ($modified.Format $iso))) -}}
+  {{- $ld = $ld | append (printf `"datePublished":%s` (partial "jsonify.html" ($published.Format $iso))) -}}
+{{- end -}}
+{{- with $desc }}{{ $ld = $ld | append (printf `"description":%s` (partial "jsonify.html" .)) }}{{ end -}}
+{{- $ld = $ld | append (printf `"headline":%s` (partial "jsonify.html" $title)) -}}
+{{- with $image.path -}}
+  {{- if eq (len $image.meta) 1 -}}
+    {{- $ld = $ld | append (printf `"image":%s` (partial "jsonify.html" .)) -}}
+  {{- else -}}
+    {{- $img := slice -}}
+    {{- with $image.meta.alt }}{{ $img = $img | append (printf `"alt":%s` (partial "jsonify.html" .)) }}{{ end -}}
+    {{- with $image.meta.lqip }}{{ $img = $img | append (printf `"lqip":%s` (partial "jsonify.html" .)) }}{{ end -}}
+    {{- with $image.meta.width }}{{ $img = $img | append (printf `"width":%v` .) }}{{ end -}}
+    {{- with $image.meta.height }}{{ $img = $img | append (printf `"height":%v` .) }}{{ end -}}
+    {{- range $key, $value := $image.meta -}}
+      {{- if not (in (slice "path" "alt" "lqip" "width" "height") $key) -}}
+        {{- $img = $img | append (printf `%s:%s` (partial "jsonify.html" $key) (partial "jsonify.html" (printf "%v" $value))) -}}
+      {{- end -}}
     {{- end -}}
+    {{- $img = $img | append (printf `"url":%s` (partial "jsonify.html" .)) -}}
+    {{- $img = $img | append `"@type":"imageObject"` -}}
+    {{- $ld = $ld | append (printf `"image":{%s}` (delimit $img ",")) -}}
   {{- end -}}
-  {{- $ld = printf `%s,"mainEntityOfPage":{"@type":"WebPage","@id":%s},"url":%s}` $ld (partial "jsonify.html" .Permalink) (partial "jsonify.html" .Permalink) -}}
-{{- else -}}
-  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebPage","description":%s,"headline":%s,"url":%s}` (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $canonical) -}}
-{{- end }}
-<script type="application/ld+json">{{ $ld | safeJS }}</script>
+{{- end -}}
+{{- if in (slice "BlogPosting" "CreativeWork") $type -}}
+  {{- $ld = $ld | append (printf `"mainEntityOfPage":{"@type":"WebPage","@id":%s}` (partial "jsonify.html" $canonical)) -}}
+{{- end -}}
+{{- with $name }}{{ $ld = $ld | append (printf `"name":%s` (partial "jsonify.html" .)) }}{{ end -}}
+{{- with $logo -}}
+  {{- $publisher := printf `{"@type":"Organization","logo":{"@type":"ImageObject","url":%s}` (partial "jsonify.html" .) -}}
+  {{- with $author.name }}{{ $publisher = printf `%s,"name":%s` $publisher (partial "jsonify.html" .) }}{{ end -}}
+  {{- $publisher = printf `%s}` $publisher -}}
+  {{- $ld = $ld | append (printf `"publisher":%s` $publisher) -}}
+{{- end -}}
+{{- with $links }}{{ $ld = $ld | append (printf `"sameAs":%s` (partial "jsonify.html" .)) }}{{ end -}}
+{{- $ld = $ld | append (printf `"url":%s` (partial "jsonify.html" $canonical)) -}}
+<script type="application/ld+json">{{ printf "{%s}" (delimit $ld ",") | safeJS }}</script>
 <!-- End Jekyll SEO tag -->

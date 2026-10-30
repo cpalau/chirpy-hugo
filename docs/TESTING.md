@@ -31,9 +31,9 @@ Pass criteria are in [PLAN.md](PLAN.md) §3 (Definition of Done).
 
 ---
 
-## 2. Test corpus: 12 fixtures
+## 2. Test corpus: 13 fixtures
 
-Both builds use the **same 12 scenarios**, expressed twice: once in Jekyll
+Both builds use the **same 13 scenarios**, expressed twice: once in Jekyll
 syntax (`tests/oracle/`) and once in Hugo syntax (`tests/fixtures/`).
 
 | # | Fixture | Covers |
@@ -50,6 +50,7 @@ syntax (`tests/oracle/`) and once in Hugo syntax (`tests/fixtures/`).
 | 10 | `home/pinned` | pinned posts, pagination, long summaries (D-03) |
 | 11 | `listing` | archives, hierarchical categories, tags, trending tags |
 | 12 | `system` | search, PWA assets, RSS, 404, sitemap |
+| 13 | `seo` | description from the first block, 100-word cut, `title_category`, `locale`, `canonical_url`, `seo.*` overrides, `twitter.card`, image dimensions, `authors[0]`, string image, publisher logo |
 
 Additional multilingual fixtures are generated per locale for G7.
 
@@ -202,6 +203,46 @@ the same two builds:
 | `/assets/img/favicons/site.webmanifest` | valid JSON with the same fields as Jekyll's |
 
 The differences that remain are declared as D-19.
+
+---
+
+### 6.6 Gate 4b — SEO metadata
+
+```bash
+npm run test:seo
+```
+
+Gate 4 compares the whole document; Gate 4b compares the `<head>` field by
+field, so a failure names the tag instead of an element index, and it checks
+invariants that equality alone cannot catch (a tag both sides omit is still a
+bug).
+
+For every page of both builds:
+
+- every `<meta name>`/`<meta property>`, `<title>`, canonical, `rel=prev/next`
+  and the parsed JSON-LD equal the oracle's;
+- declared divergences are normalised: `generator` (D-06), viewport (D-24) and
+  `/pageN/` vs `/page/N/` (D-14);
+- HTML character references are decoded (`+` is `&#43;` in Hugo) and JSON-LD is
+  compared as parsed data, so object key order is not a difference.
+
+For every Hugo page:
+
+- exactly one `<title>`, canonical, `og:title`, `og:type`, `og:locale`;
+- a non-empty description equal to `og:description` and `twitter:description`;
+- no duplicated meta keys (`theme-color` is allowed once per colour scheme);
+- absolute canonical and image URLs, numeric image dimensions;
+- a valid twitter card, and `twitter:creator` only when the site has a handle;
+- JSON-LD that parses, uses `https://schema.org`, a known `@type`, an absolute
+  `url`, and never has `dateModified` before `datePublished`.
+
+Finally it asserts the SEO fixture knobs explicitly: `title_category`,
+`locale: es-ES` → `es_ES`, image dimensions, page-level `twitter.card`,
+`@orgauthor`, `canonical_url`, 8-word description, `CreativeWork`, `name`,
+`sameAs`, `mainEntityOfPage`, publisher, author type, the 100-word excerpt with
+ellipsis that stops at the first paragraph, `authors[0]` and a string image.
+
+Current size: 51 pages, ~2.4 k assertions.
 
 ---
 
@@ -424,6 +465,7 @@ built with `--panicOnWarning`: a warning is a failure.
 | demo, deployment shape (`--baseURL …/chirpy-hugo/ --minify`) | no doubled base path; every internal URL resolves; the minified viewport still parses; taxonomy indexes list terms |
 | provider matrix (`--features-only`) | all six analytics providers and the three comment providers render. Both are dispatched from configuration (`analytics/<name>.html`, `comments/<provider>.html`), so a missing partial only fails when a user enables it |
 | front matter and CDN (`--features-only`) | `image:` as a string and as a map both build, and `params.cdn` prefixes media in `og:image`, `twitter:image` and JSON-LD |
+| site-level SEO (`--features-only`) | legacy `google_site_verification`, site-wide `twitter_card`, `author` fallback and the JSON-LD publisher from `logo` |
 | `HugoBasicExample` | a generic site builds, and it warns with the exact snippet for the settings Hugo does not merge |
 
 ### 11.1 The configuration warning

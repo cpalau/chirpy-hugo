@@ -1,0 +1,50 @@
+{{- /*
+  Resolve the page author the way `jekyll-seo-tag` does:
+
+    1. `author` in the front matter (a string, or a map with name/url/twitter/type);
+    2. the first entry of `authors` in the front matter;
+    3. the site-wide `params.author`.
+
+  A string is looked up in `data/authors.yaml`; the data file wins over the
+  string. The twitter handle falls back to the author name and loses a leading
+  `@`, which the caller adds back.
+
+  Returns: dict "name" "url" "twitter" "type".
+*/ -}}
+{{- $page := . -}}
+{{- $raw := $page.Params.author -}}
+
+{{- if not $raw -}}
+  {{- with $page.Params.authors -}}
+    {{- $raw = index . 0 -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $raw -}}
+  {{- $raw = site.Params.author -}}
+{{- end -}}
+
+{{- $meta := dict -}}
+{{- if reflect.IsMap $raw -}}
+  {{- $meta = $raw -}}
+{{- else if $raw -}}
+  {{- $meta = dict "name" $raw -}}
+  {{- with index hugo.Data.authors (string $raw) -}}
+    {{- $meta = merge $meta . -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $name := "" -}}
+{{- with $meta.name }}{{ $name = printf "%v" . }}{{ end -}}
+{{- $twitter := "" -}}
+{{- with $meta.twitter -}}
+  {{- $twitter = printf "%v" . -}}
+{{- else -}}
+  {{- $twitter = $name -}}
+{{- end -}}
+
+{{- return dict
+  "name" $name
+  "url" (printf "%v" ($meta.url | default ""))
+  "twitter" (strings.TrimPrefix "@" $twitter)
+  "type" (printf "%v" ($meta.type | default ""))
+-}}

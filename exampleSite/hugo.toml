@@ -140,6 +140,9 @@ enableGitInfo = false
   twitter_username = "cristian_palau"
 
   avatar = "/commons/avatar.jpg"
+  # Upstream demo ships a site-wide preview image; without it every page
+  # without a cover would fall back to the `summary` twitter card.
+  social_preview_image = "/commons/devices-mockup.png"
 
   [params.social]
     name = "Cristian Palau"

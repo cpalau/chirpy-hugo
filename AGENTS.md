@@ -26,6 +26,7 @@ Read before changing anything:
 | [`docs/AUDIT.md`](docs/AUDIT.md) | **File-by-file audit of upstream v7.6.0 — source of truth** |
 | [`docs/PLAN.md`](docs/PLAN.md) | Master plan, phases F0–F9, Definition of Done |
 | [`docs/FEATURES.md`](docs/FEATURES.md) | Complete upstream feature inventory and Hugo mapping |
+| [`docs/SEO.md`](docs/SEO.md) | Every `jekyll-seo-tag` field, its rule and the gate that proves it |
 | [`docs/TESTING.md`](docs/TESTING.md) | Verification gates, Jekyll oracle, Playwright |
 | [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md) | Declared divergences (D-01…) |
 | [`docs/CONFIG.md`](docs/CONFIG.md) | Config contract, Jekyll → Hugo param mapping |
@@ -286,6 +287,7 @@ npm run test:build           # Gate 1: file set, required outputs, Liquid residu
 npm run test:html            # Gate 2: html-validate vs Jekyll + links/anchors
 npm run test:contract        # Gate 3: selectors upstream JS needs
 npm run test:parity          # Gate 4: DOM (builds the Jekyll oracle)
+npm run test:seo             # Gate 4b: SEO metadata field by field + invariants
 npm run test:outputs         # feed, sitemap, search, swconf, manifest
 npm run test:visual          # Gate 5: pixels (Playwright, Jekyll vs Hugo)
 npm run test:ui              # Gate 5b: desktop/tablet/mobile/small UI matrix
@@ -467,6 +469,7 @@ A release that only touches `copy` files should take minutes.
 | 2 | `test:html` | Valid HTML, unique ids, working links and anchors |
 | 3 | `test:contract` | Our DOM still satisfies upstream JavaScript selectors |
 | 4 | `test:parity` | Our HTML equals Jekyll's, after canonicalization |
+| 4b | `test:seo` | Every SEO tag equals Jekyll's, field by field, and passes the SEO invariants |
 | 5 | `test:visual` | Our pixels equal Jekyll's (Playwright + pixelmatch) |
 | 6 | `test:a11y` | No serious/critical axe violations; Lighthouse budgets |
 | 7 | `test:i18n` | 33 locales, identical key sets, no empty values |

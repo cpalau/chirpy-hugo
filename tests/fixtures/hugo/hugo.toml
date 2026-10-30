@@ -123,9 +123,19 @@ enableGitInfo = false
 
   cdn = ""
   avatar = "/assets/img/avatar.png"
+
+  # jekyll-seo-tag publisher logo and the site-wide author fallback.
+  logo = "/assets/img/fixtures/cover.png"
+  author = "Chirpy Authors"
+
   social_preview_image = "/assets/img/social-preview.png"
 
   toc = true
+
+  [params.facebook]
+    admins = "1234567890"
+    publisher = "https://www.facebook.com/example"
+    app_id = "9876543210"
 
   [params.social]
     name = "Example Author"

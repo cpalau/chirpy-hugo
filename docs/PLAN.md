@@ -8,7 +8,7 @@
 | Starter | `github.com/cpalau/chirpy-hugo-starter` |
 | License | MIT (original copyright preserved) |
 | Total estimate | ~30 working days |
-| Status | F0–F9 complete; v1.1.1 released |
+| Status | F0–F10 complete; v1.2.0 released |
 
 Related documents:
 
@@ -454,6 +454,22 @@ runs everything nightly.
 - [x] Tag `v1.0.0`.
 
 **Acceptance**: DoD items 4, 8, 9.
+
+---
+
+### F10 — SEO parity (1 d) — done
+
+- [x] Every branch of `jekyll-seo-tag` 2.9.1 ported: description from the
+      excerpt (100 words with ellipsis), `canonical_url`, `title_category`,
+      `locale`, `twitter.card`, image width/height/alt/lqip and the
+      `facebook`/`twitter` path fallbacks, author maps/arrays and the site
+      fallback, `seo.*` overrides, `logo` → JSON-LD publisher, `facebook.*`,
+      the legacy `google_site_verification`, `sameAs`, `mainEntityOfPage`.
+- [x] Gate 4b (`test:seo`): field-by-field comparison against the oracle plus
+      invariants equality cannot catch (~2.4 k assertions over 51 pages).
+- [x] Fixture 13 (`seo-knobs`, `seo-excerpt`, `seo-images`) and the
+      site-level cases in the adoption matrix.
+- [x] `docs/SEO.md` and `FEATURES` §9 rewritten from the gem source.
 
 ---
 

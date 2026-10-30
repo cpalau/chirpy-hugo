@@ -1,0 +1,37 @@
+{{- /*
+  Reproduce `jekyll-seo-tag`'s description:
+
+    1. `description` in the front matter;
+    2. `excerpt` in the front matter;
+    3. the generated excerpt of a post: its content up to the first blank line,
+       rendered and stripped of markup;
+    4. the site description.
+
+  The result is whitespace-normalised and cut to `seo_description_max_words`
+  words (100 by default), with an ellipsis when it was longer.
+
+  Returns: string.
+*/ -}}
+{{- $page := . -}}
+{{- $max := 100 -}}
+{{- with $page.Params.seo_description_max_words }}{{ $max = int . }}{{ end -}}
+
+{{- $text := "" -}}
+{{- if $page.Description -}}
+  {{- $text = $page.Description -}}
+{{- else if $page.Params.excerpt -}}
+  {{- $text = printf "%v" $page.Params.excerpt -}}
+{{- else if eq (partial "page-kind.html" $page) "post" -}}
+  {{- /* Jekyll's excerpt separator is the first blank line. */ -}}
+  {{- $first := index (split $page.RawContent "\n\n") 0 -}}
+  {{- $text = $first | $page.RenderString | plainify -}}
+{{- end -}}
+{{- if not $text }}{{ $text = site.Params.description }}{{ end -}}
+
+{{- $text = $text | replaceRE `\s+` " " | strings.TrimSpace -}}
+{{- $words := split $text " " -}}
+{{- if gt (len $words) $max -}}
+  {{- $text = printf "%s…" (delimit (first $max $words) " ") -}}
+{{- end -}}
+
+{{- return $text -}}

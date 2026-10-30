@@ -29,7 +29,7 @@
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- with .Site.Home.Paginate (where .Site.RegularPages "Section" "posts") -}}
+{{- with .Site.Home.Paginate (partial "posts-visible.html" .) -}}
   {{- range .Pagers -}}
     {{- if gt .PageNumber 1 -}}
       {{- $urls = $urls | append (dict "loc" (.URL | absURL)) -}}

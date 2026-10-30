@@ -1,6 +1,6 @@
 # Feature Inventory and Hugo Mapping
 
-> **Audited on 2026-10-30** against the code and the gate suite: **163** rows
+> **Audited on 2026-10-30** against the code and the gate suite: **172** rows
 > at parity, **16** with a declared divergence, **0** pending and **7** out of
 > scope. Every parity row is proved by at least one gate (G1–G9, see
 > `TESTING.md`); the divergences are the `D-xx` entries in
@@ -224,30 +224,42 @@ Legend
 
 ## 9. SEO and metadata
 
-| # | Feature | Jekyll (`jekyll-seo-tag`) | Hugo | Status | Verify |
+Everything here is emitted by `jekyll-seo-tag` 2.9.1 inside Chirpy. The port
+implements every branch; [`SEO.md`](SEO.md) maps each field to the code that
+produces it.
+
+| # | Feature | Jekyll | Hugo | Status | Verify |
 |---|---|---|---|---|---|
-| O1 | `<title>` composition | Liquid in `head.html` | custom partial | ✅ | G4 |
-| O2 | Meta description | seo-tag | custom partial | ✅ | G4 |
-| O3 | Canonical link | seo-tag | `.Permalink` | ✅ | G4 |
-| O4 | Open Graph | seo-tag | custom partial | ✅ | G4 |
-| O5 | Twitter cards | seo-tag | custom partial | ✅ | G4 |
-| O6 | JSON-LD `BlogPosting` | seo-tag | custom partial | 🟡 D-06 | G4 |
-| O7 | Author resolution | `authors.yml` | `data/authors.yaml` | ✅ | G4 |
-| O8 | Social preview image | `head.html` | custom partial | ✅ | G4 |
-| O9 | Webmaster verifications | config + seo-tag | params | ✅ | G4 |
-| O10 | `fediverse:creator` | `head.html` | custom partial | ✅ | G4 |
-| O11 | Metadata hook | include | partial override | ✅ | G4 |
-| O12 | Favicon set (v7.4) | `favicons.html` | partial + assets | ✅ | G2 |
-| O13 | Atom feed | **hand-written** `assets/feed.xml` (5 posts, summary 400 chars) | custom output format reproducing it | ✅ | G4 |
-| O14 | Sitemap | `jekyll-sitemap` | built-in | ✅ | G2 |
-| O17 | `robots.txt` | `assets/robots.txt` (`Disallow: /norobots/`) | template | ✅ | G2 |
-| O16 | `hreflang` alternates | — (does not exist) | — | ❌ not an upstream feature | — |
+| O1 | `<title>` composition | `head.html` | `_partials/head.html` | ✅ | G4 |
+| O2 | Meta description | seo-tag `description \|\| excerpt` | `seo/description.html` | ✅ | G4, G4b |
+| O2b | Excerpt: first block, 100 words, ellipsis | seo-tag snippet | `seo/description.html` | ✅ | G4b |
+| O3 | Canonical + `canonical_url` | seo-tag | `seo.html` | ✅ | G4, G4b |
+| O4 | Open Graph (type, url, site, locale) | seo-tag | `seo.html` | ✅ | G4b |
+| O5 | OG image: path, width, height, alt | seo-tag + `head.html` | `seo/image.html` | ✅ | G4b |
+| O5b | OG image from `media_subpath`/CDN | `media-url.html` | `media-url.html` | ✅ | G9b |
+| O6 | Twitter cards, `twitter.card` override | seo-tag | `seo.html` | ✅ | G4b |
+| O7 | `twitter:site` / `twitter:creator`, `@` normalisation | seo-tag | `seo.html` | ✅ | G4b |
+| O8 | Author: map, string, `authors[0]`, site fallback | `author_drop.rb` | `seo/author.html` | ✅ | G4b |
+| O9 | Author twitter falls back to the name | `author_drop.rb` | `seo/author.html` | ✅ | G4b |
+| O10 | JSON-LD types: WebSite/WebPage/BlogPosting/CreativeWork | `json_ld_drop.rb` | `seo.html` | 🟡 D-06 | G4 |
+| O11 | Page SEO overrides: `seo.type/name/links/date_modified` | seo-tag | `seo.html` | ✅ | G4b |
+| O12 | `logo` → JSON-LD publisher | seo-tag | `seo.html` | ✅ | G4b, G9b |
+| O13 | `facebook.admins/publisher/app_id` | seo-tag | `seo.html` | ✅ | G4b |
+| O14 | Webmaster verifications (6) + legacy key | seo-tag | `seo.html` | ✅ | G9b |
+| O15 | `og:locale` normalisation (`-` → `_`) | seo-tag | `seo.html` | ✅ | G4b |
+| O16 | Paginated pages: WebPage, no `name`/`sameAs` | seo-tag | `seo.html` | ✅ | G4b |
+| O17 | `fediverse:creator` | `head.html` | `_partials/head.html` | ✅ | G4 |
+| O18 | Metadata hook | include | partial override | ✅ | G4 |
+| O19 | Favicon set (v7.4) | `favicons.html` | partial + assets | ✅ | G2 |
+| O20 | Atom feed | hand-written `assets/feed.xml` | custom output format | ✅ | G4 |
+| O21 | Sitemap | `jekyll-sitemap` | built-in | ✅ | G2 |
+| O22 | `robots.txt` | `assets/robots.txt` | template | ✅ | G2 |
+| O23 | `hreflang` alternates | — (does not exist) | — | ❌ not an upstream feature | — |
 
-SEO is a first-class feature, not an afterthought: items O1–O11 are part of the
-Definition of Done and are verified by the HTML parity gate against a real
-`jekyll-seo-tag` build.
-
----
+SEO is a first-class feature: every row above is proved against a real
+`jekyll-seo-tag` build, either by the whole-document gate (G4) or by the
+field-by-field gate (G4b). The two site-level knobs that would change every
+corpus page are covered by the feature matrix (G9b) instead.
 
 ## 10. PWA
 

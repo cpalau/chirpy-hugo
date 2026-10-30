@@ -339,7 +339,52 @@ Everything else is optional.
 
 ---
 
-## 12. Upgrade procedure
+## 12. SEO settings
+
+The port reproduces `jekyll-seo-tag` 2.9.1 field by field
+([`SEO.md`](SEO.md)); these are the keys it reads. All of them are optional and
+have a default in `config/_default/params.toml`.
+
+| Key | Default | Meaning |
+|---|---|---|
+| `params.logo` | `""` | image used by the JSON-LD `publisher` |
+| `params.author` | `""` | author for pages that do not declare one; a key of `data/authors.yaml` or a name |
+| `params.twitter_card` | `""` | default card; a page can override it with `twitter.card` |
+| `params.facebook.admins` | `""` | `fb:admins` |
+| `params.facebook.publisher` | `""` | `article:publisher` |
+| `params.facebook.app_id` | `""` | `fb:app_id` |
+| `params.google_site_verification` | `""` | legacy verification, used when `webmaster_verifications` has no value |
+
+Front matter keys the templates honour, with the same meaning as upstream:
+
+```yaml
+description: …            # meta description; cut to 100 words
+excerpt: …                # fallback description (pages)
+image: /cover.png         # or { path, alt, lqip, width, height, facebook, twitter }
+media_subpath: /assets    # prefix for image paths
+canonical_url: …          # overrides the canonical link
+title_category: …         # appended to og:title / JSON-LD headline
+locale: es-ES             # og:locale, `-` becomes `_`
+twitter:
+  card: summary           # overrides params.twitter_card
+seo:
+  type: CreativeWork      # JSON-LD @type
+  name: …                 # JSON-LD name
+  links: [ … ]            # JSON-LD sameAs
+  date_modified: …        # overrides lastmod for article:modified_time
+seo_description_max_words: 100
+author: key               # or a map { name, url, twitter, type }
+authors: [key, …]         # first entry is used
+last_modified_at: …       # Jekyll name, accepted for migration
+lastmod: …                # Hugo name
+```
+
+`lastmod` wins over `last_modified_at` when both are present, and
+`seo.date_modified` wins over both.
+
+---
+
+## 13. Upgrade procedure
 
 ```bash
 node scripts/check-config.mjs --upstream v7.6.0

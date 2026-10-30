@@ -408,6 +408,32 @@ coupling.
 
 ---
 
+## D-26 — An image without a path in the post header
+
+| | |
+|---|---|
+| Status | declared (upstream bug, no parity claim) |
+| Affects | the cover image of a post whose `image` map has no `path` |
+| Upstream | `_layouts/post.html` does `page.image.path \| default: page.image`, so a hash is interpolated into `src`/`href` |
+| This port | resolves `path`, then `facebook`, then `twitter`, like the SEO tag, and emits a valid image |
+| Blast radius | none: the Jekyll output for that front matter is invalid HTML |
+
+`image: { twitter: /cover.png }` is accepted by `jekyll-seo-tag` (the image
+drop falls back to `facebook` and then `twitter`), but Chirpy's post header
+stringifies the whole hash:
+
+```html
+<a href="/{twitter" class="img-link popup shimmer">
+  <img src="/{ twitter"="loading="lazy" …>
+```
+
+The port uses the resolved path in the header too, so the same front matter
+renders a valid image and the same Open Graph tags. Gate 4 does not compare this
+case (there is nothing correct to match); Gate 9b asserts the valid output. Any
+other divergence would be a bug, not a choice.
+
+---
+
 ## D-25 — The PWA register flag is omitted, not `false`
 
 | | |

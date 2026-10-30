@@ -194,6 +194,48 @@ function frontMatterMatrix() {
   }
 }
 
+/** Site-level SEO settings that would change every corpus page if they were in
+ *  the fixtures: the legacy verification key, a site-wide twitter card, the
+ *  author fallback and the publisher logo. */
+function seoConfig() {
+  const dir = featureSite('seo-config', '');
+  const config = path.join(dir, 'hugo.toml');
+  fs.writeFileSync(
+    config,
+    fs
+      .readFileSync(config, 'utf8')
+      .replace(
+        '  description = "A site built with chirpy-hugo."',
+        [
+          '  description = "A site built with chirpy-hugo."',
+          '  author = "Site Author"',
+          '  logo = "/assets/img/logo.png"',
+          '  twitter_card = "summary"',
+          '  google_site_verification = "legacy-token"',
+        ].join('\n'),
+      ),
+  );
+  fs.writeFileSync(
+    path.join(dir, 'content/posts/hello.md'),
+    '---\ntitle: "Hello"\ndate: 2026-01-01T00:00:00Z\nimage:\n  path: "/assets/img/cover.png"\n  alt: "Cover"\n---\n\nA post.\n',
+  );
+
+  const out = build('seo: site-wide settings', dir);
+  if (!out) return;
+  const html = fs.readFileSync(path.join(out, 'posts/hello/index.html'), 'utf8');
+  const checks = [
+    ['legacy google verification', /name="?google-site-verification"? content="?legacy-token/],
+    ['site twitter card wins over the image default', /name="?twitter:card"? content="?summary(?!_large)/],
+    ['site author fallback in the meta tag', /name="?author"? content="Site Author"/],
+    ['publisher logo in JSON-LD', /"publisher":\{"@type":"Organization","logo":\{"@type":"ImageObject","url":"[^"]*\/assets\/img\/logo\.png"\},"name":"Site Author"\}/],
+    ['author fallback in JSON-LD', /"author":\{"@type":"Person","name":"Site Author"\}/],
+  ];
+  for (const [name, pattern] of checks) {
+    if (pattern.test(html)) console.log(`  ok    ${name}`);
+    else fail(`seo: ${name}`);
+  }
+}
+
 /** Build once, then prove every marker is in the output. */
 function expectMarkers(name, source, file, markers) {
   const out = build(name, source);
@@ -311,12 +353,14 @@ for (const [provider, extra, marker] of [
 if (process.argv.includes('--features-only')) {
   providerMatrix();
   frontMatterMatrix();
+  seoConfig();
   console.log(failures ? `\n${failures} feature failure(s)` : '\nfeatures verified');
   process.exit(failures ? 1 : 0);
 }
 
 providerMatrix();
 frontMatterMatrix();
+seoConfig();
 
 // 5. HugoBasicExample, cloned once.
 if (!fs.existsSync(BASIC)) {

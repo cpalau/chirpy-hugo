@@ -1,6 +1,6 @@
-# Fixture contract — the twelve parity scenarios
+# Fixture contract — the thirteen parity scenarios
 
-Two sites render the same twelve scenarios:
+Two sites render the same thirteen scenarios:
 
 | Side | Path | Syntax |
 |---|---|---|
@@ -17,7 +17,7 @@ See `tests/oracle/README.md` for why each determinism setting exists.
 
 ---
 
-## 1. The twelve scenarios
+## 1. The thirteen scenarios
 
 | # | Fixture | Jekyll source | URLs compared | Covers |
 |---|---|---|---|---|
@@ -33,9 +33,11 @@ See `tests/oracle/README.md` for why each determinism setting exists.
 | 10 | `home/pinned` | `index.html` + 15 posts | `/`, `/page2/` … `/page5/` | pinned-first algorithm, pagination, `hidden`, summary truncation (D-03) |
 | 11 | `listing` | `_tabs/*`, taxonomies | `/archives/`, `/categories/`, `/categories/<term>/`, `/tags/`, `/tags/<term>/` | year grouping, hierarchical categories, natural tag sort (D-11) |
 | 12 | `system` | generated | `/search.json`, `/sw.min.js`, `/swconf.js`, `/feed.xml`, `/sitemap.xml`, `/robots.txt`, `/404.html`, `site.webmanifest` | search index, PWA, feed, 404, sitemap |
+| 13 | `seo` | `2026-01-21-seo-*.md` | `/posts/seo-knobs/`, `/posts/seo-excerpt/`, `/posts/seo-images/` | every `jekyll-seo-tag` branch (see `docs/SEO.md`), all hidden so they stay out of pagination and related posts |
 
-Supporting posts that exist only to feed fixtures 10 and 11: `pinned-a`,
-`pinned-b`, `hidden`, `truncate-199`, `truncate-200`, `truncate-201`.
+Supporting posts that exist only to feed fixtures 10, 11 and 13: `pinned-a`,
+`pinned-b`, `hidden`, `truncate-199`, `truncate-200`, `truncate-201`,
+`seo-knobs`, `seo-excerpt`, `seo-images`.
 
 ## 2. Front matter equivalence
 
@@ -47,7 +49,9 @@ Supporting posts that exist only to feed fixtures 10 and 11: `pinned-a`,
 | `pin: true` | `pin: true` | Jekyll's `where` stringifies, Hugo must accept both `true` and `"true"` |
 | `hidden: true` | `hidden: true` | home list only (G-41) |
 | `media_subpath:` | `media_subpath:` | same key, same semantics |
-| `image.{path,alt,lqip}` | `image.{path,alt,lqip}` | same shape |
+| `image.{path,alt,lqip,width,height}` | same | same shape |
+| `author` (string), `authors: [key]` | same | resolved through `data/authors.yaml` |
+| `seo.{type,name,links,date_modified}`, `canonical_url`, `title_category`, `locale`, `twitter.card`, `seo_description_max_words` | same | `jekyll-seo-tag` front matter, ported verbatim |
 
 ## 3. Authoring equivalence
 

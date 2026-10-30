@@ -27,6 +27,22 @@ toc = true
 github_username = ""
 twitter_username = ""
 
+# jekyll-seo-tag: publisher logo (JSON-LD) and the author used when a page
+# does not define one.
+logo = ""
+author = ""
+# Default twitter card. Empty means `summary_large_image` when the page has an
+# image and `summary` otherwise; a page can override it with `twitter.card`.
+twitter_card = ""
+# jekyll-seo-tag legacy verification, used only when `webmaster_verifications`
+# has no value.
+google_site_verification = ""
+
+[facebook]
+  admins = ""
+  publisher = ""
+  app_id = ""
+
 [social]
   name = ""
   email = ""

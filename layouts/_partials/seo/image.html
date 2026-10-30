@@ -1,0 +1,43 @@
+{{- /*
+  Resolve `image` front matter the way `jekyll-seo-tag`'s ImageDrop does:
+
+    image: /path.png
+    image: { path: /path.png, alt: …, lqip: …, width: …, height: … }
+    image: { twitter: /path.png }    # `path`, then `facebook`, then `twitter`
+
+  A path without `://` is resolved against `media_subpath` (absolute paths) or
+  the page directory (relative ones), and made absolute.
+
+  Returns: dict "path" (absolute URL, or "") "meta" (the original map).
+*/ -}}
+{{- $page := . -}}
+{{- $image := $page.Params.image -}}
+
+{{- $meta := dict -}}
+{{- if reflect.IsMap $image -}}
+  {{- $meta = $image -}}
+{{- else if $image -}}
+  {{- $meta = dict "path" $image -}}
+{{- end -}}
+
+{{- $raw := "" -}}
+{{- with $meta.path }}{{ $raw = printf "%v" . }}{{ else -}}
+  {{- with $meta.facebook }}{{ $raw = printf "%v" . }}{{ else -}}
+    {{- with $meta.twitter }}{{ $raw = printf "%v" . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $path := "" -}}
+{{- with $raw -}}
+  {{- if strings.Contains . "://" -}}
+    {{- $path = . -}}
+  {{- else if hasPrefix . "/" -}}
+    {{- $path = partial "media-url.html" (dict "src" . "subpath" $page.Params.media_subpath "absolute" true) -}}
+  {{- else -}}
+    {{- $dir := $page.RelPermalink -}}
+    {{- if not (hasSuffix $dir "/") }}{{ $dir = path.Dir $dir }}{{ end -}}
+    {{- $path = (printf "%s%s" $dir .) | absURL -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return dict "path" $path "meta" $meta -}}

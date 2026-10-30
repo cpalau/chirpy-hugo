@@ -1,7 +1,7 @@
 {{- /* Ports _layouts/home.html, including the pinned-first pagination
        algorithm (G-10). */ -}}
 {{- define "main" -}}
-{{- $all := where .Site.RegularPages "Type" "posts" -}}
+{{- $all := partial "posts-visible.html" . -}}
 {{- $pag := .Paginate $all -}}
 {{- $perPage := $pag.PagerSize -}}
 {{- $allPinned := sort (uniq (append (where $all "Params.pin" true) (where $all "Params.pin" "true"))) "Date" "desc" -}}
