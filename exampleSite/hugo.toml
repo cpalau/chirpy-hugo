@@ -136,15 +136,15 @@ enableGitInfo = false
   tagline = "A text-focused Jekyll theme"
   theme_mode = ""
 
-  github_username = "cotes2020"
-  twitter_username = "cotes2020"
+  github_username = "cpalau"
+  twitter_username = ""
 
-  avatar = "/commons/avatar.jpg"
+  avatar = "/assets/img/avatar.svg"
 
   [params.social]
-    name = "Cotes Chung"
+    name = "Chirpy Hugo"
     email = ""
-    links = ["https://github.com/cotes2020", "https://twitter.com/cotes2020"]
+    links = ["https://github.com/cpalau/chirpy-hugo"]
 
   # The upstream demo ships giscus. It points at this repository's Discussions
   # (the demo's own threads must not collect comments meant for the port).

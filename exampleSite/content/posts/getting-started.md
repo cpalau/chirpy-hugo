@@ -28,7 +28,7 @@ This approach simplifies upgrades, isolates unnecessary files, and is perfect fo
 This approach is convenient for modifying features or UI design, but presents challenges during upgrades. So don't try this unless you are familiar with Jekyll and plan to heavily modify this theme.
 
 1. Sign in to GitHub.
-2. [Fork the theme repository](https://github.com/cotes2020/jekyll-theme-chirpy/fork).
+2. [Fork the theme repository](https://github.com/cpalau/chirpy-hugo/fork).
 3. Name the new repository `<username>.github.io`, replacing `username` with your lowercase GitHub username.
 
 ## Setting up the Environment
@@ -98,7 +98,7 @@ To customize the stylesheet, copy the theme's {{< filepath "assets/css/jekyll-th
 
 Static assets configuration was introduced in version `5.1.0`. The CDN of the static assets is defined in {{< filepath "_data/origin/cors.yml" >}}. You can replace some of them based on the network conditions in the region where your website is published.
 
-If you prefer to self-host the static assets, refer to the [_chirpy-static-assets_](https://github.com/cotes2020/chirpy-static-assets#readme) repository.
+If you prefer to self-host the static assets, the theme ships those files itself.
 
 ## Deployment
 
@@ -140,7 +140,7 @@ $ JEKYLL_ENV=production bundle exec jekyll b
 Unless you specified the output path, the generated site files will be placed in the {{< filepath "_site" >}} folder of the project's root directory. Upload these files to your target server.
 
 [nodejs]: https://nodejs.org/
-[starter]: https://github.com/cotes2020/chirpy-starter
+[starter]: https://github.com/cpalau/chirpy-hugo/tree/main/starter
 [pages-workflow-src]: https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#publishing-with-a-custom-github-actions-workflow
 [docker-desktop]: https://www.docker.com/products/docker-desktop/
 [docker-engine]: https://docs.docker.com/engine/install/

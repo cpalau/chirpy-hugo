@@ -6,11 +6,9 @@ order: 4
 date: 2026-01-01T00:00:00Z
 ---
 
-[![Release](https://img.shields.io/github/v/release/cotes2020/jekyll-theme-chirpy?logo=github&color=blue)](https://github.com/cotes2020/jekyll-theme-chirpy/releases/latest)
+A minimal, responsive, and feature-rich theme for technical writing, ported from Jekyll to Hugo with verified pixel parity.
 
-A minimal, responsive, and feature-rich Jekyll theme for technical writing. [Open source](https://github.com/cotes2020/jekyll-theme-chirpy/) and hosted on GitHub since 2019.
-
-Follow the [tutorials](/categories/tutorial/) to quickly set up a free personal blog! All documentation is also available in the [Wiki](https://github.com/cotes2020/jekyll-theme-chirpy/wiki).
+This demo mirrors the upstream Chirpy demo so the two can be compared page by page. The prose is the original author's, adapted to Hugo's authoring syntax; the theme code, the port and its verification live at [cpalau/chirpy-hugo](https://github.com/cpalau/chirpy-hugo).
 
 ## Features
 
@@ -23,3 +21,7 @@ Follow the [tutorials](/categories/tutorial/) to quickly set up a free personal 
 - **Web Analysis Tools**: Integrated with multiple analytics tools.
 - **Modern Web Technologies**: Built for SEO and web performance.
 - **RSS Feed Support**: Keep your readers updated with RSS feeds.
+
+---
+
+Chirpy is created by Cotes Chung and contributors and is MIT licensed. The copyright notice, the license text and the full attribution are in the project's `LICENSE`, `NOTICE.md` and `README.md`.
