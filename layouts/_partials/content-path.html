@@ -1,0 +1,10 @@
+{{- /* The page path relative to the site root, with the baseURL path removed.
+       Hugo's RelPermalink includes it (`/chirpy-hugo/tags/`), and every place
+       that splits the path assumes it starts at the site root. Returns a
+       string with a leading slash. */ -}}
+{{- $rel := .RelPermalink -}}
+{{- $home := .Site.Home.RelPermalink -}}
+{{- if hasPrefix $rel $home -}}
+  {{- $rel = strings.TrimPrefix $home $rel -}}
+{{- end -}}
+{{- return (printf "/%s" $rel) -}}

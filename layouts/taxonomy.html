@@ -17,12 +17,12 @@
     {{- $pages := index $.Site.Taxonomies.categories $name -}}
     {{- $first := index $pages 0 -}}
     {{- $firstCats := $first.Page.Params.categories | default slice -}}
-    {{- if and $firstCats (eq (index $firstCats 0) $name) }}
+    {{- if and $firstCats (eq (lower (index $firstCats 0)) $name) }}
     {{- $subs := slice -}}
     {{- range $pages -}}
       {{- with .Page.Params.categories -}}
         {{- if gt (len .) 1 -}}
-          {{- $second := index . 1 -}}
+          {{- $second := lower (index . 1) -}}
           {{- if not (in $subs $second) }}{{ $subs = $subs | append $second }}{{ end -}}
         {{- end -}}
       {{- end -}}

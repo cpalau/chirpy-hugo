@@ -47,8 +47,10 @@ home and 46 on the code post: the port is ahead, not behind.
    `cotes2020/chirpy-static-assets` into `static/assets/lib/` by
    `scripts/vendor.mjs` (pinned commit, hashes in
    `tests/contract/vendor-hashes.json`). One origin instead of three.
-2. **Non-blocking CSS** for icons, lightbox, the polyfill and the font
-   stylesheet (`media="print"` + `onload`).
+2. **Non-blocking CSS** for icons, lightbox and the polyfill (`media="print"` +
+   `onload`). The font stylesheet stays blocking on purpose: with `swap` text
+   paints in the fallback face and re-lays out when the real one arrives, which
+   measured 6.3 s LCP instead of 3.0 s. The font file itself is preloaded.
 3. **Preloads** for the LCP image and the body font.
 4. **MathJax and Mermaid stay on the CDN**: ~23 MB, only on pages that use
    them.

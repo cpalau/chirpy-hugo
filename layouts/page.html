@@ -140,7 +140,7 @@
 </article>
 {{- else -}}
 <article class="px-1">
-  {{- $key := index (split (strings.Trim .RelPermalink "/") "/") 0 -}}
+  {{- $key := index (split (strings.Trim (partial "content-path.html" .) "/") "/") 0 -}}
   {{- $title := .Title -}}
   {{- if in (slice "about" "archives" "categories" "tags") $key -}}
     {{- $title = T (printf "tabs.%s" $key) | default .Title -}}

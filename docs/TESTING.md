@@ -328,6 +328,25 @@ performance and 6.3 s LCP on mobile, and 92 accessibility on post pages
 (D-20, D-21). The desktop profile is where the port proves parity (99 vs 100
 performance). Budgets live in `tests/performance/budgets.json`.
 
+`npm run test:deploy` is the fast deployment check CI runs on every PR: it
+builds `exampleSite` with a subdirectory `baseURL` and `--minify` and validates
+the emitted HTML. It exists because the development build at the root hides
+two whole classes of bug: a base path counted twice (which 404s every vendor
+script and takes the mobile menu down with it) and a taxonomy page that renders
+empty for flat categories.
+
+The interaction suite runs in both layouts (desktop 1280×900 and mobile
+375×812, touch) and on the deployment shape:
+
+```bash
+node tests/interactive/check.mjs
+node tests/interactive/check.mjs .out/example-deploy --base-path /chirpy-hugo
+```
+
+Mobile covers the sidebar (trigger, mask, close) and the search overlay
+(trigger, input, results, cancel); desktop covers tocbot, the theme toggle, the
+copy button and search.
+
 `npm run test:browsers` is the cross-browser spot check: it loads the home page
 and a post in Firefox and WebKit, asserts the chrome is visible and the
 stylesheet applied, and writes screenshots to `.out/browsers/`. A browser that

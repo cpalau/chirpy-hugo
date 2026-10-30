@@ -24,6 +24,7 @@
     "test:commit": "commitlint --from origin/main --to HEAD",
     "test:config": "node scripts/check-config.mjs",
     "test:contract": "node tests/contract/selectors.mjs",
+    "test:deploy": "node tests/adoption/check.mjs --deploy-only",
     "test:html": "node tests/html/check.mjs",
     "test:i18n": "node scripts/i18n.mjs --check",
     "test:interactive": "node tests/interactive/check.mjs",

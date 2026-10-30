@@ -14,28 +14,28 @@
   {{- $mathjax = $cdn.mathjax.js -}}
   {{- $mermaid = $cdn.mermaid.js -}}
 {{- end -}}
-{{- $urls := slice (partial "lib-url.html" $origin.search.js) -}}
+{{- $urls := slice $origin.search.js -}}
 
 {{- if in (slice "post" "page" "home") $kind -}}
-  {{- $urls = $urls | append (partial "lib-url.html" (index $origin "lazy-polyfill").js) -}}
+  {{- $urls = $urls | append (index $origin "lazy-polyfill").js -}}
   {{- if ne $kind "home" -}}
-    {{- $urls = $urls | append (partial "lib-url.html" $origin.glightbox.js) -}}
-    {{- $urls = $urls | append (partial "lib-url.html" $origin.clipboard.js) -}}
+    {{- $urls = $urls | append $origin.glightbox.js -}}
+    {{- $urls = $urls | append $origin.clipboard.js -}}
   {{- end -}}
 {{- end -}}
 
 {{- if in (slice "home" "post" "archives" "category" "tag") $kind -}}
   {{- $locale := index (split .Lang "-") 0 -}}
-  {{- $urls = $urls | append (partial "lib-url.html" $dayjs.common) -}}
-  {{- $urls = $urls | append (partial "lib-url.html" (replace $dayjs.locale ":LOCALE" $locale)) -}}
-  {{- $urls = $urls | append (partial "lib-url.html" $dayjs.relativeTime) -}}
-  {{- $urls = $urls | append (partial "lib-url.html" $dayjs.localizedFormat) -}}
+  {{- $urls = $urls | append $dayjs.common -}}
+  {{- $urls = $urls | append (replace $dayjs.locale ":LOCALE" $locale) -}}
+  {{- $urls = $urls | append $dayjs.relativeTime -}}
+  {{- $urls = $urls | append $dayjs.localizedFormat -}}
 {{- end -}}
 
 {{- /* Upstream: `h2 or h3 and site.toc and page.toc` evaluates as
        `h2 OR (h3 AND toc)`. Parity includes the bug (G-05). */ -}}
 {{- if or (strings.Contains .Content "<h2") (and (strings.Contains .Content "<h3") .Site.Params.toc .Params.toc) -}}
-  {{- $urls = $urls | append (partial "lib-url.html" $origin.toc.js) -}}
+  {{- $urls = $urls | append $origin.toc.js -}}
 {{- end -}}
 
 {{- if .Params.mermaid -}}

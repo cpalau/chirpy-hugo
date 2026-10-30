@@ -432,9 +432,11 @@ What changed:
    commit (`scripts/vendor.mjs`, hashes in `tests/contract/vendor-hashes.json`).
    Three origins and their TLS handshakes disappear. `assets.self_host.enabled`
    is `true` by default; a site can opt back into the CDN.
-2. **Non-blocking CSS.** Font Awesome, glightbox, the loading polyfill and the
-   font stylesheet load with `media="print" onload="this.media='all'"`. Text
-   paints without waiting for icons or lightbox chrome.
+2. **Non-blocking CSS for chrome.** Font Awesome, glightbox and the loading
+   polyfill load with `media="print" onload="this.media='all'"`, so text paints
+   without waiting for icons or lightbox chrome. The font stylesheet stays
+   blocking: making it async paints fallback text and re-lays it out when the
+   face arrives, which moved LCP from 3.0 s to 6.3 s on the mobile profile.
 3. **Preloads.** The image that will be the LCP element, and the body font
    (Source Sans Pro 400), are preloaded at the end of `<head>`.
 4. **MathJax and Mermaid stay on the CDN**: 23 MB together, and they only load

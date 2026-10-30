@@ -87,6 +87,13 @@ jobs:
       - name: Release consistency
         run: npm run test:release
 
+      - name: Deployment shape (subdirectory + minify) and emitted URLs
+        run: |
+          hugo -s exampleSite --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
+            --baseURL "https://example.com/chirpy-hugo/" --minify --panicOnWarning \
+            -d "$RUNNER_TEMP/deploy"
+          node tests/adoption/check.mjs --deploy-only
+
       - name: Build the demo site (warnings are errors)
         run: |
           hugo -s exampleSite --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
