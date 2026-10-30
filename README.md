@@ -8,9 +8,11 @@ must produce the same HTML — and therefore the same pixels — while upstream
 SCSS, JavaScript and assets stay byte-for-byte identical, so upstream releases
 can be adopted in hours instead of weeks.
 
-> **Status: pre-alpha.** The plan, contracts and verification strategy are in
-> place; the template layer is not implemented yet. See
-> [`docs/PLAN.md`](docs/PLAN.md) for the phase checklist.
+> **Status: alpha.** The template layer is ported and measured against a real
+> Jekyll build: **47/47** pages are identical after canonicalization and
+> **84/84** visual pairs are pixel-identical outside the three declared boxes
+> (`docs/COMPATIBILITY.md`). Scaffolding, outputs and the remaining gates are
+> tracked in [`docs/PLAN.md`](docs/PLAN.md).
 
 ---
 

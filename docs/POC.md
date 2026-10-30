@@ -178,20 +178,25 @@ accordingly (see `docs/COMPATIBILITY.md`).
 
 ---
 
-## 5. Open items (assigned, not forgotten)
+## 5. Open items — all resolved
 
-| Item | Pages | Owner |
-|---|---|---|
-| Read-time word count is 1–3 words lower than Jekyll's (123 vs 120 on fixture 1) | all posts | F4: count on a pre-hook representation |
-| Related posts: same set, different order — upstream sorts the score **as a string** (`"2:7"`, `"1:3"`, `"1.5:12"`), which puts 1.0 before 1.5 | fixture 1 | F4: reproduce the string sort with the candidate index |
-| Term/list page `<title>`, breadcrumb and SEO type (`Alpha` vs `alpha`, `article` vs `website`, missing intermediate crumb) | 23 listing pages | F3 |
-| Search-loader inline script is re-escaped by Go's JS context (`\/`, `\u003c`) | all pages | F6: emit the script with `safeHTML` |
-| Visual residual 0.13–0.52 % on home and post pages | 16 pairs | F8: follows the DOM items above |
-| Pagination URL shape (D-13) | 6 pages | accepted divergence, or an alias |
-| Gate 5 (pixels) | 18 pairs | run: 2 within budget, 16 between 0.13 % and 0.52 % (see §2b) |
+The items below were open at the end of F0.5. Each one is now fixed, and Gates
+G4/G5 prove it: **47/47** pages identical after canonicalization, **84/84**
+pixel pairs identical outside the three declared rectangles.
 
-None of these is architectural. All are enumerated and reproducible with the
-commands at the top of this document.
+| Item | Resolution |
+|---|---|
+| Read-time word count differed (123 vs 120) | `read-time.html` now counts the transformed content, which is what Jekyll counts. The `$$…$$` delimiters were adding a phantom word (`page.html`). |
+| Related posts: same set, different order | the score is sorted as a string with the candidate index, like upstream (`related-posts.html`). |
+| Term/list `<title>`, breadcrumb, SEO type | `page-kind.html` + `taxonomy-labels.html` + date-driven SEO; D-15 closed. |
+| Search-loader script re-escaped (`\/`, `\u003c`) | emitted with `safeJS`; the five `jsonify` substitutions are in `tests/qa/q2-jsonify.mjs`. |
+| Visual residual 0.13–0.52 % | gone: the DOM causes above were the cause. |
+| Pagination URL shape | declared divergence D-14 (Hugo's `/page/2/`). |
+| Gate 5 | runs in ~66 s, offline, 84/84. |
+
+Two other diffs found while closing these: the mermaid source was missing the
+trailing newline kramdown emits, and Goldmark's numeric footnote ids are now
+mapped back to the author's labels (D-16 closed).
 
 ---
 

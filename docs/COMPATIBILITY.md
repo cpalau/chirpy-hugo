@@ -427,17 +427,21 @@ are compared by G4, and the page height is compared by the pixel gate.
 
 | | |
 |---|---|
-| Status | open |
+| Status | **closed** |
 | Affects | `/categories/`, `/tags/` (head only) |
 | Upstream | the `_tabs` placeholders are pages with a date, so jekyll-seo-tag emits `og:type=article` plus `article:published_time` |
-| This port | Hugo generates the taxonomy index, which has no page date, so it emits `og:type=website` |
-| Blast radius | two `<meta>` tags; no pixels |
+| This port | the Hugo fixture carries the same front matter in `content/{categories,tags}/_index.md`, and the theme derives the metadata from the page date |
 
-Upstream's date is the **file mtime** of the tab file, which is not reproducible
-in any case. The fixture pins it, but a Hugo taxonomy page cannot carry front
-matter. Making the theme invent a date would be worse than the missing tag.
+Upstream's date is the **file mtime** of the tab file. The fixture pins it, and
+the Hugo fixture pins the same value in the taxonomy `_index.md`. The theme no
+longer special-cases the taxonomy kind: `jekyll-seo-tag` decides the type from
+`page.date`, and so does `_partials/seo.html`.
 
-Pixel impact: none (proved by G5). Tracked in `docs/POC.md` §5.
+The one Hugo quirk that had to be handled: Hugo invents a `.Date` for term pages
+(the newest page in the term), which Jekyll's archives do not have, so the date
+is ignored for `kind == "term"`.
+
+Pixel impact: none.
 
 ---
 
@@ -445,21 +449,26 @@ Pixel impact: none (proved by G5). Tracked in `docs/POC.md` §5.
 
 | | |
 |---|---|
-| Status | open |
+| Status | **closed** |
 | Affects | `post/tables-footnotes` |
 | Upstream | kramdown: `id="fn:<label>"`, `class="footnote"`, `rel="footnote"` |
-| This port | Goldmark: `id="fn:<n>"`, `class="footnote-ref"`, no `rel` |
-| Blast radius | footnote anchors; the visible text and rules are identical |
+| This port | Goldmark numbers the ids, so `_partials/content.html` maps them back to the source labels |
+| Blast radius | none |
 
-Hugo has no footnote render hook, so the ids cannot be rewritten without
-re-implementing the extension. What *is* reproduced: no `<hr>` before the list
-(Goldmark adds one), `class="footnote"` on the reference with `rel="footnote"`,
-`class="reversefootnote"` on the backlink, and the space before it. The classes
-matter visually: `.footnote` carries margins and padding in
-`_sass/base/_typography.scss`.
+Hugo has no footnote render hook. What `_partials/content.html` reproduces, as
+one documented rule set (AGENTS §5.1):
 
-Pixel impact: none (proved by G5, six viewport/theme pairs). Internal `#fn:1`
-anchors differ from upstream's `#fn:<label>`.
+- no `<hr>` before the list (Goldmark adds one);
+- `class="footnote"` and `rel="footnote"` on the reference;
+- `class="reversefootnote"` on the backlink, with the NBSP that decides line
+  breaking;
+- the ids: the labels are read from `.RawContent` in **reference order**, which
+  is the order in which Goldmark assigns its numbers, and `fn:1`/`fnref:1` are
+  rewritten to `fn:<label>`/`fnref:<label>`.
+
+Limit: a page that references the same footnote twice gets Goldmark's
+`:1`-suffixed repeat id, which is not rewritten yet. The fixtures do not cover
+it; add one before closing the gap.
 
 ---
 

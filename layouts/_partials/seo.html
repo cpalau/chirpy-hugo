@@ -25,7 +25,14 @@
 {{- $social := $site.Params.social -}}
 {{- $twitterSite := "" -}}
 {{- with $site.Params.twitter_username }}{{ $twitterSite = printf "@%s" . }}{{ end -}}
-{{- $isArticle := in (slice "post" "page" "archives") $kind -}}
+{{- /* Hugo invents a `.Date` for term pages (the newest page in the term);
+       Jekyll's archive pages have none, so the kind decides. */ -}}
+{{- $hasDate := and (not .Date.IsZero) (ne .Kind "term") -}}
+{{- $isArticle := and (ne $kind "home") $hasDate -}}
+{{- /* jekyll-seo-tag decides the JSON-LD type from the page, not from the
+       layout: a page with a date is a BlogPosting, a page without one is a
+       WebPage, and the home and about pages are the site itself. */ -}}
+{{- $isAbout := eq .RelPermalink "/about/" -}}
 {{- $iso := "2006-01-02T15:04:05-07:00" -}}
 {{- $modified := .Date -}}
 {{- with .Params.lastmod }}{{ $modified = time.AsTime . }}{{ end -}}
@@ -121,7 +128,17 @@
 {{- end }}
 {{- end }}
 {{- $ld := "" -}}
-{{- if or (eq $kind "post") (eq $kind "archives") -}}
+{{- if and (eq $kind "home") (gt (.Paginate (where $.Site.RegularPages "Type" "posts")).PageNumber 1) -}}
+  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebPage","description":%s,"headline":%s,"url":%s}` (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $canonical) -}}
+{{- else if or (eq $kind "home") $isAbout -}}
+  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebSite"` -}}
+  {{- if $isArticle -}}
+    {{- $ld = printf `%s,"dateModified":%s,"datePublished":%s` $ld (partial "jsonify.html" ($modified.Format $iso)) (partial "jsonify.html" (.Date.Format $iso)) -}}
+  {{- end -}}
+  {{- $links := "[]" -}}
+  {{- with $social.links }}{{ $links = partial "jsonify.html" . }}{{ end -}}
+  {{- $ld = printf `%s,"description":%s,"headline":%s,"name":%s,"sameAs":%s,"url":%s}` $ld (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $social.name) $links (partial "jsonify.html" .Permalink) -}}
+{{- else if $isArticle -}}
   {{- $ld = printf `{"@context":"https://schema.org","@type":"BlogPosting"` -}}
   {{- with $author -}}
     {{- $authorObj := printf `{"@type":"Person","name":%s` (partial "jsonify.html" .) -}}
@@ -141,18 +158,8 @@
     {{- end -}}
   {{- end -}}
   {{- $ld = printf `%s,"mainEntityOfPage":{"@type":"WebPage","@id":%s},"url":%s}` $ld (partial "jsonify.html" .Permalink) (partial "jsonify.html" .Permalink) -}}
-{{- else if and (eq $kind "home") (gt (.Paginate (where $.Site.RegularPages "Type" "posts")).PageNumber 1) -}}
-  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebPage","description":%s,"headline":%s,"url":%s}` (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $canonical) -}}
-{{- else if in (slice "taxonomy" "term" "tag" "category") $kind -}}
-  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebPage","description":%s,"headline":%s,"url":%s}` (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $canonical) -}}
 {{- else -}}
-  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebSite"` -}}
-  {{- if and (ne $kind "home") (not .Date.IsZero) -}}
-    {{- $ld = printf `%s,"dateModified":%s,"datePublished":%s` $ld (partial "jsonify.html" ($modified.Format $iso)) (partial "jsonify.html" (.Date.Format $iso)) -}}
-  {{- end -}}
-  {{- $links := "[]" -}}
-  {{- with $social.links }}{{ $links = partial "jsonify.html" . }}{{ end -}}
-  {{- $ld = printf `%s,"description":%s,"headline":%s,"name":%s,"sameAs":%s,"url":%s}` $ld (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $social.name) $links (partial "jsonify.html" .Permalink) -}}
+  {{- $ld = printf `{"@context":"https://schema.org","@type":"WebPage","description":%s,"headline":%s,"url":%s}` (partial "jsonify.html" $desc) (partial "jsonify.html" $title) (partial "jsonify.html" $canonical) -}}
 {{- end }}
 <script type="application/ld+json">{{ $ld | safeJS }}</script>
 <!-- End Jekyll SEO tag -->

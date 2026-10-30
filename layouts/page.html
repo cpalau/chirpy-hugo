@@ -72,7 +72,12 @@
           </span>
           {{- end }}
 
-          {{ partial "read-time.html" (dict "content" .Content "prompt" true) }}
+          {{- /* Jekyll counts the words of `page.content`, which kramdown has
+                 already rewritten: the delimiters of a display formula are
+                 merged, not two extra tokens. Counting the raw `.Content`
+                 over-counts every `$$…$$` block by one word, so the count is
+                 taken from the same transformed content that is rendered. */ -}}
+          {{ partial "read-time.html" (dict "content" (partial "content.html" .) "prompt" true) }}
         </div>
       </div>
     </div>

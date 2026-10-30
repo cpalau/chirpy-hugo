@@ -22,15 +22,38 @@
 {{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="disabled" ?/?>` `<i class="far fa-circle fa-fw"></i>` $c -}}
 {{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="" checked="">` `<i class="fas fa-check-circle fa-fw checked"></i>` $c -}}
 {{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="">` `<i class="far fa-circle fa-fw"></i>` $c -}}
-{{- /* Footnotes (D-16): Goldmark wraps the list in an <hr> and names the
-       backlink differently. The ids cannot be reproduced without a hook; the
-       NBSP before the backlink is kept, because it decides line breaking. */ -}}
+{{- /* Footnotes (D-16): Goldmark wraps the list in an <hr>, names the backlink
+       differently and numbers the ids (`fn:1`), while kramdown uses the author's
+       label (`fn:ial`). The label cannot be recovered from the rendered HTML,
+       so it is read from the source in reference order — the order in which
+       Goldmark assigns the numbers. The NBSP before the backlink is kept,
+       because it decides line breaking. */ -}}
 {{- $c = replace $c `<div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>` `<div class="footnotes" role="doc-endnotes">
 <ol>` -}}
 {{- $c = replace $c `class="footnote-backref"` `class="reversefootnote"` -}}
 {{- $c = replace $c `class="footnote-ref"` `class="footnote" rel="footnote"` -}}
-{{- /* kramdown renders $$…$$ as \[…\] (D-17). */ -}}
-{{- $c = replaceRE `(?s)\$\$\s*(.+?)\s*\$\$` `\[$1\]` $c -}}
+{{- $labels := slice -}}
+{{- range split (.RawContent | default "") "\n" -}}
+  {{- $line := . -}}
+  {{- if not (findRE `^\s{0,3}\[\^[^\]]+\]:` $line) -}}
+    {{- range findRE `\[\^[^\]\s:]+\]` $line -}}
+      {{- $label := replaceRE `^\[\^|\]$` "" . -}}
+      {{- if not (in $labels $label) -}}{{- $labels = $labels | append $label -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- range $i, $label := $labels -}}
+  {{- $n := add $i 1 -}}
+  {{- $c = replace $c (printf `id="fnref:%d"` $n) (printf `id="fnref:%s"` $label) -}}
+  {{- $c = replace $c (printf `href="#fnref:%d"` $n) (printf `href="#fnref:%s"` $label) -}}
+  {{- $c = replace $c (printf `id="fn:%d"` $n) (printf `id="fn:%s"` $label) -}}
+  {{- $c = replace $c (printf `href="#fn:%d"` $n) (printf `href="#fn:%s"` $label) -}}
+{{- end -}}
+{{- /* kramdown renders $$…$$ as \[…\] (D-17). The trailing space is not
+       decoration: kramdown leaves the block followed by whitespace, and without
+       it the formula and the next paragraph merge into one "word" for the
+       read-time count. */ -}}
+{{- $c = replaceRE `(?s)\$\$\s*(.+?)\s*\$\$` `\[$1\] ` $c -}}
 {{- $c | safeHTML -}}

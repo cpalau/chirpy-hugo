@@ -5,7 +5,8 @@
 {{- /* kramdown has no mermaid lexer: it emits a plain pre/code block, and the
        Mermaid script looks for exactly that. */ -}}
 {{- if eq $lang "mermaid" -}}
-<pre><code class="language-mermaid">{{ .Inner }}</code></pre>
+<pre><code class="language-mermaid">{{ .Inner }}
+</code></pre>
 {{- else -}}
 {{- $res := transform.HighlightCodeBlock . (dict "noClasses" false "lineNos" false) -}}
 {{- $inner := $res.Inner -}}
