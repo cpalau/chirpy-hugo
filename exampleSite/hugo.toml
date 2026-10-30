@@ -139,7 +139,7 @@ enableGitInfo = false
   github_username = "cpalau"
   twitter_username = "cristian_palau"
 
-  avatar = "/assets/img/avatar.svg"
+  avatar = "/commons/avatar.jpg"
 
   [params.social]
     name = "Cristian Palau"
