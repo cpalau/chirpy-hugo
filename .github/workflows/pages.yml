@@ -1,0 +1,73 @@
+name: Pages
+
+# Publishes the demo site (`exampleSite/`) to GitHub Pages as a project site:
+# https://cpalau.github.io/chirpy-hugo/
+#
+# GitHub builds it from an artifact, not from a `gh-pages` branch: the theme is
+# Hugo, so it must not go through Jekyll, and nothing generated is committed.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'exampleSite/**'
+      - 'layouts/**'
+      - 'assets/**'
+      - 'static/**'
+      - 'config/**'
+      - 'data/**'
+      - 'i18n/**'
+      - 'go.mod'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; a second push waits instead of cancelling the
+# publish that is already in flight.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  HUGO_VERSION: 0.168.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+
+      - name: Read the Pages URL
+        id: pages
+        uses: actions/configure-pages@v6
+
+      - name: Build the demo for a subdirectory deployment
+        run: |
+          hugo -s exampleSite --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
+            --baseURL "${{ steps.pages.outputs.base_url }}/" \
+            --panicOnWarning --gc --minify \
+            -d "$GITHUB_WORKSPACE/public"
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5

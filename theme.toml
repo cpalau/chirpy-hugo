@@ -6,7 +6,7 @@ license = "MIT"
 licenselink = "https://github.com/cpalau/chirpy-hugo/blob/main/LICENSE"
 description = "A Hugo port of the Chirpy theme: minimal, responsive, feature-rich, and byte-parity with the Jekyll original."
 homepage = "https://github.com/cpalau/chirpy-hugo"
-demosite = "https://example.com/"
+demosite = "https://cpalau.github.io/chirpy-hugo/"
 tags = [
   "blog",
   "responsive",
