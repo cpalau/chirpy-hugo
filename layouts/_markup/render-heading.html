@@ -1,6 +1,14 @@
-{{- /* Ports refactor-content's R7: anchors on h2-h5 only (G-04). */ -}}
+{{- /* Ports refactor-content's R7: anchors on h2-h5 only (G-04).
+       Explicit attributes (`{data-toc-skip="" .mt-4}`) are passed through:
+       the demo content uses them to keep example headings out of the TOC. */ -}}
+{{- $extra := "" -}}
+{{- range $name, $value := .Attributes -}}
+  {{- if ne $name "id" -}}
+    {{- $extra = printf `%s %s="%s"` $extra $name $value -}}
+  {{- end -}}
+{{- end -}}
 {{- if in (slice 2 3 4 5) .Level -}}
-<h{{ .Level }} id="{{ .Anchor }}"><span class="me-2">{{ .Text | safeHTML }}</span><a {{ printf `href="#%s"` .Anchor | safeHTMLAttr }} class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h{{ .Level }}>
+<h{{ .Level }} id="{{ .Anchor }}"{{ $extra | safeHTMLAttr }}><span class="me-2">{{ .Text | safeHTML }}</span><a {{ printf `href="#%s"` .Anchor | safeHTMLAttr }} class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h{{ .Level }}>
 {{- else -}}
-<h{{ .Level }} id="{{ .Anchor }}">{{ .Text | safeHTML }}</h{{ .Level }}>
+<h{{ .Level }} id="{{ .Anchor }}"{{ $extra | safeHTMLAttr }}>{{ .Text | safeHTML }}</h{{ .Level }}>
 {{- end -}}

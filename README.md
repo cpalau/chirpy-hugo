@@ -68,7 +68,9 @@ Read [`AGENTS.md`](AGENTS.md) before contributing — it contains the hard rules
 ## For users
 
 **Live demo:** <https://cpalau.github.io/chirpy-hugo/> — the `exampleSite/`
-built with this theme and deployed by `.github/workflows/pages.yml`.
+built with this theme and deployed by `.github/workflows/pages.yml`. It mirrors
+the [upstream demo](https://chirpy.cotes.page/) page by page, including its four
+posts and the feature showcase.
 
 `chirpy-hugo` is meant to be installed, not copied. It works as a Hugo Module,
 as a git submodule, or as a local theme, and it must build any site — including

@@ -11,7 +11,7 @@
 # Nothing in this file is personal: `example.com`, neutral author, no analytics.
 
 baseURL = "https://example.com/"
-title = "Chirpy Hugo"
+title = "Chirpy"
 locale = "en"
 timeZone = "UTC"
 
@@ -131,15 +131,17 @@ enableGitInfo = false
       icon = "fas fa-info-circle"
 
 [params]
-  description = "A demo of the Chirpy theme ported to Hugo."
-  tagline = "Parity with the Jekyll original"
+  # The demo mirrors the upstream Chirpy demo (title, tagline, identity).
+  description = "A minimal, responsive and feature-rich Jekyll theme for technical writing. Ported to Hugo with verified pixel parity."
+  tagline = "A text-focused Jekyll theme"
   theme_mode = ""
 
-  # Neutral identity. Replace with your own in a real site.
-  avatar = "/assets/img/avatar.svg"
-  social_preview_image = ""
+  github_username = "cotes2020"
+  twitter_username = "cotes2020"
+
+  avatar = "/commons/avatar.jpg"
 
   [params.social]
-    name = "Example Author"
-    email = "author@example.com"
-    links = ["https://example.com/author"]
+    name = "Cotes Chung"
+    email = ""
+    links = ["https://github.com/cotes2020", "https://twitter.com/cotes2020"]

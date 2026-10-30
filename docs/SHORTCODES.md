@@ -194,12 +194,12 @@ Each upstream `_includes/embed/*.html` becomes a shortcode with the same
 parameter names.
 
 ```go-html-template
-{{< embed-youtube id="dQw4w9WgXcQ" >}}
-{{< embed-spotify type="track" id="4uLU6hMCjMI75M1A2tKUQC" >}}
-{{< embed-bilibili bvid="BV1xx411c7mD" >}}
-{{< embed-twitch channel="channelname" >}}
-{{< embed-audio src="/audio/file.mp3" >}}
-{{< embed-video src="/video/file.mp4" >}}
+{{< embed/youtube id="dQw4w9WgXcQ" >}}
+{{< embed/spotify id="4uLU6hMCjMI75M1A2tKUQC" >}}
+{{< embed/bilibili id="BV1xx411c7mD" >}}
+{{< embed/twitch id="channelname" >}}
+{{< embed/audio src="/audio/file.mp3" >}}
+{{< embed/video src="/video/file.mp4" >}}
 ```
 
 All of them honour `params.cdn` and `media_subpath`, and emit the same markup as

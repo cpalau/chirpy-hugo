@@ -1,14 +1,14 @@
 # Author identities referenced from post front matter (`author: example`).
 #
-# Every value is a parameter a site overrides; none of it is theme data.
-# The shape mirrors upstream `_data/authors.yml` (jekyll-seo-tag advanced usage):
-#
-#   {author_id}:
-#     name: {full name}
-#     twitter: {twitter handle, without @}
-#     url: {homepage}
+# `cotes` is the author of the upstream demo content mirrored in `content/`;
+# the attribution lives in NOTICE.md and in the example site README.
 
 example:
   name: Example Author
   twitter: example
   url: https://example.com/author
+
+cotes:
+  name: Cotes Chung
+  twitter: cotes2020
+  url: https://github.com/cotes2020/

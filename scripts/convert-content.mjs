@@ -15,14 +15,24 @@
  *   {: .prompt-tip }             text
  *                                {{< /prompt >}}
  *
+ *   ## Heading                →  ## Heading {.mt-4 data-toc-skip=""}
+ *   {: .mt-4 data-toc-skip='' }
+ *
  *   `x`{: .filepath }         →  {{< filepath "x" >}}
  *
- *   ```shell {.nolineno}      →  ```shell {.nolineno}   (attribute moved to the
- *   code                         code                 fence's info string)
+ *   ```shell                  →  ```shell {.nolineno}
+ *   code                         code
  *   ```
  *   {: .nolineno }
  *
  *   ![alt](src){: .left }     →  {{< img src="src" alt="alt" class="left" >}}
+ *
+ *   {% include embed/youtube.html id='x' %}  →  {{< embed-youtube id="x" >}}
+ *
+ * Fenced code is copied verbatim: the upstream posts demonstrate this very
+ * syntax inside code blocks, and rewriting a sample would teach the wrong
+ * thing. Fences may be indented (inside a list) and may be longer than three
+ * backticks.
  *
  * Anything it does not recognise is reported and left untouched: a wrong guess
  * would silently change the rendered page.
@@ -32,37 +42,72 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
-const PROMPTS = new Set(['tip', 'info', 'warning', 'danger']);
+const FENCE = /^(\s{0,3})(`{3,}|~{3,})(.*)$/;
 
-function stripQuote(lines) {
-  return lines.map((line) => line.replace(/^>\s?/, ''));
+function parseIal(attrs) {
+  const classes = [];
+  const pairs = [];
+  for (const match of attrs.matchAll(/(\.?[\w-]+(?:=(?:"[^"]*"|'[^']*'))?)/g)) {
+    const token = match[1];
+    if (token.startsWith('.')) classes.push(token.slice(1));
+    else if (token.includes('=')) {
+      const [key, value] = token.split('=');
+      pairs.push([key, value.replace(/^["']|["']$/g, '')]);
+    }
+  }
+  return { classes, pairs };
 }
 
+const ialLine = (line) => /^\s*\{:\s*([^}]+)\s*\}\s*$/.exec(line);
+
+// --- prompts ---------------------------------------------------------------
+
 function convertPrompts(source) {
-  let changes = 0;
   const lines = source.split('\n');
   const out = [];
-  for (let i = 0; i < lines.length; i += 1) {
-    const attr = /^\{:\s*\.prompt-(tip|info|warning|danger)\s*\}$/.exec(lines[i].trim());
-    if (!attr) {
-      out.push(lines[i]);
-      continue;
+  let changes = 0;
+  for (const line of lines) {
+    const attr = ialLine(line);
+    if (attr) {
+      const prompt = /^\.prompt-(tip|info|warning|danger)$/.exec(attr[1].trim());
+      let start = out.length;
+      while (start > 0 && /^\s*>/.test(out[start - 1])) start -= 1;
+      if (prompt && start < out.length) {
+        const quoted = out.splice(start).map((l) => l.replace(/^\s*>\s?/, ''));
+        out.push(`{{< prompt ${prompt[1]} >}}`, ...quoted, '{{< /prompt >}}');
+        changes += 1;
+        continue;
+      }
     }
-    // Walk back over the blockquote this attribute closes.
-    let start = out.length;
-    while (start > 0 && out[start - 1].startsWith('>')) start -= 1;
-    if (start === out.length) {
-      out.push(lines[i]);
-      continue;
-    }
-    const quoted = out.splice(start);
-    out.push(`{{< prompt ${attr[1]} >}}`);
-    out.push(...stripQuote(quoted));
-    out.push('{{< /prompt >}}');
-    changes += 1;
+    out.push(line);
   }
   return { source: out.join('\n'), changes };
 }
+
+// --- headings --------------------------------------------------------------
+
+function convertHeadings(source) {
+  const lines = source.split('\n');
+  const out = [];
+  let changes = 0;
+  for (const line of lines) {
+    const attr = ialLine(line);
+    if (attr && out.length && /^#{1,6}\s/.test(out.at(-1))) {
+      const { classes, pairs } = parseIal(attr[1]);
+      const merged = [
+        ...classes.map((c) => `.${c}`),
+        ...pairs.map(([k, v]) => `${k}="${v}"`),
+      ];
+      out[out.length - 1] = `${out.at(-1).trimEnd()} {${merged.join(' ')}}`;
+      changes += 1;
+      continue;
+    }
+    out.push(line);
+  }
+  return { source: out.join('\n'), changes };
+}
+
+// --- inline ----------------------------------------------------------------
 
 function convertInline(source) {
   let changes = 0;
@@ -73,61 +118,24 @@ function convertInline(source) {
   return { source: converted, changes };
 }
 
-/** Parse the inside of a kramdown attribute list: `.class` and `key="value"`. */
-function parseIal(attrs) {
-  const classes = [];
-  const pairs = [];
-  for (const match of attrs.matchAll(/(\.?[\w-]+(?:="[^"]*")?)/g)) {
-    const token = match[1];
-    if (token.startsWith('.')) classes.push(token.slice(1));
-    else if (token.includes('=')) {
-      const [key, value] = token.split('=');
-      pairs.push([key, value.replaceAll('"', '')]);
-    }
-  }
-  return { classes, pairs };
-}
+// --- images ----------------------------------------------------------------
 
 /**
- * Moves `{: ... }` after a closing fence into the fence's info string.
- *
- * Line based on purpose: a regular expression over the whole document happily
- * spans from one fence to the next and attaches the attribute to the wrong
- * block.
+ * Run `fn` only outside inline code spans. A backtick-quoted sample of the
+ * Jekyll syntax is documentation, not a construct to convert.
  */
-function convertFences(source) {
-  const lines = source.split('\n');
-  const out = [];
-  let open = false;
-  let opening = -1;
+function outsideInlineCode(source, fn) {
   let changes = 0;
-
-  for (let i = 0; i < lines.length; i += 1) {
-    const line = lines[i];
-    if (line.startsWith('```')) {
-      if (!open) {
-        open = true;
-        opening = out.length;
-        out.push(line);
-      } else {
-        open = false;
-        const attr = /^\{:\s*([^}]+)\s*\}$/.exec((lines[i + 1] ?? '').trim());
-        if (attr && opening >= 0) {
-          const { classes, pairs } = parseIal(attr[1]);
-          const merged = [...classes.map((c) => `.${c}`), ...pairs.map(([k, v]) => `${k}="${v}"`)];
-          if (merged.length) {
-            out[opening] = `${out[opening].trimEnd()} {${merged.join(' ')}}`;
-            changes += 1;
-            i += 1; // consume the attribute line
-          }
-        }
-        out.push(line);
-      }
-      continue;
-    }
-    out.push(line);
-  }
-  return { source: out.join('\n'), changes };
+  const parts = source.split(/(`[^`\n]*`)/g);
+  const converted = parts
+    .map((part) => {
+      if (part.startsWith('`') && part.endsWith('`')) return part;
+      const result = fn(part);
+      changes += result.changes;
+      return result.source;
+    })
+    .join('');
+  return { source: converted, changes };
 }
 
 function convertImages(source) {
@@ -150,17 +158,143 @@ function convertImages(source) {
   return { source: converted, changes };
 }
 
-function convert(source) {
+// --- embeds ----------------------------------------------------------------
+
+function convertEmbeds(source) {
+  let changes = 0;
+  const converted = source.replace(
+    /\{%\s*include\s+embed\/(youtube|spotify|bilibili|twitch|audio|video)\.html\s+([^%]*?)\s*%\}/g,
+    (_, kind, args) => {
+      const params = [...args.matchAll(/([\w-]+)=['"]([^'"]*)['"]/g)]
+        .map(([, key, value]) => `${key}="${value}"`)
+        .join(' ');
+      changes += 1;
+      return `{{< embed/${kind} ${params} >}}`;
+    },
+  );
+  return { source: converted, changes };
+}
+
+// --- fences ----------------------------------------------------------------
+
+/**
+ * Merge `{: ... }` after a closing fence into the fence's info string.
+ *
+ * Tracks fence length and indentation so a fenced sample that itself shows a
+ * fence is not mistaken for the end of the outer block.
+ */
+function convertFences(source) {
+  const lines = source.split('\n');
+  const out = [];
+  let open = null; // { index, char, length }
+  let changes = 0;
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i];
+    const match = FENCE.exec(line);
+    if (!open && match) {
+      open = { index: out.length, char: match[2][0], length: match[2].length };
+      out.push(line);
+      continue;
+    }
+    if (open) {
+      out.push(line);
+      const close = new RegExp(`^\\s{0,3}${open.char === '`' ? '`' : '~'}{${open.length},}\\s*$`);
+      if (close.test(line)) {
+        const attr = ialLine(lines[i + 1] ?? '');
+        if (attr) {
+          const { classes, pairs } = parseIal(attr[1]);
+          const merged = [...classes.map((c) => `.${c}`), ...pairs.map(([k, v]) => `${k}="${v}"`)];
+          if (merged.length) {
+            out[open.index] = `${out[open.index].trimEnd()} {${merged.join(' ')}}`;
+            changes += 1;
+            i += 1;
+          }
+        }
+        open = null;
+      }
+      continue;
+    }
+    out.push(line);
+  }
+  return { source: out.join('\n'), changes };
+}
+
+// --- driver ----------------------------------------------------------------
+
+function convertChunk(chunk) {
   let total = 0;
-  for (const step of [convertPrompts, convertInline, convertFences, convertImages]) {
-    const result = step(source);
-    source = result.source;
+  for (const step of [convertPrompts, convertHeadings, convertInline]) {
+    const result = step(chunk);
+    chunk = result.source;
     total += result.changes;
   }
-  // Anything still shaped like an IAL was not recognised.
-  const leftovers = [...source.matchAll(/^\{:\s*\.[^\n]*$/gm)].map((m) => m[0]);
-  return { source, changes: total, leftovers };
+  for (const step of [convertImages, convertEmbeds]) {
+    const result = outsideInlineCode(chunk, step);
+    chunk = result.source;
+    total += result.changes;
+  }
+  return { source: chunk, changes: total };
 }
+
+function convert(source) {
+  const lines = source.split('\n');
+  const out = [];
+  let open = null;
+  let chunk = [];
+  let changes = 0;
+
+  const flush = () => {
+    if (!chunk.length) return;
+    const result = convertChunk(chunk.join('\n'));
+    out.push(...result.source.split('\n'));
+    changes += result.changes;
+    chunk = [];
+  };
+
+  for (const line of lines) {
+    const match = FENCE.exec(line);
+    if (!open && match) {
+      flush();
+      open = { char: match[2][0], length: match[2].length };
+      out.push(line);
+      continue;
+    }
+    if (open) {
+      out.push(line);
+      const close = new RegExp(`^\\s{0,3}${open.char === '`' ? '`' : '~'}{${open.length},}\\s*$`);
+      if (close.test(line)) open = null;
+      continue;
+    }
+    chunk.push(line);
+  }
+  flush();
+
+  let text = out.join('\n');
+  const fences = convertFences(text);
+  text = fences.source;
+  changes += fences.changes;
+
+  // Leftovers outside code are reported: they need a human.
+  const leftovers = [];
+  let inFence = null;
+  for (const line of text.split('\n')) {
+    const match = FENCE.exec(line);
+    if (!inFence && match) {
+      inFence = { char: match[2][0], length: match[2].length };
+      continue;
+    }
+    if (inFence) {
+      const close = new RegExp(`^\\s{0,3}${inFence.char === '`' ? '`' : '~'}{${inFence.length},}\\s*$`);
+      if (close.test(line)) inFence = null;
+      continue;
+    }
+    if (ialLine(line)) leftovers.push(line.trim());
+  }
+  return { source: text, changes, leftovers };
+}
+
+// --- CLI -------------------------------------------------------------------
 
 function walk(target) {
   const stat = fs.statSync(target);
