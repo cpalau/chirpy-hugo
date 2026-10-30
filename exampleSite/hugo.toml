@@ -137,14 +137,14 @@ enableGitInfo = false
   theme_mode = ""
 
   github_username = "cpalau"
-  twitter_username = ""
+  twitter_username = "cristian_palau"
 
   avatar = "/assets/img/avatar.svg"
 
   [params.social]
-    name = "Chirpy Hugo"
+    name = "Cristian Palau"
     email = ""
-    links = ["https://github.com/cpalau/chirpy-hugo"]
+    links = ["https://github.com/cpalau/chirpy-hugo", "https://x.com/cristian_palau"]
 
   # The upstream demo ships giscus. It points at this repository's Discussions
   # (the demo's own threads must not collect comments meant for the port).
