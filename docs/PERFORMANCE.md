@@ -49,9 +49,8 @@ home and 46 on the code post: the port is ahead, not behind.
    `tests/contract/vendor-hashes.json`). One origin instead of three.
 2. **Non-blocking CSS** for icons, lightbox, the polyfill and the font
    stylesheet (`media="print"` + `onload`).
-3. **Deferred theme bootstrap** (`theme.min.js` no longer blocks parsing).
-4. **Preloads** for the LCP image and the body font.
-5. **MathJax and Mermaid stay on the CDN**: ~23 MB, only on pages that use
+3. **Preloads** for the LCP image and the body font.
+4. **MathJax and Mermaid stay on the CDN**: ~23 MB, only on pages that use
    them.
 
 Pixels are still measured with the real fonts: both builds self-host the same
@@ -70,6 +69,10 @@ network rather than localhost:
 The gap with the local gate is the round trip to GitHub Pages, not the theme;
 the gate compares both builds on the same local server so the number is about
 the port, not the hosting.
+
+The theme bootstrap (`theme.min.js`, 2.4 KB) stays synchronous: the inline
+giscus script and the bundles read the global `Theme` while parsing, so
+deferring it breaks comment-enabled pages (`Theme is not defined`).
 
 ## What is still slow
 

@@ -435,11 +435,15 @@ What changed:
 2. **Non-blocking CSS.** Font Awesome, glightbox, the loading polyfill and the
    font stylesheet load with `media="print" onload="this.media='all'"`. Text
    paints without waiting for icons or lightbox chrome.
-3. **Deferred bootstrap.** `theme.min.js` is `defer` instead of synchronous.
-4. **Preloads.** The image that will be the LCP element, and the body font
+3. **Preloads.** The image that will be the LCP element, and the body font
    (Source Sans Pro 400), are preloaded at the end of `<head>`.
-5. **MathJax and Mermaid stay on the CDN**: 23 MB together, and they only load
+4. **MathJax and Mermaid stay on the CDN**: 23 MB together, and they only load
    on the pages that ask for them.
+
+The theme bootstrap stays synchronous on purpose: the inline giscus script and
+the layout bundles use the global `Theme` while parsing, and `defer` produced
+`Theme is not defined` on every comment-enabled page. The interaction gate
+caught it. Its cost is one small same-origin request.
 
 Why the DOM gate does not fail: the attributes (`media`, `onload`, `defer`) and
 the two preload nodes are exempted in `tests/parity/ignore.yml` with this id.
