@@ -384,18 +384,22 @@ See [I18N.md](I18N.md) for the transform contract.
 ## 10. Gate 8 — Upstream drift
 
 ```bash
-node scripts/fetch-upstream.mjs --check
+npm run test:upstream        # fetch-upstream.mjs --check
 node scripts/sync-upstream.mjs --check
 ```
 
-- sha256 of every file in `assets/scss/`, `assets/js/`, `data/`,
+- sha256 of every copied file in `assets/scss/`, `assets/js/`, `data/`,
   `assets/img/favicons/` equals the pinned upstream file (`tag` or `gem`,
   whichever the contract declares).
 - `i18n/` regenerates byte-identically from `_data/locales/`.
-- `ports.yml` covers 100 % of upstream `_layouts/` and `_includes/`: a new
-  upstream file with no mapping fails the gate.
-- Once a phase closes, its targets are no longer allowed to be missing: pending
-  counts must reach zero (`--strict-targets`).
+- `ports.yml` covers 100 % of the pinned tag tree (225 files) and every
+  gem-only artifact is declared with `source: gem`.
+- Every `manual` port has a target that exists. The gate cannot hash a
+  hand-written template, but it can prove the file was written; a template that
+  dispatches to a partial nobody created otherwise builds clean until a user
+  enables that provider.
+- Every `transform` target is verified by its generator (`scripts/i18n.mjs`,
+  `scripts/build-js.mjs`).
 
 ---
 
@@ -405,65 +409,48 @@ This gate is what makes the theme usable by other people. It answers one
 question: *can someone install this without reading our source?*
 
 ```bash
-npm run test:adoption
+npm run test:adoption                       # every scenario
+node tests/adoption/check.mjs --deploy-only # the deployment shape only
 ```
 
-Four independent scenarios, each in a temporary directory:
+Every scenario uses the starter configuration unless stated, and every one is
+built with `--panicOnWarning`: a warning is a failure.
 
-### 11.1 Fresh site, empty params
+| Scenario | What it proves |
+|---|---|
+| fresh site | `starter/hugo.toml` is the whole config; empty `[params]` works; one post renders |
+| subdirectory `baseURL` | every theme URL keeps the `/blog/` prefix (no dropped or doubled base path) |
+| demo, deployment shape (`--baseURL …/chirpy-hugo/ --minify`) | no doubled base path; every internal URL resolves; the minified viewport still parses; taxonomy indexes list terms |
+| provider matrix | all six analytics providers and the three comment providers render. Both are dispatched from configuration (`analytics/<name>.html`, `comments/<provider>.html`), so a missing partial only fails when a user enables it |
+| `HugoBasicExample` | a generic site builds, and it warns with the exact snippet for the settings Hugo does not merge |
 
-```bash
-hugo new site /tmp/adopt-fresh
-cd /tmp/adopt-fresh
-hugo mod init example.com/fresh
-hugo mod get github.com/cpalau/chirpy-hugo
-# hugo.toml: only module.imports + baseURL + title
-hugo build
-```
+### 11.1 The configuration warning
 
-Assertions:
+`_partials/check-config.html` runs once per build (`partialCached` in
+`baseof.html`). It probes what a template can observe:
 
-- build exits 0 with no `WARN`/`ERROR`,
-- `public/index.html` exists and is non-empty,
-- empty `content/` does not crash,
-- no missing-resource errors (avatar, fonts, icons).
+- block attributes: `markdownify "probe\n{.chirpy-probe}"` must yield
+  `class="chirpy-probe"`;
+- highlighting classes: `highlight` must not emit `style="color…"`;
+- the home output formats: `site.Home.OutputFormats.Get` for `feed`, `search`,
+  `swconf` and `manifest`.
 
-### 11.2 `HugoBasicExample`
+`markup.goldmark.renderer.unsafe` is not probed (rendering raw HTML to test it
+would emit Hugo's own warning, which already says what to add) and
+`enableRobotsTXT` cannot be read at template time. The warning prints the exact
+TOML block, and the gate asserts it against an under-configured site.
 
-```bash
-git clone --depth 1 https://github.com/gohugoio/HugoBasicExample /tmp/adopt-basic
-# install the theme as a module
-hugo build
-```
+### 11.2 Reusability checklist (asserted by the gates)
 
-This is the canonical compatibility test used by the Hugo theme gallery. It
-proves the theme tolerates generic content, unknown sections and arbitrary
-front matter.
-
-### 11.3 Documented minimum configuration
-
-A site that copies **only** the settings listed as mandatory in
-[`CONFIG.md`](CONFIG.md) (`markup`, `outputs`) must produce the full feature set:
-`search.json`, `sw.js`, `swconf.js`, feed and sitemap.
-
-### 11.4 Hostile configuration
-
-A site that defines its own `markup` section without our required keys must:
-
-- still build (no hard failure),
-- print a warning naming the missing key and the exact snippet to add.
-
-This proves D-07's warning path.
-
-### 11.5 Reusability checklist (asserted by the gate)
-
-- [ ] Works with `baseURL` in a subdirectory (`https://example.com/blog/`).
-- [ ] Works monolingual and multilingual.
-- [ ] Works with zero posts, one post and 500 posts.
-- [ ] Works without `avatar`, `image`, `author` or `social`.
-- [ ] Every credential-dependent feature is off by default.
-- [ ] No absolute personal URL anywhere in the rendered output.
-- [ ] Templates can be overridden from the project directory.
+- [x] Works with `baseURL` in a subdirectory (`https://example.com/blog/`).
+- [x] Works monolingual; multilingual is Hugo's own `translations` (no upstream
+      selector to port).
+- [x] Works with zero posts (fresh site) and with the 12-fixture corpus.
+- [x] Works without `avatar`, `image`, `author` or `social`.
+- [x] Every credential-dependent feature is off by default.
+- [x] No absolute personal URL in the rendered output of `starter/` or the
+      fixtures (`test:release`).
+- [x] Templates can be overridden from the project directory.
 
 ---
 

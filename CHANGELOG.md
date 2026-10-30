@@ -22,6 +22,67 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.1.0] - 2026-10-30
+
+### Added
+
+- **A build warning for the settings Hugo does not inherit from a theme.**
+  `_partials/check-config.html` probes block attributes, highlighting classes
+  and the four home output formats, then prints the exact TOML block to add.
+  Adoption now asserts the warning against an under-configured site (F1, D-07).
+- **Umami, Matomo, Cloudflare and Fathom analytics providers.** `head.html`
+  dispatched to `analytics/<provider>.html`; four of the six partials did not
+  exist, so enabling any of them failed the build. All six are ported from
+  upstream and covered by the adoption gate.
+- **UI matrix (Gate 5b).** Four viewports (1280, 768, 390, 320) over the pages
+  that carry every component: overflow, viewport parsing, script and network
+  errors, sidebar, search, TOC popup, theme toggle and persistence, copy,
+  back-to-top. 63 checks in ~16 s, and the same matrix on the deployment shape.
+- **Provider matrix in the adoption gate.** Six analytics providers and the
+  three comment providers are built and asserted, because both are dispatched
+  from configuration.
+- **Manifest invariants.** Every `manual` port must have an existing target;
+  every partial a template names must exist, including the two configuration
+  dispatched ones; every shipped configuration must declare the mandatory
+  settings.
+
+### Changed
+
+- **Self-hosted vendor assets by default.** Fonts, icons, tocbot, search,
+  dayjs, glightbox, clipboard and the polyfill are served from
+  `static/assets/lib` (pinned and hash-verified); non-critical CSS loads
+  asynchronously and the LCP image and body font are preloaded (D-22). Mobile
+  home: 66 → 92–97 performance, LCP 6.3 s → 2.1–3.0 s.
+- **Service worker update policy (D-23).** New workers skip waiting and claim
+  the page; navigation is network-first; a visitor is reloaded only when a cache
+  from an older build existed.
+- **Viewport meta uses commas between directives (D-24)** and no longer blocks
+  pinch-zoom: `user-scalable=no` is an accessibility violation and costs nothing
+  visually.
+- **Faster suites.** Visual capture runs its viewports concurrently (6 workers,
+  84 pairs in ~33 s); `npm run test:fast` chains the everyday checks in ~19 s.
+- Documentation pass: `COMPATIBILITY.md` statuses now use one vocabulary,
+  `PLAN.md` is complete, `FEATURES.md` counts and C18/C31 match the shipped
+  vendor bundle, and `TESTING.md` describes Gates 8 and 9 as implemented.
+
+### Fixed
+
+- Enabling Umami, Matomo, Cloudflare or Fathom analytics crashed the build
+  (`partial "analytics/…" not found`).
+- A minified `user-scalable=no initial-scale=1` viewport made phones rescale the
+  page when the off-canvas sidebar opened.
+- `app.min.js` registered a service worker with `register=false` (any non-empty
+  value is true), which could reload a cached page in a loop.
+- Subdirectory deployments, empty taxonomies, doubled base paths and the
+  breadcrumb base segment (found by the deployment gate).
+- `ports.yml` pointed eight hand-written ports at files that never existed,
+  including `layouts/index.json`, `layouts/swconf.js` and `layouts/rss.xml`.
+
+### Security
+
+- No known vulnerabilities. The PWA no longer registers a worker when the cache
+  is disabled.
+
 ## [1.0.0] - 2026-10-30
 
 ### Added

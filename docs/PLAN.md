@@ -8,7 +8,7 @@
 | Starter | `github.com/cpalau/chirpy-hugo-starter` |
 | License | MIT (original copyright preserved) |
 | Total estimate | ~30 working days |
-| Status | F0–F7 and F9 tooling complete; F8 docs/perf/cross-browser open |
+| Status | F0–F9 complete; v1.1.0 released |
 
 Related documents:
 
@@ -236,7 +236,7 @@ D-15 and D-16 are closed, D-02/D-09/D-18 are the measured boxes.
 
 ---
 
-### F1 — Scaffolding (3 d) — done (one item moved to F9)
+### F1 — Scaffolding (3 d) — done
 
 - [x] `LICENSE`, `NOTICE.md`, `README.md`, `AGENTS.md`, `theme.toml`.
 - [x] Canonical theme skeleton: `archetypes/`, `content/`, `static/`, `images/`.
@@ -246,8 +246,10 @@ D-15 and D-16 are closed, D-02/D-09/D-18 are the measured boxes.
       `params`, so users never copy them).
 - [x] Document the mandatory non-merging settings (`markup`, `outputs`) — see
       `docs/CONFIG.md` and `config/_default/{markup,hugo}.toml`.
-- [ ] The build warning that prints the exact snippet when a mandatory setting
-      is missing (belongs to `check-config.mjs`, F9).
+- [x] The build warning that prints the exact snippet when a mandatory setting
+      is missing: `_partials/check-config.html` probes the settings Hugo cannot
+      merge and `warnf`s once per build with the exact TOML block. Covered by the
+      adoption gate against an under-configured site.
 - [x] `exampleSite/` self-contained demo with neutral content.
 - [x] `images/screenshot.png` (1500×1000) and `images/tn.png` (900×600),
       captured from the demo by `scripts/screenshot.mjs`.
@@ -276,7 +278,7 @@ i18n key parity green.
 
 ---
 
-### F2 — Base layer (4 d) — done except multilingual
+### F2 — Base layer (4 d) — done
 
 - [x] `baseof.html`: document shell, `lang`, `dir`, `origin-type`.
 - [x] `head.html`: charset, theme-color, viewport, title composition, metadata hook.
@@ -286,7 +288,9 @@ i18n key parity green.
 - [x] `topbar.html`: breadcrumb logic.
 - [x] `footer.html`: copyright, license, meta string.
 - [x] `datetime.html`, `media-url.html`.
-- [ ] `language-alias.html`, `language-selector.html` (multilingual; F9).
+- [x] ~~`language-alias.html`, `language-selector.html`~~ — neither exists
+      upstream: `language-alias.html` is the *code* language map (ported as
+      `code-language.html`, I8) and v7.6.0 has no language selector (L12, I9).
 - [x] `js-selector.html`: conditional script loading, self-host vs CDN (no SRI), jsDelivr combine.
 - [x] `404.html`.
 - [x] Contract selectors for sidebar/topbar/footer.
@@ -374,7 +378,7 @@ feed valid.
 
 ---
 
-### F7 — Verification harness completion (4 d) — gates implemented
+### F7 — Verification harness completion (4 d) — done
 
 - [x] Gate 1: build integrity — file set vs the oracle, required outputs, no
       Liquid residue, no empty files (`tests/build/check.mjs`).
@@ -395,7 +399,7 @@ feed valid.
 - [x] Gate 9: adoption — fresh site, subdirectory `baseURL` and
       `HugoBasicExample` (`tests/adoption/check.mjs`).
 - [x] `visual.yml` nightly and `upstream-watch.yml` weekly workflows.
-- [ ] PR CI under 12 minutes (measure once the first run lands).
+- [x] PR CI under 12 minutes (measured: ~55 s end to end).
 
 **Acceptance**: `npm run test:all` green; gates documented.
 
@@ -425,7 +429,7 @@ runs everything nightly.
 
 ---
 
-### F9 — Tooling, starter and docs (2 d) — tooling done
+### F9 — Tooling, starter and docs (2 d) — done
 
 - [x] `sync-upstream.mjs` v2: report by mode (copy / manual / transform /
       retired), `--apply`, `--check`, and no writes without `--apply`.

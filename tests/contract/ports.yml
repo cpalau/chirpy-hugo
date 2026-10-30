@@ -264,22 +264,22 @@ files:
       publishes the rendered file to `static/assets/js/data/mathjax.js`;
       without that MathJax never receives its delimiters.
   "assets/js/data/search.json":
-    target: layouts/index.json
+    target: layouts/home.search.json
     mode: manual
     note: becomes a JSON output format for the home page (F6)
   "assets/js/data/swconf.js":
-    target: layouts/swconf.js
+    target: layouts/home.swconf.js
     mode: manual
     note: becomes a JS output format with the cache list (F6)
   "assets/css/jekyll-theme-chirpy.scss":
-    target: null
+    target: assets/scss/entry-dual.scss
     mode: manual
     note: >
       Contains Liquid (`@use ... with ($theme: ...)`), so it cannot be copied or
-      hashed. The equivalent is generated at build time in
-      layouts/_partials/head.html with resources.FromString + toCSS (G-36).
+      hashed. The port has three precompiled entries (light, dark, dual) built by
+      scripts/build-css.sh (D-13).
   "assets/feed.xml":
-    target: layouts/rss.xml
+    target: layouts/home.feed.xml
     mode: manual
     note: hand-written Atom, 5 posts, 400-char summary (G-07)
   "assets/robots.txt":
@@ -360,20 +360,21 @@ files:
     mode: manual
     note: rollup/sass/purgecss/eslint toolchain; purgecss globs adapted to layouts/
   "purgecss.js":
-    target: scripts/purgecss.mjs
-    mode: manual
-    note: only used to prove the shipped _bootstrap.scss; not part of the asset pipeline
+    target: null
+    mode: retired
+    reason: upstream build tooling; the assets are copied verbatim and hash-verified (D-10)
   "rollup.config.js":
-    target: rollup.config.mjs
-    mode: manual
-    note: only used to prove the shipped bundles; consumers get them from the gem
+    target: null
+    mode: retired
+    reason: upstream build tooling; the 9 bundles are copied from the gem (D-10)
   "eslint.config.js":
-    target: eslint.config.mjs
-    mode: manual
+    target: null
+    mode: retired
+    reason: upstream build tooling; the JavaScript is copied verbatim (D-10)
   ".stylelintrc.json":
-    target: .stylelintrc.json
-    mode: manual
-    note: globs retargeted from _sass/ to assets/scss/
+    target: null
+    mode: retired
+    reason: upstream build tooling; the Sass is copied verbatim (D-10)
   "jekyll-theme-chirpy.gemspec":
     target: theme.toml
     mode: new

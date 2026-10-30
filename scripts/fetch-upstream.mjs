@@ -330,6 +330,27 @@ async function check(u, ports) {
       `${transformed} transform target(s) verified by their generator`,
   );
 
+  // 5. Every hand-written port must exist. The gate cannot hash a `manual`
+  //    target (it is not a copy), but it can prove the file was written: a
+  //    template that dispatches to a partial nobody created builds clean until
+  //    a user enables that provider (this is how four analytics providers were
+  //    missing).
+  let manual = 0;
+  const absent = [];
+  for (const [rel, entry] of Object.entries(ports.files)) {
+    if (entry.mode !== 'manual') continue;
+    manual += 1;
+    if (!entry.target || !existsSync(path.join(ROOT, entry.target))) {
+      absent.push(`${rel} -> ${entry.target ?? '(no target)'}`);
+    }
+  }
+  if (absent.length) {
+    fail(`${absent.length} manual port(s) have no target:`);
+    for (const line of absent) console.log(`          ${line}`);
+  } else {
+    console.log(`manual ports: ${manual}/${manual} present`);
+  }
+
   return failures;
 }
 

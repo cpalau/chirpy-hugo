@@ -61,7 +61,9 @@ Invariants enforced by `scripts/fetch-upstream.mjs --check` (Gate G8):
   (currently 225 of 225);
 - **every** gem-only artifact is declared with `source: gem` (currently 10);
 - every `copy`/`transform` file matches its recorded sha256;
-- any local copy that already exists still matches upstream.
+- any local copy that already exists still matches upstream;
+- every `manual` port has a target that exists: the gate cannot hash a
+  hand-written template, but it can prove the file was written.
 
 Two sources are needed and both are pinned: the tag ships the sources, the gem
 ships the sources **plus** the ten build artifacts that upstream git-ignores.

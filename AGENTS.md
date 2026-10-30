@@ -292,7 +292,8 @@ npm run test:ui              # Gate 5b: desktop/tablet/mobile/small UI matrix
 npm run test:a11y            # Gate 6: axe vs Jekyll
 npm run test:i18n            # Gate 7: 33 locales, same key tree
 npm run test:upstream        # Gate 8: asset hashes + ports coverage
-npm run test:adoption        # Gate 9: fresh site, subdir, HugoBasicExample
+npm run test:adoption        # Gate 9: fresh site, subdir, providers, HugoBasicExample
+npm run test:providers       # Gate 9b: six analytics + three comment providers
 npm run test:config          # params defaults and mandatory settings
 npm run test:release         # changelog/version/pin consistency
 
@@ -471,6 +472,7 @@ A release that only touches `copy` files should take minutes.
 | 7 | `test:i18n` | 33 locales, identical key sets, no empty values |
 | 8 | `test:upstream` | Copied assets match the pinned tag and gem (`scripts/fetch-upstream.mjs --check`); ports.yml is complete |
 | 9 | `test:adoption` | The theme builds any fresh site and `HugoBasicExample` with no config |
+| 9b | `test:providers` | Every analytics and comment provider renders (configuration-dispatched partials) |
 
 Gate 4 and Gate 5 are the definition of "pixel perfect". They compare against
 a **real Jekyll build of the same content**, not against a hand-made mock.

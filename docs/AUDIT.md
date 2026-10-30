@@ -561,6 +561,43 @@ rationale.
 - [x] Every Jekyll-specific capability mapped to Hugo.
 - [x] All divergences D-01…D-11 justified.
 - [x] Previous documentation corrected where wrong.
-- [ ] Q1–Q4 answered and recorded in `tests/qa/` (F0).
-- [ ] Q5–Q8 answered (F1, F0.5, F6).
+- [x] Q1–Q4 answered and recorded in `tests/qa/`.
+- [x] Q5–Q8 answered (F1, F0.5, F6).
 - [x] `sha` pinned in `ports.yml` (F0).
+
+---
+
+## 12. Second pass — completeness verification
+
+Re-audited after `v1.0.0`, because "every file mapped" and "every feature works"
+are different claims: a mapped file can point at a target that was never
+written, and a template can dispatch to a partial that does not exist.
+
+Method:
+
+1. `fetch-upstream.mjs --check` — 225/225 tag files mapped, 10 gem-only
+   artifacts declared, 112 hashes verified, 79 local copies intact, 33
+   transform targets verified by their generators.
+2. Every `manual` port was checked for an existing target. This is now an
+   invariant of Gate 8 (it found twelve stale targets, all corrected).
+3. Every partial named by a template was checked statically, including the two
+   configuration-driven dispatches (`analytics/<provider>.html`,
+   `comments/<provider>.html`). This is now part of `check-config.mjs`.
+4. Every provider was built and asserted in the adoption gate.
+5. Every declared parameter was matched against the templates that read it: no
+   dead parameter and no undocumented one.
+
+Findings:
+
+| Finding | Consequence | Fix |
+|---|---|---|
+| `analytics/umami.html`, `matomo.html`, `cloudflare.html`, `fathom.html` were missing while `head.html` dispatched to them | enabling any of the four **failed the build** (`partial not found`) | partials ported from upstream; all six providers in the adoption matrix |
+| `ports.yml` mapped 8 files to targets that do not exist (`layouts/index.json`, `layouts/swconf.js`, `layouts/rss.xml`, …) | the manifest could not detect a port that was never written | targets corrected; "manual ports present" gate added |
+| `purgecss.js`, `rollup.config.js`, `eslint.config.js`, `.stylelintrc.json` still claimed as ports | dead entries implied tooling that does not exist | marked `retired` (D-10) |
+| FEATURES C18/C31 said the vendor bundle was not shipped | understated the feature set | updated to D-22 (`static/assets/lib`, hash-verified) |
+| A site missing the non-merging settings built silently | broken highlighting/feed with no explanation | build warning with the exact snippet (F1) |
+
+No upstream feature is unimplemented: the 186 inventory rows are 163 direct
+parity, 16 declared divergences and 7 out of scope, and every out-of-scope row
+was re-verified against the pinned tree (no language selector, no `hreflang`, no
+`dir="rtl"`, no per-language content or menus).

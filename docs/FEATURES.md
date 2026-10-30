@@ -1,7 +1,7 @@
 # Feature Inventory and Hugo Mapping
 
-> **Audited on 2026-10-30** against the code and the gate suite: **162** rows
-> at parity, **16** with a declared divergence, **0** pending and **8** out of
+> **Audited on 2026-10-30** against the code and the gate suite: **163** rows
+> at parity, **16** with a declared divergence, **0** pending and **7** out of
 > scope. Every parity row is proved by at least one gate (G1–G9, see
 > `TESTING.md`); the divergences are the `D-xx` entries in
 > `COMPATIBILITY.md`.
@@ -53,7 +53,7 @@ Legend
 | C15 | Category / tag permalinks | `/categories/:name/`, `/tags/:name/` | `permalinks.term` | ✅ | G2 |
 | C16 | HTML compression | `compress_html` | `minify` | 🟡 D-05 | G4 |
 | C17 | Sass output style | `sass.style: compressed` | `toCSS` + `minify` | ✅ | G5 |
-| C18 | Self-hosted vendor assets | `assets.self_host.*` | `params.assets.self_host.*` | 🟡 parameters only, the vendor files are not shipped (C31) | G3 |
+| C18 | Self-hosted vendor assets | `assets.self_host.*` | `params.assets.self_host.*` | ✅ D-22 (`static/assets/lib`, 35 files, hash-verified) | G3, G8 |
 | C19 | CDN for media | `cdn` | `params.cdn` + `media-url` partial | ✅ | G4 |
 | C20 | Custom meta injection | `metadata-hook.html` | partial override | ✅ | G4 |
 | C21 | Webmaster verifications | `webmaster_verifications.*` | `params.webmaster_verifications.*` | ✅ | G4 |
@@ -66,7 +66,7 @@ Legend
 | C28 | HTML lang override | `alt_lang` (optional site key) | `params.alt_lang` | ✅ | G7 |
 | C29 | Pagination path | `paginate_path` (`/page:num/`) | `pagination.path` | 🟡 D-14 | G4 |
 | C30 | Theme version (footer tooltip) | `theme.version` (gem) | `params.theme_version` | ✅ | G4 |
-| C31 | Self-hosted vendor assets | external `chirpy-static-assets` repo at `/assets/lib` | module mount or documented dependency | ❌ | G9 |
+| C31 | Self-hosted vendor assets | external `chirpy-static-assets` repo at `/assets/lib` | vendored at a pinned commit by `scripts/vendor.mjs` | 🟡 D-22 | G8 |
 
 ---
 

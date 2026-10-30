@@ -267,8 +267,13 @@ default** in `config/_default/params.toml`. A user site does not need to declare
 any of them; it only overrides what it wants to change.
 
 The only settings a user must provide are the ones in non-merging categories
-(`markup`, `outputs`), and the theme emits a build warning with the exact
-snippet when they are missing:
+(`markup`, `outputs`). The theme checks them on every build
+(`_partials/check-config.html`) and prints one warning with the exact TOML block
+for the ones it can detect: block attributes, highlighting classes and the four
+home output formats. Two are not probed: `unsafe` already has Hugo's own
+`warning-goldmark-raw-html` on the page that needs it, and `enableRobotsTXT` is
+read before the theme is merged, so a template cannot see it. The block below is
+the complete, copy-pasteable snippet:
 
 ```toml
 enableRobotsTXT = true   # upstream publishes /robots.txt (theme asset)

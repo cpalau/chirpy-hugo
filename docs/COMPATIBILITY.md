@@ -6,8 +6,10 @@ an ID, the reason, the blast radius, and the test that proves it is harmless.
 **Rule:** a divergence without an ID is a bug. A `D-xx` must have a matching
 entry in `tests/parity/ignore.yml` when it affects Gate G4.
 
-Status values: `open` (accepted, not yet implemented), `closed` (implemented and
-tested), `retired` (upstream no longer relevant).
+Status values: `declared` (accepted and permanent, with a test that proves the
+blast radius is harmless), `closed` (the gap no longer exists: reproduced, or the
+upstream feature is gone), `open` (identified, not yet decided), `retired`
+(upstream no longer relevant). Every `declared` entry names its verification.
 
 ---
 
@@ -15,7 +17,7 @@ tested), `retired` (upstream no longer relevant).
 
 | | |
 |---|---|
-| Status | open |
+| Status | declared |
 | Affects | Markdown authoring; fixtures 2, 3, 7 |
 | Upstream | kramdown IAL: `{: .prompt-tip }`, `` `x`{: .filepath } ``, `{: .nolineno }`, `{: .light }` |
 | This port | Shortcodes (`{{< prompt >}}`, `{{< filepath >}}`, `{{< img >}}`) and fence attributes in the info string |
@@ -69,7 +71,7 @@ The converter is idempotent and produces a diff for review.
 
 | | |
 |---|---|
-| Status | open (measured in F0.5, see `docs/POC.md`) |
+| Status | declared |
 | Affects | Every code block; fixture 2 |
 | Upstream | Rouge with `css_class: highlight`, `block.line_numbers: true`, `start_line: 1` |
 | This port | Chroma token stream, Rouge's DOM rebuilt by `render-codeblock.html` |
@@ -132,7 +134,7 @@ language and breaks the others, and it edits vendor SCSS.
 
 | | |
 |---|---|
-| Status | open |
+| Status | declared |
 | Affects | Home listing, search index, fixtures 10 |
 | Upstream | `markdownify \| strip_html \| truncate: 200` |
 | This port | Custom partial replicating Jekyll's `truncate` exactly |
@@ -182,7 +184,7 @@ HTML, exactly as upstream does.
 
 | | |
 |---|---|
-| Status | open |
+| Status | declared |
 | Affects | Anchors, TOC, deep links; fixture 8 |
 | Upstream | kramdown `auto_ids` |
 | This port | Goldmark `autoHeadingID` with `autoIDType` tuned to match |
@@ -214,7 +216,7 @@ headings and leading digits. Spanish content makes this visible immediately.
 
 | | |
 |---|---|
-| Status | open |
+| Status | declared |
 | Affects | Byte-level output only |
 | Upstream | `jekyll-compress-html` (`compress_html`) |
 | This port | Hugo `minify` |
@@ -234,7 +236,7 @@ because canonicalization already handles it.
 
 | | |
 |---|---|
-| Status | open |
+| Status | declared |
 | Affects | `<head>` of every page |
 | Upstream | `jekyll-seo-tag` gem |
 | This port | `_partials/seo.html` reproducing tags and JSON-LD |
@@ -267,7 +269,7 @@ because those emit different markup. The partial is the single source of truth.
 
 | | |
 |---|---|
-| Status | open |
+| Status | declared |
 | Affects | Every user site |
 | Upstream | Jekyll merges the theme `_config.yml` with the site config, deeply |
 | This port | Hugo merges theme config per category: `params` deep, but `markup`, `outputs`, `permalinks`, `module`, `languages` are **replaced**, not merged |
@@ -322,7 +324,7 @@ G-11.
 
 | | |
 |---|---|
-| Status | open |
+| Status | declared |
 | Affects | Footer of every page; fixture 12 |
 | Upstream | `Using the :THEME theme for :PLATFORM.` where PLATFORM = **Jekyll** and THEME links to the upstream repo, with `title="v{theme.version}"` |
 | This port | PLATFORM = **Hugo**, THEME links to this repository, version from `params.theme_version` |
@@ -635,7 +637,7 @@ None of these affects a rendered page, and Gate G5 never sees them.
 
 | | |
 |---|---|
-| Status | open (harness limitation, not a theme difference) |
+| Status | declared |
 | Affects | `post/embeds`, the `audio` and `video` elements |
 | Upstream | the browser draws the controls from the UA shadow DOM |
 | This port | identical element, attributes and `<source>` list |
@@ -652,7 +654,7 @@ are compared by G4, and the page height is compared by the pixel gate.
 
 | | |
 |---|---|
-| Status | **closed** |
+| Status | closed |
 | Affects | `/categories/`, `/tags/` (head only) |
 | Upstream | the `_tabs` placeholders are pages with a date, so jekyll-seo-tag emits `og:type=article` plus `article:published_time` |
 | This port | the Hugo fixture carries the same front matter in `content/{categories,tags}/_index.md`, and the theme derives the metadata from the page date |
@@ -674,7 +676,7 @@ Pixel impact: none.
 
 | | |
 |---|---|
-| Status | **closed** |
+| Status | closed |
 | Affects | `post/tables-footnotes` |
 | Upstream | kramdown: `id="fn:<label>"`, `class="footnote"`, `rel="footnote"` |
 | This port | Goldmark numbers the ids, so `_partials/content.html` maps them back to the source labels |
@@ -748,7 +750,7 @@ like the JS bundles (D-10).
 
 | | |
 |---|---|
-| Status | open |
+| Status | declared |
 | Affects | Home pagination; 6 pages in the fixture set |
 | Upstream | Jekyll `paginate_path` default → `/page2/`, `/page3/` |
 | This port | Hugo → `/page/2/`, `/page/3/` |
@@ -772,7 +774,7 @@ invent them.
 
 | | |
 |---|---|
-| Status | open |
+| Status | declared |
 | Affects | The "Edit this post" link; fixture 1 |
 | Upstream | `page.path`, relative to the Jekyll source root (`_posts/2026-01-01-x.md`) |
 | This port | `.File.Path`, relative to `content/` (`posts/2026-01-01-x.md`) |
@@ -804,7 +806,7 @@ path. No template can recover the other convention.
 
 | | |
 |---|---|
-| Status | **closed** — reproducible without a divergence |
+| Status | closed (reproducible without a divergence) |
 | Affects | Tags index (`tags.html`), trending tags |
 | Upstream | Liquid `sort_natural` |
 | This port | `_partials/sort-natural.html`: stable insertion sort on an ASCII-only fold |

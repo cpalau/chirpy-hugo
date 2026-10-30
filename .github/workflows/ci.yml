@@ -94,6 +94,9 @@ jobs:
             -d "$RUNNER_TEMP/deploy"
           node tests/adoption/check.mjs --deploy-only
 
+      - name: Analytics and comment provider matrix
+        run: node tests/adoption/check.mjs --providers-only
+
       - name: Build the demo site (warnings are errors)
         run: |
           hugo -s exampleSite --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \

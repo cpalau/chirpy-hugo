@@ -1,0 +1,96 @@
+{{- /*
+  Warn once when the site is missing a setting the theme cannot supply.
+
+  `markup` and `outputs` are replaced, not merged (D-07), so a site that omits
+  them silently loses syntax-highlighting classes, raw HTML or the feed, search
+  index, service-worker config and manifest. The configuration itself is not
+  readable from a template (`site.Config` exposes only `services` and `privacy`),
+  so each setting is probed through its effect.
+
+  Called with `partialCached` from `baseof.html`: the probes run once per site,
+  not once per page. It prints nothing, so the DOM is unaffected.
+*/ -}}
+{{- $missing := slice -}}
+
+{{- /*
+  `markup.goldmark.renderer.unsafe` is not probed: rendering raw HTML to test it
+  would emit Hugo's own `warning-goldmark-raw-html`, and that native warning
+  already tells the user, on the page that needs it, that the setting is off.
+*/ -}}
+
+{{- /* Block attributes on code fences (`{.nolineno}`). */ -}}
+{{- if not (strings.Contains (markdownify "probe\n{.chirpy-probe}") `class="chirpy-probe"`) -}}
+  {{- $missing = $missing | append "markup.goldmark.parser.attribute.block = true" -}}
+{{- end -}}
+
+{{- /* Chroma classes instead of inline styles. */ -}}
+{{- if strings.Contains (highlight "probe" "go") `style="color` -}}
+  {{- $missing = $missing | append "markup.highlight.noClasses = false" -}}
+{{- end -}}
+
+{{- /* The five home outputs: /feed.xml, search.json, swconf.js, manifest. */ -}}
+{{- $formats := slice -}}
+{{- range $name := slice "feed" "search" "swconf" "manifest" -}}
+  {{- if not (site.Home.OutputFormats.Get $name) -}}
+    {{- $formats = $formats | append $name -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if or $missing (not (eq (len $formats) 0)) -}}
+  {{- $lines := slice -}}
+  {{- $lines = $lines | append "chirpy-hugo: the site is missing configuration that Hugo does not inherit from a theme," -}}
+  {{- $lines = $lines | append "so the theme cannot render it correctly. Add this to the site configuration:" -}}
+  {{- $lines = $lines | append "" -}}
+  {{- if $missing -}}
+    {{- range $missing -}}
+      {{- if strings.HasPrefix . "markup.goldmark.parser" -}}
+        {{- $lines = $lines | append "[markup.goldmark.parser.attribute]" -}}
+        {{- $lines = $lines | append "  block = true" -}}
+      {{- else -}}
+        {{- $lines = $lines | append "[markup.highlight]" -}}
+        {{- $lines = $lines | append "  noClasses = false" -}}
+      {{- end -}}
+      {{- $lines = $lines | append "" -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if $formats -}}
+    {{- $lines = $lines | append "[mediaTypes.\"application/atom+xml\"]" -}}
+    {{- $lines = $lines | append "  suffixes = [\"xml\"]" -}}
+    {{- $lines = $lines | append "" -}}
+    {{- $lines = $lines | append "[mediaTypes.\"application/manifest+json\"]" -}}
+    {{- $lines = $lines | append "  suffixes = [\"webmanifest\"]" -}}
+    {{- $lines = $lines | append "" -}}
+    {{- $lines = $lines | append "[outputFormats.search]" -}}
+    {{- $lines = $lines | append "  mediaType = \"application/json\"" -}}
+    {{- $lines = $lines | append "  baseName = \"search\"" -}}
+    {{- $lines = $lines | append "  path = \"assets/js/data\"" -}}
+    {{- $lines = $lines | append "  isPlainText = true" -}}
+    {{- $lines = $lines | append "  notAlternative = true" -}}
+    {{- $lines = $lines | append "" -}}
+    {{- $lines = $lines | append "[outputFormats.feed]" -}}
+    {{- $lines = $lines | append "  mediaType = \"application/atom+xml\"" -}}
+    {{- $lines = $lines | append "  baseName = \"feed\"" -}}
+    {{- $lines = $lines | append "  isPlainText = true" -}}
+    {{- $lines = $lines | append "  notAlternative = true" -}}
+    {{- $lines = $lines | append "" -}}
+    {{- $lines = $lines | append "[outputFormats.swconf]" -}}
+    {{- $lines = $lines | append "  mediaType = \"text/javascript\"" -}}
+    {{- $lines = $lines | append "  baseName = \"swconf\"" -}}
+    {{- $lines = $lines | append "  path = \"assets/js/data\"" -}}
+    {{- $lines = $lines | append "  isPlainText = true" -}}
+    {{- $lines = $lines | append "  notAlternative = true" -}}
+    {{- $lines = $lines | append "" -}}
+    {{- $lines = $lines | append "[outputFormats.manifest]" -}}
+    {{- $lines = $lines | append "  mediaType = \"application/manifest+json\"" -}}
+    {{- $lines = $lines | append "  baseName = \"site\"" -}}
+    {{- $lines = $lines | append "  path = \"assets/img/favicons\"" -}}
+    {{- $lines = $lines | append "  isPlainText = true" -}}
+    {{- $lines = $lines | append "  notAlternative = true" -}}
+    {{- $lines = $lines | append "" -}}
+    {{- $lines = $lines | append "[outputs]" -}}
+    {{- $lines = $lines | append "  home = [\"HTML\", \"feed\", \"search\", \"swconf\", \"manifest\"]" -}}
+    {{- $lines = $lines | append "" -}}
+  {{- end -}}
+  {{- $lines = $lines | append "Complete reference: docs/CONFIG.md §11." -}}
+  {{- warnf "%s" (delimit $lines "\n") -}}
+{{- end -}}

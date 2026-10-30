@@ -20,7 +20,7 @@
  * counted twice, an asset that 404s, or a taxonomy page that renders empty.
  */
 
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -39,24 +39,34 @@ const fail = (message) => {
   console.error(`  FAIL  ${message}`);
 };
 
-function build(name, source, extra = []) {
+function build(name, source, extra = [], options = {}) {
   const out = path.join(WORK, `${name}-out`);
   fs.rmSync(out, { recursive: true, force: true });
-  try {
-    execFileSync(
-      HUGO,
-      ['-s', source, '--themesDir', THEMES_DIR, '--theme', THEME, '--panicOnWarning', '--gc', '-d', out, ...extra],
-      { stdio: 'pipe', encoding: 'utf8' },
-    );
-  } catch (error) {
-    fail(`${name}: build failed\n${error.stderr ?? error.message}`);
+  const args = ['-s', source, '--themesDir', THEMES_DIR, '--theme', THEME, '--gc', '-d', out, ...extra];
+  // A site that is missing the non-merging settings gets the theme's build
+  // warning, which is a failure under `--panicOnWarning`.
+  if (!options.allowWarnings) args.splice(4, 0, '--panicOnWarning');
+  const result = spawnSync(HUGO, args, { encoding: 'utf8' });
+  if (result.status !== 0) {
+    fail(`${name}: build failed\n${result.stderr ?? ''}`);
+    return null;
+  }
+  if (options.expectWarning) {
+    const missing = options.expectWarning.filter((text) => !result.stderr.includes(text));
+    if (missing.length) {
+      fail(`${name}: warning is missing "${missing[0]}"\n${result.stderr}`);
+      return null;
+    }
+    console.log(`  ok    ${name}: warns with the exact configuration snippet`);
+  } else if (/WARN/.test(result.stderr)) {
+    fail(`${name}: build emitted a warning\n${result.stderr}`);
     return null;
   }
   if (!fs.existsSync(path.join(out, 'index.html'))) {
     fail(`${name}: build succeeded but produced no index.html`);
     return null;
   }
-  console.log(`  ok    ${name}`);
+  if (!options.expectWarning) console.log(`  ok    ${name}`);
   return out;
 }
 
@@ -130,6 +140,35 @@ function checkDeployment(out) {
   }
 }
 
+/** A starter site with extra params and one post (comments need a post). */
+function featureSite(name, extra) {
+  const dir = path.join(WORK, name);
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(path.join(dir, 'content', 'posts'), { recursive: true });
+  fs.copyFileSync(path.join(ROOT, 'starter/hugo.toml'), path.join(dir, 'hugo.toml'));
+  fs.appendFileSync(path.join(dir, 'hugo.toml'), `\n${extra}\n`);
+  fs.writeFileSync(
+    path.join(dir, 'content/posts/hello.md'),
+    '---\ntitle: "Hello"\ndate: 2026-01-01T00:00:00Z\ncategories: ["Blogging"]\ntags: ["hello"]\n---\n\nA post.\n',
+  );
+  return dir;
+}
+
+/** Build once, then prove every marker is in the output. */
+function expectMarkers(name, source, file, markers) {
+  const out = build(name, source);
+  if (!out) return;
+  const abs = path.join(out, file);
+  if (!fs.existsSync(abs)) {
+    fail(`${name}: ${file} is missing`);
+    return;
+  }
+  const html = fs.readFileSync(abs, 'utf8');
+  const absent = markers.filter((marker) => !html.includes(marker));
+  if (absent.length) fail(`${name}: missing ${absent.join(', ')}`);
+  else console.log(`  ok    ${name}: ${markers.length} marker(s) rendered`);
+}
+
 fs.mkdirSync(WORK, { recursive: true });
 
 // `--deploy-only` is the fast check CI runs on every PR: it builds the demo in
@@ -180,7 +219,64 @@ const deploy = build('demo in deployment shape (subdirectory + minify)', path.jo
 ]);
 if (deploy) checkDeployment(deploy);
 
-// 4. HugoBasicExample, cloned once.
+// 4. Provider matrix: `head.html` and `comment.html` dispatch on configuration,
+// so a provider without a partial only fails when a user turns it on. All of
+// them are exercised here, plus the pageview counter.
+function providerMatrix() {
+expectMarkers(
+  'analytics providers (all six)',
+  featureSite(
+    'analytics',
+    `[params.analytics.google]
+  id = "G-TEST"
+[params.analytics.goatcounter]
+  id = "test"
+[params.analytics.umami]
+  id = "umami-test"
+  domain = "https://umami.example.com"
+[params.analytics.matomo]
+  id = "7"
+  domain = "matomo.example.com"
+[params.analytics.cloudflare]
+  id = "cf-test"
+[params.analytics.fathom]
+  id = "fathom-test"`,
+  ),
+  'index.html',
+  [
+    'googletagmanager.com/gtag/js?id=G-TEST',
+    'gc.zgo.at/count.js',
+    'data-website-id="umami-test"',
+    'matomo.js',
+    'cloudflareinsights.com/beacon.min.js',
+    'cdn.usefathom.com/script.js',
+  ],
+);
+
+for (const [provider, extra, marker] of [
+  ['giscus', '[params.comments.giscus]\n  repo = "owner/repo"\n  repo_id = "R_1"\n  category = "Announcements"\n  category_id = "DIC_1"', 'giscus.app/client.js'],
+  ['disqus', '[params.comments.disqus]\n  shortname = "chirpy-test"', 'disqus.com/embed.js'],
+  ['utterances', '[params.comments.utterances]\n  repo = "owner/repo"\n  issue_term = "pathname"', 'utteranc.es/client.js'],
+]) {
+  expectMarkers(
+    `comments: ${provider}`,
+    featureSite(`comments-${provider}`, `[params.comments]\n  provider = "${provider}"\n${extra}`),
+    'posts/hello/index.html',
+    [marker],
+  );
+}
+}
+
+// `--providers-only` is the fast run PR CI needs: no clone, no deployment build.
+if (process.argv.includes('--providers-only')) {
+  providerMatrix();
+  console.log(failures ? `\n${failures} provider failure(s)` : '\nproviders verified');
+  process.exit(failures ? 1 : 0);
+}
+
+providerMatrix();
+
+// 5. HugoBasicExample, cloned once.
 if (!fs.existsSync(BASIC)) {
   try {
     execFileSync('git', ['clone', '--depth', '1', 'https://github.com/gohugoio/HugoBasicExample.git', BASIC], {
@@ -192,7 +288,16 @@ if (!fs.existsSync(BASIC)) {
     process.exit(failures ? 1 : 0);
   }
 }
-build('HugoBasicExample', BASIC);
+// HugoBasicExample does not declare the non-merging settings: it must still
+// build, and it must say why the output is incomplete (F1).
+build('HugoBasicExample (under-configured site)', BASIC, [], {
+  allowWarnings: true,
+  expectWarning: [
+    'chirpy-hugo: the site is missing configuration',
+    '[markup.goldmark.parser.attribute]',
+    '[outputs]',
+  ],
+});
 
 console.log(failures ? `\n${failures} adoption failure(s)` : '\nadoption verified');
 process.exit(failures ? 1 : 0);
