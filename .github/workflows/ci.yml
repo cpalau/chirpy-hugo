@@ -15,7 +15,8 @@ env:
 jobs:
   commitlint:
     # Runs on both events. A PR has base/head; a push has `before`/`sha`.
-    runs-on: ubuntu-latest
+    # Pinned: `ubuntu-latest` migrates to Ubuntu 26 from October 2026.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
         with:
@@ -50,7 +51,8 @@ jobs:
           npx commitlint --from "$from" --to "$to"
 
   build:
-    runs-on: ubuntu-latest
+    # Pinned: `ubuntu-latest` migrates to Ubuntu 26 from October 2026.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: peaceiris/actions-hugo@v3
@@ -116,7 +118,8 @@ jobs:
             --panicOnWarning --gc --minify
 
   ui:
-    runs-on: ubuntu-latest
+    # Pinned: `ubuntu-latest` migrates to Ubuntu 26 from October 2026.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: peaceiris/actions-hugo@v3
@@ -143,7 +146,8 @@ jobs:
         run: node tests/ui/check.mjs .out/hugo --fast
 
   parity:
-    runs-on: ubuntu-latest
+    # Pinned: `ubuntu-latest` migrates to Ubuntu 26 from October 2026.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: peaceiris/actions-hugo@v3

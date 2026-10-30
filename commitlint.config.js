@@ -54,6 +54,7 @@ export default {
         'parity',
         'seo',
         'plugins',
+        'footer',
         'visual',
         'qa',
         'a11y',

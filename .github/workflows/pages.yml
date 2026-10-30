@@ -37,7 +37,8 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned: `ubuntu-latest` migrates to Ubuntu 26 from October 2026.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
 
@@ -63,7 +64,8 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    # Pinned: `ubuntu-latest` migrates to Ubuntu 26 from October 2026.
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
