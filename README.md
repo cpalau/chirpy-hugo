@@ -1,167 +1,136 @@
-# chirpy-hugo
+<!-- markdownlint-disable-next-line -->
+<div align="center">
 
-A Hugo port of [**Chirpy**](https://github.com/cotes2020/jekyll-theme-chirpy),
-the minimal, responsive and feature-rich Jekyll theme for technical writing.
+  <!-- markdownlint-disable-next-line -->
+  # Chirpy Hugo Theme
 
-The goal is not "inspired by Chirpy". The goal is **parity**: the same content
-must produce the same HTML — and therefore the same pixels — while upstream
-SCSS, JavaScript and assets stay byte-for-byte identical, so upstream releases
-can be adopted in hours instead of weeks.
+  A minimal, responsive, and feature-rich Hugo theme for technical writing.
 
-> **Status: v1.0.0.** The template layer, the outputs and the verification
-> harness are complete: **47/47** pages are identical to a real Jekyll build
-> after canonicalization, **84/84** visual pairs are pixel-identical outside the
-> three declared boxes (`docs/COMPATIBILITY.md`), Gates 1–9 run in CI, and the
-> nightly workflow adds accessibility, Lighthouse and a Firefox/WebKit check.
-> Release notes: [`docs/releases/v1.0.0.md`](docs/releases/v1.0.0.md).
+  A port of the Chirpy Jekyll theme that renders the same HTML, and therefore
+  the same pixels.
 
----
+  [![CI][badge-ci]][ci]&nbsp;
+  [![GitHub license][badge-license]][license]&nbsp;
+  [![Release][badge-release]][release]&nbsp;
+  [![Demo][badge-demo]][demo]
 
-## Principles
+  [**Live Demo** →][demo]
 
-1. **Assets are read-only.** `assets/scss/`, `assets/js/`, `data/origin/` and
-   `static/assets/img/favicons/` are copies of upstream. `i18n/` is generated
-   from the upstream locales by `scripts/i18n.mjs`. None of them is edited by
-   hand.
-2. **The DOM is a contract.** Class names, ids, `data-*` attributes and nesting
-   match Jekyll output, so upstream JavaScript keeps working untouched.
-3. **Parity is measured.** A template is done when a real Jekyll build of the
-   same content produces the same DOM and the same pixels.
-4. **Hugo conventions, strictly.** Idiomatic Hugo code that renders
-   upstream-identical HTML.
+  [![Devices Mockup](images/devices-mockup.png)][demo]
 
-Read [`AGENTS.md`](AGENTS.md) before contributing — it contains the hard rules.
+</div>
 
----
+> **This is an adaptation.** `chirpy-hugo` is an independent Hugo port of
+> [**Chirpy**][upstream], the Jekyll theme created by
+> [Cotes Chung][cotes] and its contributors. All design, stylesheets,
+> JavaScript, imagery and demo content are theirs; this repository
+> reimplements the template layer and proves the output matches. It is not
+> endorsed by the upstream author.
+>
+> Upstream is MIT licensed and that license is preserved here: see
+> [`LICENSE`](LICENSE) and [`NOTICE.md`](NOTICE.md) for the full attribution.
 
-## Requirements
+## Features
 
-| Tool | Version |
-|---|---|
-| Hugo | extended ≥ 0.150 (tested with 0.168.0) |
-| Node.js | ≥ 20 (tested with 24) |
-| Go | ≥ 1.21 (for Hugo Modules) |
-| Ruby + Bundler | only for the Jekyll oracle in the test suite |
+- **Design & UX** - Responsive layout, Dark/Light modes, Localized UI language
+  (33 locales), and Dark mode images.
+- **Content Management** - Pinned posts, Hierarchical categories, Trending
+  tags, Auto-generated Table of Contents, and Last modified dates.
+- **Rich Text Support** - Syntax highlighting, Mathematical expressions,
+  Mermaid diagrams & flowcharts, Prompts, and Embedded media.
+- **Interactivity & Outreach** - Built-in search, Multiple comment systems
+  (Disqus, Utterances, Giscus), Atom feeds, and sharing.
+- **System & Optimization** - PWA support, integrated Web analytics, advanced
+  SEO, and an Atom feed and sitemap generated as Hugo outputs.
 
----
+Everything above is the upstream feature set. What this port adds is proof: a
+[Jekyll oracle](tests/oracle) builds the same content, and the two outputs are
+compared page by page.
 
-## Documentation
+## Quick start
 
-| Document | Purpose |
-|---|---|
-| [docs/AUDIT.md](docs/AUDIT.md) | File-by-file audit of upstream v7.6.0 — source of truth |
-| [docs/PLAN.md](docs/PLAN.md) | Master plan, phases F0–F9, Definition of Done |
-| [docs/FEATURES.md](docs/FEATURES.md) | Complete upstream feature inventory and Hugo mapping |
-| [docs/TESTING.md](docs/TESTING.md) | Nine verification gates, Jekyll oracle, Playwright |
-| [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) | Declared divergences (D-01…) |
-| [docs/CONFIG.md](docs/CONFIG.md) | Configuration contract |
-| [docs/UPSTREAM.md](docs/UPSTREAM.md) | Synchronization with the Jekyll original |
-| [docs/SHORTCODES.md](docs/SHORTCODES.md) | Authoring syntax and kramdown conversion |
-| [docs/I18N.md](docs/I18N.md) | Internationalization contract (33 locales) |
-| [docs/RELEASING.md](docs/RELEASING.md) | Conventional Commits, changelog and release notes |
-
-> This is a generic, reusable theme. Site-specific migration work and personal
-> content are documented outside this repository.
-
----
-
-## For users
-
-**Live demo:** <https://cpalau.github.io/chirpy-hugo/> — the `exampleSite/`
-built with this theme and deployed by `.github/workflows/pages.yml`. It mirrors
-the [upstream demo](https://chirpy.cotes.page/) page by page, including its four
-posts and the feature showcase.
-
-`chirpy-hugo` is meant to be installed, not copied. It works as a Hugo Module,
-as a git submodule, or as a local theme, and it must build any site — including
-`gohugoio/HugoBasicExample` — with the documented minimum configuration.
+Requirements: **Hugo extended ≥ 0.150** (tested with 0.168). Node is only
+needed for the verification harness, not to build a site.
 
 ```bash
-hugo new site my-blog
-cd my-blog
+hugo new site my-blog && cd my-blog
 hugo mod init example.com/my-blog
 hugo mod get github.com/cpalau/chirpy-hugo
 ```
 
-Then import the theme and copy the mandatory settings from
-[`starter/hugo.toml`](starter/hugo.toml):
+Import the theme and copy the mandatory settings from
+[`starter/hugo.toml`](starter/hugo.toml) — the sections Hugo does not merge from
+a theme (`outputs`, `outputFormats`, `markup`, `menus`, `enableRobotsTXT`).
+Everything else has a default: a site with an empty `params` table works.
 
-```toml
-[module]
-  [[module.imports]]
-    path = "github.com/cpalau/chirpy-hugo"
-```
+A complete minimal site lives in [`starter/`](starter/); the demo in
+[`exampleSite/`](exampleSite) mirrors [the upstream demo][upstream-demo] page by
+page and is what the [live demo][demo] serves.
 
-Those settings (`outputs`, `outputFormats`, `markup`) are the ones Hugo does not
-merge from a theme (D-07). Everything else is optional and has a default.
+## Documentation
 
-A complete, minimal site lives in [`starter/`](starter/): config, one post and
-the site-owned data files.
+| Document | Contents |
+|---|---|
+| [`docs/CONFIG.md`](docs/CONFIG.md) | Every parameter, its default and the settings a site must declare |
+| [`docs/SHORTCODES.md`](docs/SHORTCODES.md) | Prompts, filepaths, images and embeds, with the kramdown equivalents |
+| [`docs/I18N.md`](docs/I18N.md) | The 33 locales and the generation contract |
+| [`docs/UPSTREAM.md`](docs/UPSTREAM.md) | How to sync with a new Chirpy release |
+| [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md) | Every declared divergence (`D-01`…`D-21`) and why it cannot be reproduced |
+| [`docs/TESTING.md`](docs/TESTING.md) | The nine gates: build, HTML, DOM contract, DOM, pixels, a11y, i18n, upstream, adoption |
+| [`docs/PLAN.md`](docs/PLAN.md) | The plan and the Definition of Done |
+| [`AGENTS.md`](AGENTS.md) | The rules a change must follow |
+| [`docs/releases/`](docs/releases) | Release notes |
 
-The theme ships:
+## Parity, measured
 
-- `theme.toml` metadata for the Hugo theme gallery,
-- `exampleSite/` as a self-contained demo,
-- `archetypes/` for `hugo new`,
-- all 33 locales,
-- every `params` default (Hugo deep-merges `params`, so you only override what
-  you need).
+| Gate | Result |
+|---|---|
+| HTML (Gate 4) | **47/47** pages identical to Jekyll after canonicalization |
+| Pixels (Gate 5) | **84/84** pairs identical outside three declared rectangles |
+| Feed, sitemap, search, service worker, manifest | identical content to the Jekyll build |
+| Adoption | fresh site, subdirectory `baseURL` and `HugoBasicExample` build warning-free |
 
----
+Run the suite with `npm run test:build`, `test:html`, `test:contract`,
+`test:parity`, `test:outputs`, `test:visual`, `test:a11y`, `test:i18n`,
+`test:upstream`, `test:adoption`. The Jekyll oracle and every fixture live under
+[`tests/`](tests).
 
-## Repository layout
+## Contributing
 
-```
-theme.toml          theme metadata for the Hugo gallery
-go.mod              Hugo Module definition
-config/_default/    theme configuration (merged into the user's config)
-archetypes/         content templates for `hugo new`
-images/             screenshot.png + tn.png for the theme gallery
-exampleSite/        self-contained demo site
+Contributions — pull requests, issues and discussions — are welcome. Before
+opening one, read [`AGENTS.md`](AGENTS.md): the DOM and the pixels are a
+contract, and a change that moves either needs a measurement and, if it cannot
+be avoided, a declared divergence. Every commit follows
+[Conventional Commits](https://www.conventionalcommits.org/), and every change
+adds a [`CHANGELOG.md`](CHANGELOG.md) entry.
 
-layouts/            Hugo templates (the only original rendering code)
-├── _partials/      fragments, mirroring upstream include names
-├── _shortcodes/    prompt, filepath, embeds
-└── _markup/        render hooks (codeblock, image, heading, link, table)
+## Credits
 
-assets/scss/        COPY of upstream _sass/                  DO NOT EDIT
-assets/js/          COPY of upstream _javascript/            DO NOT EDIT
-data/origin/        COPY of upstream _data/origin             DO NOT EDIT
-static/assets/...   COPY of upstream images and favicons     DO NOT EDIT
-i18n/               GENERATED from _data/locales (i18n.mjs)   DO NOT EDIT
+This project stands on the work of the Chirpy community:
 
-config/_default/    configuration contract
-scripts/            sync, i18n, content conversion, config checks
-tests/              oracle, fixtures, parity, visual, contract, a11y, i18n, adoption
-docs/               the plan and the contracts
-starter/            minimal site template for end users
-```
+- [**Chirpy**][upstream], created by [Cotes Chung][cotes] and contributors,
+  MIT licensed. The stylesheets, JavaScript, vendored Bootstrap, favicons,
+  demo prose and demo imagery come from there.
+- The Jekyll ecosystem and the libraries Chirpy integrates.
+- The avatar and favicon artwork sourced from ClipartMAX by the upstream
+  project.
 
----
-
-## Verification
-
-```bash
-npm run build          # hugo --panicOnWarning --gc --minify
-npm run build:example  # the demo site, warning-free
-npm run test:qa        # Q1-Q4 contract tests
-npm run test:i18n      # 33 locales, identical key trees
-npm run test:upstream  # pin, coverage and asset hashes
-npm run test:parity    # Jekyll build vs Hugo build, DOM diff
-npm run test:visual    # Playwright pixel comparison (build both sides first)
-```
-
-Gates 1-3, 6-7 and 9 are still being implemented; `docs/PLAN.md` tracks them.
-
-The test suite builds the **real Jekyll theme** locally and compares both
-outputs. That is the definition of "pixel perfect" used by this project.
-
----
+The Hugo template layer, the shortcodes, the migration and synchronization
+tooling, and the verification harness are original work in this repository.
 
 ## License
 
-MIT. The original copyright notice is preserved in [`LICENSE`](LICENSE), and
-attribution details are in [`NOTICE.md`](NOTICE.md).
+MIT. The original copyright notice is preserved in [`LICENSE`](LICENSE) and the
+attribution is detailed in [`NOTICE.md`](NOTICE.md).
 
-Chirpy is created by Cotes Chung and contributors. This is an independent port,
-not endorsed by the upstream author.
+[badge-ci]: https://img.shields.io/github/actions/workflow/status/cpalau/chirpy-hugo/ci.yml?logo=github
+[badge-license]: https://img.shields.io/github/license/cpalau/chirpy-hugo?color=goldenrod
+[badge-release]: https://img.shields.io/github/v/release/cpalau/chirpy-hugo?logo=github
+[badge-demo]: https://img.shields.io/badge/demo-online-brightgreen
+[ci]: https://github.com/cpalau/chirpy-hugo/actions/workflows/ci.yml
+[license]: https://github.com/cpalau/chirpy-hugo/blob/main/LICENSE
+[release]: https://github.com/cpalau/chirpy-hugo/releases
+[demo]: https://cpalau.github.io/chirpy-hugo/
+[upstream]: https://github.com/cotes2020/jekyll-theme-chirpy
+[upstream-demo]: https://chirpy.cotes.page/
+[cotes]: https://github.com/cotes2020
