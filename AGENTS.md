@@ -562,7 +562,8 @@ Rules:
   commit.
 - Never commit `public/`, `resources/`, `.out/`, `node_modules/`.
 - Enforced mechanically by `commitlint` through a `commit-msg` hook
-  (`commitlint.config.js`, wired in F1). CI re-validates the range on every PR.
+  (`commitlint.config.js`). CI re-validates the range on every push (the
+  `before..sha` range) and on every PR (the `base..head` range).
 
 ### 9.2 Releases: complete, human-readable release notes (mandatory)
 

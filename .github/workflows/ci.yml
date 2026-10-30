@@ -14,7 +14,7 @@ env:
 
 jobs:
   commitlint:
-    if: github.event_name == 'pull_request'
+    # Runs on both events. A PR has base/head; a push has `before`/`sha`.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +25,29 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - run: npx commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}"
+      - name: Lint the commit range
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            from="$BASE"
+            to="$HEAD"
+          else
+            from="$BEFORE"
+            to="$SHA"
+            # A new branch or a force push sends a zero/hidden `before`; fall
+            # back to the root commit rather than linting nothing.
+            if [ -z "$from" ] || [ "$from" = "0000000000000000000000000000000000000000" ] \
+               || ! git cat-file -e "${from}^{commit}" 2>/dev/null; then
+              from=$(git rev-list --max-parents=0 "$to" | tail -1)
+            fi
+          fi
+          echo "commitlint: $from..$to"
+          npx commitlint --from "$from" --to "$to"
 
   build:
     runs-on: ubuntu-latest

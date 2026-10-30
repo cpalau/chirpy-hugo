@@ -19,6 +19,8 @@ export default {
         'docs',
         'test',
         'build',
+        'outputs',
+        'gates',
         'ci',
         'chore',
         'revert'
@@ -47,6 +49,8 @@ export default {
         'qa',
         'a11y',
         'build',
+        'outputs',
+        'gates',
         'ci',
         'deps',
         'upstream',
