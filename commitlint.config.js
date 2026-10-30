@@ -17,6 +17,7 @@ export default {
         'perf',
         'refactor',
         'docs',
+        'features',
         'test',
         'build',
         'browsers',
@@ -25,7 +26,8 @@ export default {
         'gates',
         'ci',
         'chore',
-        'revert'
+        'revert',
+        'release'
       ]
     ],
     'scope-enum': [
@@ -43,6 +45,7 @@ export default {
         'tests',
         'theme',
         'docs',
+        'features',
         'contract',
         'fixtures',
         'oracle',

@@ -536,6 +536,7 @@ Allowed types:
 | `ci` | CI configuration |
 | `chore` | maintenance that fits nowhere else |
 | `revert` | reverting a previous commit |
+| `release` | version bump, changelog promotion, release notes |
 
 Scopes: `partials`, `layouts`, `shortcodes`, `markup`, `assets`, `config`,
 `i18n`, `scripts`, `tests`, `docs`, `upstream`, `starter`, `release`.
