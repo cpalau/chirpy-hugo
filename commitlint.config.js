@@ -64,6 +64,7 @@ export default {
         'deps',
         'upstream',
         'starter',
+        'sw',
         'release'
       ]
     ],
