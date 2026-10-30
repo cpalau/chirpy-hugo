@@ -147,145 +147,138 @@ async function main() {
     ],
   });
 
-  try {
-    for (const theme of THEMES) {
-      for (const viewport of VIEWPORTS) {
-        const context = await browser.newContext({
-          viewport: { width: viewport.width, height: viewport.height },
-          deviceScaleFactor: 1,
-          colorScheme: theme,
-          reducedMotion: 'reduce',
-          locale: 'en-US',
-          timezoneId: 'UTC',
-        });
-        await context.addInitScript(`
-          const fixed = ${FIXED_TIME.getTime()};
-          const RealDate = Date;
-          class FixedDate extends RealDate {
-            constructor(...args) { super(...(args.length ? args : [fixed])); }
-            static now() { return fixed; }
-          }
-          Date = FixedDate;
-        `);
-        await context.route('**', async (route) => {
-          const url = route.request().url();
-          if (url.startsWith(`http://127.0.0.1:${PORT}/`)) return route.continue();
-          if (!WITH_RENDERERS && SLOW_RENDERERS.some((re) => re.test(url))) return route.abort();
-          if (ALLOWED.some((h) => url.includes(h))) {
-            try {
-              return route.fulfill({ body: await vendored(url), contentType: contentType(url) });
-            } catch {
-              return route.abort();
-            }
-          }
+  async function captureViewport(theme, viewport) {
+    const context = await browser.newContext({
+      viewport: { width: viewport.width, height: viewport.height },
+      deviceScaleFactor: 1,
+      colorScheme: theme,
+      reducedMotion: 'reduce',
+      locale: 'en-US',
+      timezoneId: 'UTC',
+    });
+    await context.addInitScript(`
+      const fixed = ${FIXED_TIME.getTime()};
+      const RealDate = Date;
+      class FixedDate extends RealDate {
+        constructor(...args) { super(...(args.length ? args : [fixed])); }
+        static now() { return fixed; }
+      }
+      Date = FixedDate;
+    `);
+    await context.route('**', async (route) => {
+      const url = route.request().url();
+      if (url.startsWith(`http://127.0.0.1:${PORT}/`)) return route.continue();
+      if (!WITH_RENDERERS && SLOW_RENDERERS.some((re) => re.test(url))) return route.abort();
+      if (ALLOWED.some((h) => url.includes(h))) {
+        try {
+          return route.fulfill({ body: await vendored(url), contentType: contentType(url) });
+        } catch {
           return route.abort();
-        });
-
-        let page = await context.newPage();
-        page.setDefaultTimeout(8000);
-        page.setDefaultNavigationTimeout(15000);
-        for (const url of PAGES) {
-          const started = Date.now();
-          if (page.isClosed()) page = await context.newPage();
-          try {
-          await page.goto(`http://127.0.0.1:${PORT}${url}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-          // Force the theme attribute the same way the toggle does, instead of
-          // relying on localStorage + matchMedia.
-          await page.evaluate((t) => document.documentElement.setAttribute('data-bs-theme', t), theme);
-          // Async stylesheets (font icons, lightbox, polyfill) are applied on
-          // load; wait for the sheet before waiting for its fonts.
-          await page.evaluate(async () => {
-            const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
-            await Promise.all(
-              links.map((link) =>
-                link.sheet
-                  ? Promise.resolve()
-                  : new Promise((resolve) => {
-                      link.addEventListener('load', resolve, { once: true });
-                      link.addEventListener('error', resolve, { once: true });
-                    }),
-              ),
-            );
-          });
-          await page.evaluate(() => document.fonts.ready);
-          // Async stylesheets (font icons, lightbox, polyfill) are applied on
-          // load; wait for the sheet before waiting for its fonts.
-          await page.evaluate(async () => {
-            const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
-            await Promise.all(
-              links.map((link) =>
-                link.sheet
-                  ? Promise.resolve()
-                  : new Promise((resolve) => {
-                      link.addEventListener('load', resolve, { once: true });
-                      link.addEventListener('error', resolve, { once: true });
-                    }),
-              ),
-            );
-          });
-          await page.evaluate(() => document.fonts.ready);
-          if (WITH_RENDERERS) {
-            await page.evaluate(async () => {
-              const withTimeout = (promise, ms) => Promise.race([promise, new Promise((r) => setTimeout(r, ms))]);
-              if (window.MathJax?.startup?.promise) await withTimeout(MathJax.startup.promise, 5000);
-              if (document.querySelectorAll('.language-mermaid').length) {
-                const deadline = Date.now() + 8000;
-                while (document.querySelectorAll('.language-mermaid svg').length === 0 && Date.now() < deadline) {
-                  await new Promise((r) => setTimeout(r, 50));
-                }
-              }
-            });
-            await page.waitForTimeout(600);
-          }
-          // Native media controls paint their time text differently until the
-          // media is fully buffered, with or without the vendor scripts.
-          await page.waitForFunction(
-            () => [...document.querySelectorAll('audio, video')].every((m) => m.readyState >= 4 && !m.seeking),
-            { timeout: 8000 },
-          ).catch(() => {});
-          // A full-page screenshot makes Playwright scroll and stitch, and
-          // scroll-driven widgets (tocbot's active item) change mid-shot. One
-          // tall viewport removes the scrolling entirely.
-          const pageHeight = await page.evaluate(() =>
-            Math.max(document.body.scrollHeight, document.documentElement.scrollHeight),
-          );
-          await page.setViewportSize({ width: viewport.width, height: Math.min(pageHeight, 9000) });
-          await page.evaluate(() => window.scrollTo(0, 0));
-          await page.waitForTimeout(150);
-
-          const masks = await page.evaluate(() => {
-            const rect = (el, id) => {
-              const b = el.getBoundingClientRect();
-              return { id, x: b.left + window.scrollX, y: b.top + window.scrollY, w: b.width, h: b.height };
-            };
-            const out = [];
-            document.querySelectorAll('footer > p:nth-of-type(2)').forEach((el) => out.push(rect(el, 'D-09')));
-            document.querySelectorAll('td.rouge-code > pre').forEach((el) => out.push(rect(el, 'D-02')));
-            // Native media controls live in the UA shadow DOM and are not
-            // deterministic in headless Chromium. The element, its size and its
-            // <source> list are still compared (G4 and the height delta).
-            document.querySelectorAll('audio, video').forEach((el) => out.push(rect(el, 'D-18')));
-            return out;
-          });
-          const name = `${theme}-${viewport.name}-${url === '/' ? 'home' : url.replace(/^\/|\/$/g, '').replace(/\//g, '-')}.png`;
-          await page.screenshot({ path: path.join(outDir, name), animations: 'disabled', caret: 'hide' });
-          fs.writeFileSync(path.join(outDir, name.replace(/\.png$/, '.masks.json')), JSON.stringify(masks));
-          } catch (error) {
-            console.error(`  ${side}: ${theme} ${viewport.name} ${url} — ${error.message.split('\n')[0]}`);
-            // a crashed renderer takes the page with it; start a fresh one
-            try { await page.close(); } catch {}
-          }
-          if (process.env.VERBOSE) {
-            console.log(`    ${side} ${theme} ${viewport.name} ${url} ${Date.now() - started}ms`);
-          }
-          if (Date.now() - started > 20000) {
-            console.error(`  slow page: ${url} took ${Date.now() - started}ms`);
-          }
         }
-        await context.close();
-        console.log(`  ${side}: ${theme} ${viewport.name} → ${PAGES.length} shot(s)`);
+      }
+      return route.abort();
+    });
+
+    let page = await context.newPage();
+    page.setDefaultTimeout(8000);
+    page.setDefaultNavigationTimeout(15000);
+    for (const url of PAGES) {
+      const started = Date.now();
+      if (page.isClosed()) page = await context.newPage();
+      try {
+        await page.goto(`http://127.0.0.1:${PORT}${url}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        // Force the theme attribute the same way the toggle does, instead of
+        // relying on localStorage + matchMedia.
+        await page.evaluate((t) => document.documentElement.setAttribute('data-bs-theme', t), theme);
+        // Async stylesheets (font icons, lightbox, polyfill) are applied on
+        // load; wait for the sheet before waiting for its fonts.
+        await page.evaluate(async () => {
+          const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
+          await Promise.all(
+            links.map((link) =>
+              link.sheet
+                ? Promise.resolve()
+                : new Promise((resolve) => {
+                    link.addEventListener('load', resolve, { once: true });
+                    link.addEventListener('error', resolve, { once: true });
+                  }),
+            ),
+          );
+        });
+        await page.evaluate(() => document.fonts.ready);
+        if (WITH_RENDERERS) {
+          await page.evaluate(async () => {
+            const withTimeout = (promise, ms) => Promise.race([promise, new Promise((r) => setTimeout(r, ms))]);
+            if (window.MathJax?.startup?.promise) await withTimeout(MathJax.startup.promise, 5000);
+            if (document.querySelectorAll('.language-mermaid').length) {
+              const deadline = Date.now() + 8000;
+              while (document.querySelectorAll('.language-mermaid svg').length === 0 && Date.now() < deadline) {
+                await new Promise((r) => setTimeout(r, 50));
+              }
+            }
+          });
+          await page.waitForTimeout(600);
+        }
+        // Native media controls paint their time text differently until the
+        // media is fully buffered, with or without the vendor scripts.
+        await page.waitForFunction(
+          () => [...document.querySelectorAll('audio, video')].every((m) => m.readyState >= 4 && !m.seeking),
+          { timeout: 8000 },
+        ).catch(() => {});
+        // A full-page screenshot makes Playwright scroll and stitch, and
+        // scroll-driven widgets (tocbot's active item) change mid-shot. One
+        // tall viewport removes the scrolling entirely.
+        const pageHeight = await page.evaluate(() =>
+          Math.max(document.body.scrollHeight, document.documentElement.scrollHeight),
+        );
+        await page.setViewportSize({ width: viewport.width, height: Math.min(pageHeight, 9000) });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.waitForTimeout(150);
+
+        const masks = await page.evaluate(() => {
+          const rect = (el, id) => {
+            const b = el.getBoundingClientRect();
+            return { id, x: b.left + window.scrollX, y: b.top + window.scrollY, w: b.width, h: b.height };
+          };
+          const out = [];
+          document.querySelectorAll('footer > p:nth-of-type(2)').forEach((el) => out.push(rect(el, 'D-09')));
+          document.querySelectorAll('td.rouge-code > pre').forEach((el) => out.push(rect(el, 'D-02')));
+          // Native media controls live in the UA shadow DOM and are not
+          // deterministic in headless Chromium. The element, its size and its
+          // <source> list are still compared (G4 and the height delta).
+          document.querySelectorAll('audio, video').forEach((el) => out.push(rect(el, 'D-18')));
+          return out;
+        });
+        const name = `${theme}-${viewport.name}-${url === '/' ? 'home' : url.replace(/^\/|\/$/g, '').replace(/\//g, '-')}.png`;
+        await page.screenshot({ path: path.join(outDir, name), animations: 'disabled', caret: 'hide' });
+        fs.writeFileSync(path.join(outDir, name.replace(/\.png$/, '.masks.json')), JSON.stringify(masks));
+      } catch (error) {
+        console.error(`  ${side}: ${theme} ${viewport.name} ${url} — ${error.message.split('\n')[0]}`);
+        // a crashed renderer takes the page with it; start a fresh one
+        try { await page.close(); } catch {}
+      }
+      if (process.env.VERBOSE) {
+        console.log(`    ${side} ${theme} ${viewport.name} ${url} ${Date.now() - started}ms`);
+      }
+      if (Date.now() - started > 20000) {
+        console.error(`  slow page: ${url} took ${Date.now() - started}ms`);
       }
     }
+    await context.close();
+    console.log(`  ${side}: ${theme} ${viewport.name} → ${PAGES.length} shot(s)`);
+  }
+
+  try {
+    const jobs = [];
+    for (const theme of THEMES) for (const viewport of VIEWPORTS) jobs.push({ theme, viewport });
+    const concurrency = Number(process.env.CAPTURE_CONCURRENCY || 6);
+    const worker = async () => {
+      while (jobs.length) {
+        const job = jobs.shift();
+        await captureViewport(job.theme, job.viewport);
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(concurrency, jobs.length) }, worker));
   } finally {
     await browser.close();
     server.close();

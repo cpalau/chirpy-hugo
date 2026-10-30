@@ -7,7 +7,7 @@
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e">
   <meta
     name="viewport"
-    content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
+    content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
   >
 
   <!-- Setup Open Graph image -->
@@ -81,7 +81,10 @@
   {{- /* `baseurl` is not a parameter: it is the path of the site (empty at the
          root, `/blog` under a subdirectory), which is what upstream reads from
          `site.baseurl`. */ -}}
-  <script defer src="{{ "app.min.js" | relURL }}?baseurl={{ relURL "" | strings.TrimSuffix "/" }}&register={{ (.Site.Params.pwa.cache.enabled | default false) }}"></script>
+  {{- /* `app.min.js` treats any non-empty `register` value as true, including
+         the string "false". Send the parameter only when the cache is on, so a
+         site with the cache disabled does not register a worker at all. */ -}}
+  <script defer src="{{ "app.min.js" | relURL }}?baseurl={{ relURL "" | strings.TrimSuffix "/" }}&register={{ if (.Site.Params.pwa.cache.enabled | default false) }}true{{ end }}"></script>
     {{- end }}
 
   <!-- Web Analytics -->

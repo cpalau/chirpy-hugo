@@ -106,6 +106,33 @@ jobs:
           hugo -s "$RUNNER_TEMP/empty" --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
             --panicOnWarning --gc --minify
 
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Cache the Playwright browser
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('package-lock.json') }}
+      - name: Install Chromium
+        run: npx --yes playwright@1.64.1 install --with-deps chromium
+      - name: Build the fixture site
+        run: |
+          hugo -s tests/fixtures/hugo --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
+            -d "$GITHUB_WORKSPACE/.out/hugo"
+      - name: UI matrix (desktop, tablet, mobile)
+        run: node tests/ui/check.mjs .out/hugo --fast
+
   parity:
     runs-on: ubuntu-latest
     steps:

@@ -64,15 +64,15 @@ jobs:
           node tests/visual/capture.mjs hugo --all
           node tests/visual/compare.mjs
 
-      - name: Interaction suite (desktop + mobile)
-        run: node tests/interactive/check.mjs
+      - name: UI matrix (desktop, tablet, mobile, small)
+        run: node tests/ui/check.mjs
 
-      - name: Interaction suite on the deployment shape
+      - name: UI matrix on the deployment shape
         run: |
           hugo -s exampleSite --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
             --baseURL "https://example.com/chirpy-hugo/" --minify --panicOnWarning \
             -d "$GITHUB_WORKSPACE/.out/example-deploy"
-          node tests/interactive/check.mjs .out/example-deploy --base-path /chirpy-hugo
+          node tests/ui/check.mjs .out/example-deploy --base-path /chirpy-hugo
 
       - name: Gate 6 - accessibility (compared with Jekyll)
         run: node tests/a11y/check.mjs .out/hugo .out/oracle

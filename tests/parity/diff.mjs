@@ -188,6 +188,9 @@ function canonicalize(node, ignore, inherited = false, inRougeCode = false) {
     .filter((a) => !ignore.selectors.some((s) => s.attribute === a.name && matches(node, s.selector)))
     .map((a) => {
       let value = normalizePageURLs(a.value);
+      // D-25: `register=false` (Jekyll) vs `register=` (Hugo): the value only
+      // changes whether a site registers a worker, not the page.
+      if (tag === 'script' && a.name === 'src') value = value.replace(/([?&]register=)[^&]*/, '$1');
       if (a.name === 'class') value = value.split(/\s+/).filter(Boolean).sort().join(' ');
       if (BOOLEAN.has(a.name)) value = '';
       return [a.name, value];

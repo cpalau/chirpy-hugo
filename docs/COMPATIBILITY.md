@@ -406,6 +406,54 @@ coupling.
 
 ---
 
+## D-25 — The PWA register flag is omitted, not `false`
+
+| | |
+|---|---|
+| Status | declared (behaviour fix, no visual change) |
+| Affects | the `app.min.js?…&register=` query |
+| Upstream | passes `register=false`; the script treats **any** non-empty value as true |
+| This port | passes `register=true` only when `pwa.cache.enabled`, otherwise leaves it empty |
+| Blast radius | a site with the cache disabled no longer registers a worker |
+
+`app.min.js` reads the parameter with `URLSearchParams.get()` and tests it for
+truthiness, so the string `"false"` registers the worker. That worker activates,
+claims the page and fires `controllerchange`, and the same script reloads the
+page; with the cache disabled it can loop while a tool is measuring the page
+(this is what made the visual capture hang on the home page).
+
+The theme now emits `register=true` when the cache is enabled and an empty
+value otherwise, which makes the script take its unregister branch. Gate 4
+normalises the parameter value (the page is identical); D-23 covers the worker
+itself.
+
+---
+
+## D-24 — Viewport meta uses commas between directives
+
+| | |
+|---|---|
+| Status | declared (identical semantics) |
+| Affects | the `<meta name="viewport">` of every page |
+| Upstream | `width=device-width, user-scalable=no initial-scale=1, ...` |
+| This port | `width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover` |
+| Blast radius | none visually; it fixes a mobile rescale |
+
+Hugo's `--minify` removes spaces inside attribute values. It turned
+`user-scalable=no initial-scale=1` into `user-scalable=noinitial-scale=1`, an
+invalid viewport: the browser dropped `initial-scale` and rescaled the whole
+page when the fixed sidebar (260 px) opened. The development build keeps the
+space, which is why the pixel and interaction gates did not see it; the
+deployment-shape check now parses the minified value and fails if the
+directives are merged.
+
+Commas are equivalent in the viewport grammar. The port also drops
+`user-scalable=no`: blocking pinch-zoom is an accessibility violation that
+Lighthouse flags (`meta-viewport`), and it costs nothing visually. Gate 4 ignores
+this one attribute value; every other head attribute is still compared.
+
+---
+
 ## D-23 — Service worker update policy
 
 | | |

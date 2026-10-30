@@ -98,6 +98,20 @@ function checkDeployment(out) {
   if (broken) fail(`deployment: ${broken} internal URL(s) do not resolve`);
   else console.log('  ok    deployment: every internal URL resolves');
 
+  // The minifier strips spaces; `user-scalable=no initial-scale=1` became
+  // `user-scalable=noinitial-scale=1`, an invalid viewport that makes a phone
+  // rescale the page when the sidebar opens.
+  const home = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
+  const viewport = /<meta[^>]*name=["']?viewport["']?[^>]*content=["']?([^"'>]+)/i.exec(home)?.[1] ?? '';
+  const directives = viewport.split(/[,\s]+/).filter(Boolean);
+  if (!directives.includes('initial-scale=1') || !directives.includes('width=device-width')) {
+    fail(`deployment: invalid viewport meta (${viewport})`);
+  } else if (/noinitial|no,?initial/.test(viewport)) {
+    fail(`deployment: viewport directives merged (${viewport})`);
+  } else {
+    console.log('  ok    deployment: viewport meta parses into separate directives');
+  }
+
   // A taxonomy index without terms is a rendering bug, not an empty site.
   for (const [file, pattern] of [
     ['categories/index.html', /\/chirpy-hugo\/categories\/[^/"']+\//],

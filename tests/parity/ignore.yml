@@ -13,6 +13,7 @@ selectors:
   - 'head link[media="print"]@media | D-22 | async stylesheets (icons, lightbox, polyfill, toc)'
   - 'head link[media="print"]@onload | D-22 | the swap that applies the async stylesheet'
   - 'head link[rel="preload"] | D-22 | LCP image and body font preloads, appended last'
+  - 'meta[name="viewport"]@content | D-24 | commas instead of spaces: the minifier removes spaces and merges directives'
 
 # Canonicalization note: Go's html/template re-encodes JS string literals
 # inside <script> (\/, \u003c, \", \n). The comparator normalises those

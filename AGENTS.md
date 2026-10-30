@@ -288,7 +288,7 @@ npm run test:contract        # Gate 3: selectors upstream JS needs
 npm run test:parity          # Gate 4: DOM (builds the Jekyll oracle)
 npm run test:outputs         # feed, sitemap, search, swconf, manifest
 npm run test:visual          # Gate 5: pixels (Playwright, Jekyll vs Hugo)
-npm run test:interactive     # Gate 5b: toc, search, theme toggle, copy
+npm run test:ui              # Gate 5b: desktop/tablet/mobile/small UI matrix
 npm run test:a11y            # Gate 6: axe vs Jekyll
 npm run test:i18n            # Gate 7: 33 locales, same key tree
 npm run test:upstream        # Gate 8: asset hashes + ports coverage
