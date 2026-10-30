@@ -406,6 +406,39 @@ coupling.
 
 ---
 
+## D-20 — Inherited accessibility debt
+
+| | |
+|---|---|
+| Status | declared (upstream debt, not a port decision) |
+| Affects | all pages: icon-only `#back-to-top`, code contrast, taxonomy ARIA |
+| Upstream | the same violations appear in the Jekyll build |
+| This port | identical markup and stylesheet, so identical violations |
+| Blast radius | none for parity; Gate G6 fails only on *new* serious or critical findings |
+
+Measured with axe-core on six pages (`npm run test:a11y`). The findings that
+exist on both sides are:
+
+| Rule | Impact | Where |
+|---|---|---|
+| `button-name` | serious | `#back-to-top` is an icon with no accessible name |
+| `color-contrast` | serious | syntax highlighting and taxonomy links |
+| `aria-allowed-attr` | critical | the category cards |
+| `label-content-name-mismatch` | serious | share and copy controls |
+| `link-in-text-block` | serious | inline links in taxonomy copy |
+
+Fixing them means changing the markup or the stylesheet, which breaks Gate 4
+(the DOM must equal Jekyll's) or Gate 5 (the pixels must equal Jekyll's). The
+rule of this project is that parity wins and the divergence must be declared,
+so it is declared here instead of silently fixed.
+
+The gate is therefore comparative: `tests/a11y/check.mjs` runs axe on the Hugo
+and the Jekyll build and fails only when Hugo introduces a serious or critical
+violation that Jekyll does not have. An upstream fix arrives through the normal
+sync, not through local edits.
+
+---
+
 ## D-19 — Non-HTML outputs
 
 | | |

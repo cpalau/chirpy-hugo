@@ -98,6 +98,15 @@ jobs:
           hugo -s tests/fixtures/hugo --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
             -d "$GITHUB_WORKSPACE/.out/hugo"
 
+      - name: Gate 1 - build integrity
+        run: npm run test:build
+
+      - name: Gate 2 - HTML validity, links and anchors
+        run: npm run test:html
+
+      - name: Gate 3 - DOM contract
+        run: npm run test:contract
+
       - name: Gate 4 - HTML parity
         run: npm run test:parity
 

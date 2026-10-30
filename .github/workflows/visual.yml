@@ -1,0 +1,84 @@
+name: Visual
+
+# The full parity matrix is too slow for a PR, so it runs nightly and on
+# demand. PRs run Gate 4 (HTML) and the fast checks in `ci.yml`.
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  HUGO_VERSION: 0.168.0
+  NODE_VERSION: 24
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+          working-directory: tests/oracle
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      - name: Install Chromium for the harness
+        run: npx --yes playwright@1.64.1 install --with-deps chromium
+
+      - name: Build the Jekyll oracle
+        run: bash tests/oracle/build.sh
+
+      - name: Build the same content with Hugo
+        run: |
+          hugo -s tests/fixtures/hugo --themesDir "$GITHUB_WORKSPACE/.." --theme chirpy-hugo \
+            -d "$GITHUB_WORKSPACE/.out/hugo"
+
+      - name: Gate 1 - build integrity
+        run: node tests/build/check.mjs
+
+      - name: Gate 3 - DOM contract
+        run: node tests/contract/selectors.mjs
+
+      - name: Gate 4 - HTML parity
+        run: node tests/parity/diff.mjs
+
+      - name: Non-HTML outputs
+        run: node tests/outputs/check.mjs
+
+      - name: Gate 5 - pixel parity (84 pairs)
+        run: |
+          node tests/visual/capture.mjs oracle --all
+          node tests/visual/capture.mjs hugo --all
+          node tests/visual/compare.mjs
+
+      - name: Interaction suite
+        run: node tests/interactive/check.mjs
+
+      - name: Gate 6 - accessibility (compared with Jekyll)
+        run: node tests/a11y/check.mjs .out/hugo .out/oracle
+
+      - name: Gate 9 - adoption
+        run: node tests/adoption/check.mjs
+        env:
+          HUGO: hugo
+
+      - name: Upload diff images
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diff
+          path: reports/visual
+          if-no-files-found: ignore

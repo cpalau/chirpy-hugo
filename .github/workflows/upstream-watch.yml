@@ -1,0 +1,41 @@
+name: Upstream watch
+
+# Weekly: prove the pinned upstream tree still matches what we ship, and tell
+# us when a newer Chirpy release exists. The second part fails the run on
+# purpose — a red workflow is the notification.
+
+on:
+  schedule:
+    - cron: '41 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      - name: Fetch and verify the pin
+        run: |
+          node scripts/fetch-upstream.mjs --fetch
+          node scripts/fetch-upstream.mjs --check
+          node scripts/extract-params.mjs --check
+
+      - name: Is there a newer upstream tag?
+        run: |
+          pinned=$(awk '/^  tag:/{print $2; exit}' tests/contract/ports.yml)
+          latest=$(git ls-remote --tags --refs https://github.com/cotes2020/jekyll-theme-chirpy.git \
+            | awk -F/ '{print $NF}' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          echo "pinned=$pinned latest=$latest"
+          if [ "$pinned" != "$latest" ]; then
+            echo "::warning::upstream $latest is newer than the pin $pinned"
+            exit 1
+          fi

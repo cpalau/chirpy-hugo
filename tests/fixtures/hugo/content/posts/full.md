@@ -10,7 +10,6 @@ image:
   path: /assets/img/fixtures/cover.png
   alt: "Cover image for fixture 1"
   lqip: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==
-media_subpath: /assets/img/fixtures
 toc: true
 ---
 
@@ -27,7 +26,7 @@ to give the parity harness a page with every optional element enabled.
 - A last modification date that differs from the publication date.
 - An edit link, a pageview counter and a comments block.
 
-{{< img src="img-normal.png" alt="A plain body image" >}}
+{{< img src="/assets/img/fixtures/img-normal.png" alt="A plain body image" >}}
 
 ### Inline elements
 

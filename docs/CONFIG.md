@@ -244,6 +244,8 @@ The only settings a user must provide are the ones in non-merging categories
 snippet when they are missing:
 
 ```toml
+enableRobotsTXT = true   # upstream publishes /robots.txt (theme asset)
+
 [markup.goldmark.renderer]
   unsafe = true          # upstream content uses raw HTML
 

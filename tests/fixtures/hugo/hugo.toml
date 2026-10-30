@@ -16,12 +16,17 @@ defaultContentLanguage = "en"
 locale = "en"
 timeZone = "UTC"
 
+# Jekyll publishes /robots.txt (theme asset); Hugo only does it when the
+# project enables it, because the key is read before the theme is merged.
+enableRobotsTXT = true
+
 # Off by default: with it on, Hugo derives `.Lastmod` from the commit date, which
 # upstream only does when a post has more than one commit (Q5, F1).
 enableGitInfo = false
 
 # Same URL shape as Jekyll's `permalink: /posts/:title/`.
 [pagination]
+  disableAliases = true
   pagerSize = 3
   # Upstream (Jekyll) uses /page2/; Hugo's path option is broken in 0.168, so the
   # default /page/2/ is used and the difference is recorded as D-13.
@@ -75,6 +80,10 @@ enableGitInfo = false
 
 [outputs]
   home = ["HTML", "feed", "search", "swconf", "manifest"]
+  section = ["HTML"]
+  taxonomy = ["HTML"]
+  term = ["HTML"]
+  page = ["HTML"]
 
 [markup.goldmark.renderer]
   unsafe = true

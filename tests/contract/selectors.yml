@@ -1,0 +1,66 @@
+# DOM contract: the selectors upstream JavaScript depends on.
+#
+# Each entry is a page of the fixture build and the selectors that must match
+# at least one element. The list is derived from the upstream bundles, not
+# invented: every id and class here appears in a `getElementById`,
+# `getElementsByClassName` or `querySelector` call in `assets/js/`.
+#
+# Supported syntax (deliberately small): tag, #id, .class, [attr], [attr="v"],
+# and the descendant (space) and child (>) combinators.
+
+pages:
+  /:
+    - "#sidebar"
+    - "#sidebar-trigger"
+    - "#topbar"
+    - "#topbar-title"
+    - "#search"
+    - "#search-trigger"
+    - "#search-input"
+    - "#search-cancel"
+    - "#search-results"
+    - "#search-result-wrapper"
+    - "#search-hints"
+    - "#mode-toggle"
+    - "#back-to-top"
+    - "#mask"
+    - "#notification"
+    - "#main-wrapper"
+    - "#panel-wrapper"
+    - "#post-list"
+    - ".post-preview"
+    - "footer"
+
+  /posts/code/:
+    - "main>article[data-toc=\"true\"]"
+    - "#toc"
+    - "#toc-wrapper"
+    - "#toc-bar"
+    - "#toc-solo-trigger"
+    - "#toc-popup"
+    - "#toc-popup-close"
+    - "#toc-popup-content"
+    - "#copy-link"
+    - "#pageviews"
+    - "#related-posts"
+    - "#tail-wrapper"
+    - "code .rouge-code"
+    - ".readtime"
+    - "[data-bs-toggle=\"tooltip\"]"
+    - "button[aria-label=\"copy\"]"
+
+  /posts/mermaid/:
+    - "code.language-mermaid"
+
+  /posts/math/:
+    - "main>article[data-toc=\"true\"]"
+
+  /categories/:
+    - "#sidebar"
+    - "#main-wrapper"
+    - "main"
+
+  /tags/:
+    - "#sidebar"
+    - "#main-wrapper"
+    - "main"

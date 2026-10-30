@@ -10,9 +10,14 @@ title = "My Site"
 locale = "en"
 timeZone = "UTC"
 
+# Jekyll publishes /robots.txt (theme asset); Hugo only does it when the
+# project enables it, because the key is read before the theme is merged.
+enableRobotsTXT = true
+
 theme = "chirpy-hugo"
 
 [pagination]
+  disableAliases = true
   pagerSize = 10
 
 [permalinks]
@@ -63,6 +68,10 @@ theme = "chirpy-hugo"
 
 [outputs]
   home = ["HTML", "feed", "search", "swconf", "manifest"]
+  section = ["HTML"]
+  taxonomy = ["HTML"]
+  term = ["HTML"]
+  page = ["HTML"]
 
 [markup.goldmark.renderer]
   unsafe = true

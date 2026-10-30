@@ -15,8 +15,14 @@ timeZone = "UTC"
 # more than one commit (Q5, F1). With it on, `.Lastmod` becomes the commit date.
 enableGitInfo = false
 
+# `enableRobotsTXT` is NOT read from a theme configuration (measured on
+# 0.168), so the site must set it; `layouts/robots.txt` reproduces the upstream
+# asset once it does. See docs/CONFIG.md.
+
 [pagination]
   pagerSize = 10
+  # Jekyll has no `/page1/` alias; Hugo generates one unless this is off.
+  disableAliases = true
   # D-13: Jekyll emits /page2/, Hugo emits /page/2/. The `path` option mangles
   # the URL in 0.168, so the default shape is kept.
   
@@ -66,6 +72,11 @@ enableGitInfo = false
 
 [outputs]
   home = ["HTML", "feed", "search", "swconf", "manifest"]
+  # Upstream has no per-section or per-taxonomy feeds: only /feed.xml.
+  section = ["HTML"]
+  taxonomy = ["HTML"]
+  term = ["HTML"]
+  page = ["HTML"]
 
 [css.sass]
   transpiler = "dartsass"

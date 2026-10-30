@@ -19,6 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { chromium } from 'playwright-core';
+import { chromiumPath } from '../tests/lib/browser.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const args = process.argv.slice(2);
@@ -58,10 +59,7 @@ function serve(root) {
   return new Promise((resolve) => server.listen(PORT, '127.0.0.1', () => resolve(server)));
 }
 
-const browserPath = path.join(
-  process.env.HOME ?? '',
-  '.cache/ms-playwright/chromium-1247/chrome-linux64/chrome',
-);
+const browserPath = chromiumPath();
 
 if (!fs.existsSync(SITE)) {
   console.error(`no built site in ${SITE}: build the demo first (see the header of this file)`);

@@ -21,6 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { chromium } from 'playwright-core';
+import { chromiumPath } from '../lib/browser.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const PORT = 4001;
@@ -132,9 +133,7 @@ async function main() {
   fs.mkdirSync(outDir, { recursive: true });
 
   const server = await serve(source);
-  const executablePath =
-    process.env.CHROME_PATH ||
-    `${process.env.HOME}/.cache/ms-playwright/chromium-1247/chrome-linux64/chrome`;
+  const executablePath = chromiumPath();
 
   const browser = await chromium.launch({
     executablePath,
