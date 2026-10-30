@@ -1,8 +1,8 @@
 {
   "name": "chirpy-hugo",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "Hugo port of jekyll-theme-chirpy \u2014 verification harness",
+  "description": "Hugo port of jekyll-theme-chirpy — verification harness",
   "type": "module",
   "scripts": {
     "build": "hugo --panicOnWarning --gc --minify",

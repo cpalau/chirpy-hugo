@@ -12,6 +12,20 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.0.0] - 2026-10-30
+
+### Added
+
 - The Hugo template layer, ported from `jekyll-theme-chirpy` v7.6.0: base
   chrome, home and listings, post and page, render hooks, shortcodes, comments,
   analytics, pageviews, PWA and search.

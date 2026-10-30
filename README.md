@@ -8,12 +8,12 @@ must produce the same HTML — and therefore the same pixels — while upstream
 SCSS, JavaScript and assets stay byte-for-byte identical, so upstream releases
 can be adopted in hours instead of weeks.
 
-> **Status: alpha.** The template layer, the outputs and the verification
+> **Status: v1.0.0.** The template layer, the outputs and the verification
 > harness are complete: **47/47** pages are identical to a real Jekyll build
 > after canonicalization, **84/84** visual pairs are pixel-identical outside the
-> three declared boxes (`docs/COMPATIBILITY.md`), and Gates 1–9 run in CI.
-> What remains for `v1.0.0` is the Lighthouse budget, the cross-browser spot
-> check and the final documentation pass: [`docs/PLAN.md`](docs/PLAN.md).
+> three declared boxes (`docs/COMPATIBILITY.md`), Gates 1–9 run in CI, and the
+> nightly workflow adds accessibility, Lighthouse and a Firefox/WebKit check.
+> Release notes: [`docs/releases/v1.0.0.md`](docs/releases/v1.0.0.md).
 
 ---
 

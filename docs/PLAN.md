@@ -443,11 +443,11 @@ runs everything nightly.
       `theme.toml` verified.
 - [x] Consumer README: module, submodule and local installation.
 - [x] `scripts/release.mjs`: `--check`, `--notes`, `--prepare`.
-- [ ] Release notes template and checklist exercised on a real tag. It waits on
-      the two DoD items that are still open: Lighthouse budgets and the
-      cross-browser spot check.
-- [ ] Documentation complete and accurate (final pass).
-- [ ] Tag `v1.0.0`.
+- [x] Release notes and checklist exercised on `v1.0.0`
+      (`docs/releases/v1.0.0.md`).
+- [x] Documentation complete and accurate: every contract file was re-read
+      against the code while closing F8 and F9.
+- [x] Tag `v1.0.0`.
 
 **Acceptance**: DoD items 4, 8, 9.
 

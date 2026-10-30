@@ -673,9 +673,9 @@ See `docs/PLAN.md` §6 for the phase checklist. Update the checkboxes there
 when a phase is completed; that file is the single source of truth for
 progress.
 
-At the time of writing: F0–F7 and the F9 tooling are complete, with Gates 1–9
-implemented as commands. F8 (final documentation pass, performance budget,
-cross-browser spot check) and the `v1.0.0` tag are open.
+At the time of writing, `v1.0.0` is tagged: F0–F9 are complete, Gates 1–9 are
+implemented as commands, and the feature inventory is audited (162 parity,
+16 declared divergences, 8 out of scope because upstream does not ship them).
 
 ---
 
