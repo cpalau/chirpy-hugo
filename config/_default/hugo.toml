@@ -25,19 +25,47 @@ enableGitInfo = false
   category = "categories"
   tag = "tags"
 
-# `search.json` is served from the home page as its own output format.
+# Home outputs. `outputs` does not merge (D-07), so a site must list them too.
+[mediaTypes."application/atom+xml"]
+  suffixes = ["xml"]
+
+[mediaTypes."application/manifest+json"]
+  suffixes = ["webmanifest"]
+
 [outputFormats.search]
   mediaType = "application/json"
   baseName = "search"
+  # Upstream publishes it as an asset at this path; the search loader fetches
+  # exactly this URL.
+  path = "assets/js/data"
+  isPlainText = true
+  notAlternative = true
+
+# Upstream serves a hand-written Atom feed at /feed.xml, a generated
+# `swconf.js` at /assets/js/data/swconf.js and a Liquid-rendered
+# `site.webmanifest`. All three are output formats here.
+[outputFormats.feed]
+  mediaType = "application/atom+xml"
+  baseName = "feed"
+  isPlainText = true
+  notAlternative = true
+
+[outputFormats.swconf]
+  mediaType = "text/javascript"
+  baseName = "swconf"
+  path = "assets/js/data"
+  isPlainText = true
+  notAlternative = true
+
+[outputFormats.manifest]
+  mediaType = "application/manifest+json"
+  baseName = "site"
+  path = "assets/img/favicons"
   isPlainText = true
   notAlternative = true
 
 [outputs]
-  home = ["HTML", "RSS", "search"]
-  section = ["HTML", "RSS"]
-  taxonomy = ["HTML"]
-  term = ["HTML"]
-  page = ["HTML"]
+  home = ["HTML", "feed", "search", "swconf", "manifest"]
 
 [css.sass]
   transpiler = "dartsass"

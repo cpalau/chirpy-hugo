@@ -35,16 +35,47 @@ enableGitInfo = false
 
 # `search.json` (F6). The output format itself is declared by the theme, but
 # `outputs` does not merge, so the consumer has to list it.
+[mediaTypes."application/atom+xml"]
+  suffixes = ["xml"]
+
+[mediaTypes."application/manifest+json"]
+  suffixes = ["webmanifest"]
+
 [outputFormats.search]
   mediaType = "application/json"
   baseName = "search"
+  # Upstream publishes it as an asset at this path; the search loader fetches
+  # exactly this URL.
+  path = "assets/js/data"
+  isPlainText = true
+  notAlternative = true
+
+# Upstream serves a hand-written Atom feed at /feed.xml, a generated
+# `swconf.js` at /assets/js/data/swconf.js and a Liquid-rendered
+# `site.webmanifest`. All three are output formats here.
+[outputFormats.feed]
+  mediaType = "application/atom+xml"
+  baseName = "feed"
+  isPlainText = true
+  notAlternative = true
+
+[outputFormats.swconf]
+  mediaType = "text/javascript"
+  baseName = "swconf"
+  path = "assets/js/data"
+  isPlainText = true
+  notAlternative = true
+
+[outputFormats.manifest]
+  mediaType = "application/manifest+json"
+  baseName = "site"
+  path = "assets/img/favicons"
   isPlainText = true
   notAlternative = true
 
 [outputs]
-  home = ["HTML", "RSS", "search"]
+  home = ["HTML", "feed", "search", "swconf", "manifest"]
 
-# Mandatory settings: they do not merge from the theme (D-07).
 [markup.goldmark.renderer]
   unsafe = true
 

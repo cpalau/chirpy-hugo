@@ -13,6 +13,7 @@
     "i18n": "node scripts/i18n.mjs --apply",
     "screenshot": "node scripts/screenshot.mjs",
     "test:parity": "node tests/parity/diff.mjs",
+    "test:outputs": "node tests/outputs/check.mjs",
     "test:visual": "node tests/visual/capture.mjs oracle && node tests/visual/capture.mjs hugo && node tests/visual/compare.mjs",
     "test:qa": "node tests/qa/q1-word-count.mjs && node tests/qa/q2-jsonify.mjs && node tests/qa/q3-page-order.mjs && node tests/qa/q4-sort-natural.mjs",
     "test:i18n": "node scripts/i18n.mjs --check",

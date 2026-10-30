@@ -36,7 +36,7 @@
       >
         <span class="ms-2">
           <i class="far fa-folder{{ if gt (len $subs) 0 }}-open{{ end }} fa-fw"></i>
-          <a href="{{ printf "/categories/%s/" (urlquery (partial "slugify.html" $name)) | relURL }}" class="mx-2">{{ index $labels $name | default $name }}</a>
+          <a href="{{ printf "categories/%s/" (urlquery (partial "slugify.html" $name)) | relURL }}" class="mx-2">{{ index $labels $name | default $name }}</a>
           <!-- content count -->
           <span class="text-muted small font-weight-light">
             {{- if gt (len $subs) 0 }} {{ len $subs }} {{ if gt (len $subs) 1 }}{{ T "categories.category_measure.plural" }}{{ else }}{{ T "categories.category_measure.singular" }}{{ end }} ,{{ end }} {{ len $pages }} {{ if gt (len $pages) 1 }}{{ T "categories.post_measure.plural" }}{{ else }}{{ T "categories.post_measure.singular" }}{{ end -}}
@@ -66,7 +66,7 @@
           {{- $subPages := index $.Site.Taxonomies.categories $sub }}
           <li class="list-group-item">
             <i class="far fa-folder fa-fw"></i>
-            <a href="{{ printf "/categories/%s/" (urlquery (partial "slugify.html" $sub)) | relURL }}" class="mx-2">{{ index $labels $sub | default $sub }}</a>
+            <a href="{{ printf "categories/%s/" (urlquery (partial "slugify.html" $sub)) | relURL }}" class="mx-2">{{ index $labels $sub | default $sub }}</a>
             <span class="text-muted small font-weight-light">
               {{ len $subPages }} {{ if gt (len $subPages) 1 }}{{ T "categories.post_measure.plural" }}{{ else }}{{ T "categories.post_measure.singular" }}{{ end }}
             </span>
@@ -99,7 +99,7 @@
       {{- range $sorted }}
       {{- $key := index $byLabel . }}
       <div>
-        <a class="tag" href="{{ printf "/tags/%s/" (urlquery (partial "slugify.html" $key)) | relURL }}"> {{ . }}<span class="text-muted">{{ len (index $.Site.Taxonomies.tags $key) }}</span></a>
+        <a class="tag" href="{{ printf "tags/%s/" (urlquery (partial "slugify.html" $key)) | relURL }}"> {{ . }}<span class="text-muted">{{ len (index $.Site.Taxonomies.tags $key) }}</span></a>
       </div>
       {{- end }}
     </div>

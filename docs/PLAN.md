@@ -8,7 +8,7 @@
 | Starter | `github.com/cpalau/chirpy-hugo-starter` |
 | License | MIT (original copyright preserved) |
 | Total estimate | ~30 working days |
-| Status | F0–F5 complete and green; F6 next |
+| Status | F0–F6 complete and green; F7 next |
 
 Related documents:
 
@@ -353,16 +353,21 @@ accented heading ids identical.
 
 ---
 
-### F6 — Special outputs (2 d)
+### F6 — Special outputs (2 d) — done
 
-- [ ] `search.json` with the exact upstream schema.
-- [ ] `sw.min.js` and `swconf.js` output formats with cache list and `deny_paths`.
-- [ ] Manifest and installability.
-- [ ] Atom feed matching `assets/feed.xml` exactly (5 posts, summary 400 chars,
-      `&` escaping).
-- [ ] `sitemap.xml` verified against Jekyll's.
-- [ ] Subdirectory `baseURL` test.
-- [ ] Gate 4 green for fixture 12.
+- [x] `search.json` with the exact upstream schema, published at the path the
+      search loader fetches (`/assets/js/data/search.json`).
+- [x] `sw.min.js` and `swconf.js` output formats with cache list and `deny_paths`.
+- [x] Manifest and installability. The upstream manifest is a Liquid asset, so
+      the static copy would ship invalid JSON; it is now an output format.
+- [x] Atom feed matching `assets/feed.xml` (5 posts, 400-character summary,
+      upstream's `&` escaping); the generator credits Hugo (D-19).
+- [x] `sitemap.xml` with the same URL set as Jekyll's, including pagination and
+      excluding the section listing Hugo adds (D-19).
+- [x] Subdirectory `baseURL`: every theme-generated URL now goes through
+      `relURL`/`absURL` without a leading slash. Leading slashes make Hugo drop
+      the base path, which broke the CSS, the icons and every taxonomy link.
+- [x] Gate 4 green for fixture 12; `npm run test:outputs` covers the rest.
 
 **Acceptance**: search returns identical results in Playwright; PWA installable;
 feed valid.

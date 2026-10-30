@@ -406,6 +406,36 @@ coupling.
 
 ---
 
+## D-19 — Non-HTML outputs
+
+| | |
+|---|---|
+| Status | declared (no pixels, no HTML) |
+| Affects | `/feed.xml`, `/sitemap.xml`, `/assets/js/data/search.json`, `site.webmanifest` |
+| Upstream | Jekyll renders `assets/feed.xml`, `jekyll-sitemap`, `assets/js/data/search.json` and `site.webmanifest` with Liquid |
+| This port | Hugo output formats, compared semantically by `npm run test:outputs` |
+| Blast radius | none for rendering; the feed and the sitemap are identical in content |
+
+Four differences, all bounded and measured:
+
+1. **Feed generator.** `<generator>` says Hugo, not Jekyll. Same reason as
+   D-09: the theme must not claim to be the Jekyll original. Every other field
+   matches, including entry order, summaries and categories.
+2. **Sitemap order and pagination.** The URL set is identical; the order is
+   Hugo's, and the pagination entries use Hugo's `/page/2/` shape (D-14).
+   Sitemap order has no semantic meaning.
+3. **Search index text.** The index keeps numeric character references where
+   kramdown wrote a literal character (for example `&#160;` instead of a
+   non-breaking space), and whitespace is normalised after the HTML is
+   stripped. The comparison decodes references and collapses whitespace, which
+   is how the client tokenizes it.
+4. **Manifest key order.** `jsonify` sorts object keys; the fields and values
+   are identical.
+
+None of these affects a rendered page, and Gate G5 never sees them.
+
+---
+
 ## D-18 — Native media controls
 
 | | |

@@ -254,9 +254,48 @@ snippet when they are missing:
   noClasses = false      # emit classes, styled by _sass/base/_syntax.scss
                          # (the default emits inline styles and breaks the theme)
 
+[mediaTypes."application/atom+xml"]
+  suffixes = ["xml"]
+
+[mediaTypes."application/manifest+json"]
+  suffixes = ["webmanifest"]
+
+[outputFormats.search]
+  mediaType = "application/json"
+  baseName = "search"
+  path = "assets/js/data"
+  isPlainText = true
+  notAlternative = true
+
+[outputFormats.feed]
+  mediaType = "application/atom+xml"
+  baseName = "feed"
+  isPlainText = true
+  notAlternative = true
+
+[outputFormats.swconf]
+  mediaType = "text/javascript"
+  baseName = "swconf"
+  path = "assets/js/data"
+  isPlainText = true
+  notAlternative = true
+
+[outputFormats.manifest]
+  mediaType = "application/manifest+json"
+  baseName = "site"
+  path = "assets/img/favicons"
+  isPlainText = true
+  notAlternative = true
+
 [outputs]
-  home = ["HTML", "RSS", "JSON"]   # search.json
+  home = ["HTML", "feed", "search", "swconf", "manifest"]
 ```
+
+The five home outputs are the upstream URLs: `/feed.xml` (Atom),
+`/assets/js/data/search.json`, `/assets/js/data/swconf.js` (read by the service
+worker) and `/assets/img/favicons/site.webmanifest`. Declaring only `search`
+leaves the RSS icon pointing at a missing `/feed.xml` and the PWA inert, so the
+theme documents them together.
 
 `noClasses = false` is mandatory and easy to get wrong: Hugo's default is
 `noClasses = true`, which inlines a Chroma colour scheme and overrides the

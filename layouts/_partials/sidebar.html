@@ -4,20 +4,20 @@
 {{- $current := .RelPermalink -}}
 <aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end">
   <header class="profile-wrapper">
-    <a href="{{ "/" | relURL }}" id="avatar" class="rounded-circle">
+    <a href="{{ "" | relURL }}" id="avatar" class="rounded-circle">
       {{- with $params.avatar -}}
         <img src="{{ partial "media-url.html" (dict "src" .) }}" width="112" height="112" alt="avatar" onerror="this.style.display='none'">
       {{- end -}}
     </a>
 
-    <a class="site-title d-block" href="{{ "/" | relURL }}">{{ .Site.Title }}</a>
+    <a class="site-title d-block" href="{{ "" | relURL }}">{{ .Site.Title }}</a>
     <p class="site-subtitle fst-italic mb-0">{{ $params.tagline }}</p>
   </header>
 
   <nav class="flex-column flex-grow-1 w-100 ps-0">
     <ul class="nav">
       <li class="nav-item{{ if eq .Kind "home" }} active{{ end }}">
-        <a href="{{ "/" | relURL }}" class="nav-link">
+        <a href="{{ "" | relURL }}" class="nav-link">
           <i class="fa-fw fas fa-home"></i>
           <span>{{ upper (T "tabs.home") }}</span>
         </a>
@@ -88,7 +88,7 @@
           {{- $url = printf "javascript:void(location.href = 'mailto:' + ['%s','%s'].join('@'))" (index $parts 0) (index $parts 1) -}}
         {{- end -}}
       {{- else if eq $type "rss" -}}
-        {{- $url = "/feed.xml" | relURL -}}
+        {{- $url = "feed.xml" | relURL -}}
       {{- else -}}
         {{- $url = .url -}}
       {{- end -}}

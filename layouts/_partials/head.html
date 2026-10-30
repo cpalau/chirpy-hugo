@@ -45,9 +45,9 @@
   {{- /* Precompiled with dart-sass and committed (D-13): Hugo cannot inject
          `@use ... with` for a theme, and not every Hugo build ships Dart Sass. */ -}}
   {{- $theme := .Site.Params.theme_mode | default "" -}}
-  {{- $file := "/assets/css/jekyll-theme-chirpy.css" -}}
-  {{- if eq $theme "light" }}{{ $file = "/assets/css/jekyll-theme-chirpy-light.css" }}
-  {{- else if eq $theme "dark" }}{{ $file = "/assets/css/jekyll-theme-chirpy-dark.css" }}{{ end }}
+  {{- $file := "assets/css/jekyll-theme-chirpy.css" -}}
+  {{- if eq $theme "light" }}{{ $file = "assets/css/jekyll-theme-chirpy-light.css" }}
+  {{- else if eq $theme "dark" }}{{ $file = "assets/css/jekyll-theme-chirpy-dark.css" }}{{ end }}
   <link rel="stylesheet" href="{{ $file | relURL }}">
 
   <!-- Web Font -->
@@ -71,14 +71,14 @@
   {{- end }}
 
   <!-- Scripts -->
-  <script src="{{ "/assets/js/dist/theme.min.js" | relURL }}"></script>
+  <script src="{{ "assets/js/dist/theme.min.js" | relURL }}"></script>
 
   {{ partial "js-selector.html" . }}
 
   {{- if eq hugo.Environment "production" }}
     {{- if .Site.Params.pwa.enabled }}
   <!-- PWA -->
-  <script defer src="{{ "/app.min.js" | relURL }}?baseurl={{ .Site.Params.baseurl | default "" }}&register={{ .Site.Params.pwa.cache.enabled }}"></script>
+  <script defer src="{{ "app.min.js" | relURL }}?baseurl={{ .Site.Params.baseurl | default "" }}&register={{ .Site.Params.pwa.cache.enabled }}"></script>
     {{- end }}
 
   <!-- Web Analytics -->

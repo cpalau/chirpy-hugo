@@ -30,7 +30,7 @@
 
       {{- if $show }}
     <li class="page-item{{ if eq $i $pag.PageNumber }} active{{ end }}">
-      <a class="page-link" href="{{ if gt $i 1 }}{{ (index $pag.Pagers (sub $i 1)).URL }}{{ else }}{{ "/" | relURL }}{{ end }}">{{ $i }}</a>
+      <a class="page-link" href="{{ if gt $i 1 }}{{ (index $pag.Pagers (sub $i 1)).URL }}{{ else }}{{ "" | relURL }}{{ end }}">{{ $i }}</a>
     </li>
       {{- else -}}
         {{- if and (lt $i $pre) (not $leftEllipsis) }}

@@ -188,6 +188,23 @@ Any non-zero diff must map to a `D-xx` in `COMPATIBILITY.md`, with an entry in
 
 ---
 
+### 6.5 Non-HTML outputs
+
+`npm run test:outputs` compares the four outputs that are not HTML pages, using
+the same two builds:
+
+| Output | Compared how |
+|---|---|
+| `/feed.xml` | entry count (5), order, title, summary, categories, id; the generator must say Hugo |
+| `/sitemap.xml` | the URL set equals Jekyll's; `/pageN/` and `/page/N/` are the same URL (D-14) |
+| `/assets/js/data/search.json` | schema, entry order, every field; content compared as text (character references and whitespace normalised) |
+| `/assets/js/data/swconf.js` | emitted at the path the service worker imports, with `purge` matching `pwa.cache.enabled` |
+| `/assets/img/favicons/site.webmanifest` | valid JSON with the same fields as Jekyll's |
+
+The differences that remain are declared as D-19.
+
+---
+
 ## 7. Gate 5 — Visual parity (Playwright)
 
 This is the literal pixel proof. It compares **the Jekyll build against the

@@ -609,12 +609,6 @@
       "mode": "copy",
       "sha256": "453bf1a58415df87846edb6dbd4bc3e029697139aae48cb46bdcd4940b902aa1"
     },
-    "assets/img/favicons/site.webmanifest": {
-      "source": "tag",
-      "target": "static/assets/img/favicons/site.webmanifest",
-      "mode": "copy",
-      "sha256": "91b7539f61c7bae6aeb25f673d70c1cf158e0c0c41be9823c42cf2daf94111b1"
-    },
     "assets/img/favicons/web-app-manifest-192x192.png": {
       "source": "tag",
       "target": "static/assets/img/favicons/web-app-manifest-192x192.png",

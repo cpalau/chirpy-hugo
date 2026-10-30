@@ -4,6 +4,11 @@
        index. Block boundaries become a space; inline tags are removed without
        one, exactly like kramdown's output. Returns a string. */ -}}
 {{- $s := printf "%s" . -}}
+{{- /* Jekyll's strip_html removes comments and script/style blocks whole, not
+       just their tags; a commented-out code gutter must not add words. */ -}}
+{{- $s = replaceRE `(?s)<!--.*?-->` "" $s -}}
+{{- $s = replaceRE `(?s)<script.*?</script>` "" $s -}}
+{{- $s = replaceRE `(?s)<style.*?</style>` "" $s -}}
 {{- $s = replaceRE `</(p|h[1-6]|li|ul|ol|dl|dt|dd|div|pre|blockquote|figcaption|td|th|tr|table|section|article|aside|header|footer|nav|tbody|thead)>` " " $s -}}
 {{- $s = replaceRE `<br\s*/?>` " " $s -}}
 {{- $s = replaceRE `<[^>]+>` "" $s -}}

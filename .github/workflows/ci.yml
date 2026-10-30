@@ -100,3 +100,6 @@ jobs:
 
       - name: Gate 4 - HTML parity
         run: npm run test:parity
+
+      - name: Non-HTML outputs (feed, sitemap, search, swconf, manifest)
+        run: npm run test:outputs

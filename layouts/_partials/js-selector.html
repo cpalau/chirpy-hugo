@@ -40,11 +40,11 @@
 {{- else if in (slice "archives" "category" "tag") $kind -}}
   {{- $bundle = "misc" -}}
 {{- end }}
-<script defer src="{{ printf "/assets/js/dist/%s.min.js" $bundle | relURL }}"></script>
+<script defer src="{{ printf "assets/js/dist/%s.min.js" $bundle | relURL }}"></script>
 
 {{- if .Params.math }}
 <!-- MathJax -->
-<script src="{{ "/assets/js/data/mathjax.js" | relURL }}"></script>
+<script src="{{ "assets/js/data/mathjax.js" | relURL }}"></script>
 <script id="MathJax-script" async src="{{ $origin.mathjax.js | relURL }}"></script>
 {{- end }}
 

@@ -112,7 +112,7 @@
       {{- with .Params.categories }}
       <div class="post-meta">
         <i class="far fa-folder-open fa-fw me-1"></i>
-        {{ range $i, $c := . }}{{ if $i }}, {{ end }}<a href="{{ printf "/categories/%s/" (urlquery (partial "slugify.html" $c)) | relURL }}">{{ index $labels (lower $c) | default $c }}</a>{{ end }}
+        {{ range $i, $c := . }}{{ if $i }}, {{ end }}<a href="{{ printf "categories/%s/" (urlquery (partial "slugify.html" $c)) | relURL }}">{{ index $labels (lower $c) | default $c }}</a>{{ end }}
       </div>
       {{- end }}
 
@@ -122,7 +122,7 @@
     {{- with .Params.tags }}
     <div class="post-tags">
       <i class="fa fa-tags fa-fw me-1"></i>
-      {{ range . }}<a href="{{ printf "/tags/%s/" (urlquery (partial "slugify.html" .)) | relURL }}" class="post-tag no-text-decoration">{{ index $labels (lower .) | default . }}</a> {{ end }}
+      {{ range . }}<a href="{{ printf "tags/%s/" (urlquery (partial "slugify.html" .)) | relURL }}" class="post-tag no-text-decoration">{{ index $labels (lower .) | default . }}</a> {{ end }}
     </div>
     {{- end }}
 

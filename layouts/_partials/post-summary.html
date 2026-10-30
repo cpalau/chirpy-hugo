@@ -6,17 +6,47 @@
 {{- if and $post.Description (not $full) -}}
   {{- $post.Description -}}
 {{- else -}}
-  {{- $content := $post.Content -}}
+  {{- $content := .content | default $post.Content -}}
   {{- if strings.Contains $content `<td class="rouge-gutter gl"><pre class="lineno">` -}}
     {{- $content = replace $content `<td class="rouge-gutter gl"><pre class="lineno">` `<!-- <td class="rouge-gutter gl"><pre class="lineno">` -}}
     {{- $content = replace $content `</td><td class="rouge-code">` `</td> --><td class="rouge-code">` -}}
   {{- end -}}
-  {{- $text := partial "plain-text.html" $content -}}
+  {{- $text := "" -}}
+  {{- if .keep_entities -}}
+    {{- /* Jekyll's strip_html does not decode character references, and the
+           search index is compared with it byte for byte. */ -}}
+    {{- $text = $content -}}
+    {{- $text = replaceRE `(?s)<!--.*?-->` "" $text -}}
+    {{- $text = replaceRE `(?s)<script.*?</script>` "" $text -}}
+    {{- $text = replaceRE `(?s)<style.*?</style>` "" $text -}}
+    {{- $text = replaceRE `</(p|h[1-6]|li|ul|ol|dl|dt|dd|div|pre|blockquote|figcaption|td|th|tr|table|section|article|aside|header|footer|nav|tbody|thead)>` " " $text -}}
+    {{- $text = replaceRE `<br\s*/?>` " " $text -}}
+    {{- $text = replaceRE `<[^>]+>` "" $text -}}
+    {{- /* kramdown's markdownify unescapes backslash-escaped punctuation before
+           whitespace is normalised: a LaTeX hard break (`\\` at the end of a
+           line) becomes one backslash joined to the next line, and the
+           delimiters become literal brackets. */ -}}
+    {{- $text = replaceRE `\\\\\s*\n\s*` `\` $text -}}
+    {{- $text = replaceRE `\\\\` `\` $text -}}
+    {{- $text = replaceRE `\\\[` `[` $text -}}
+    {{- $text = replaceRE `\\\]` `]` $text -}}
+    {{- /* Whitespace is collapsed: the index feeds a tokenizer, and Goldmark's
+           block formatting would otherwise leave runs of blanks. */ -}}
+    {{- $text = replaceRE `\s+` " " $text | strings.TrimSpace -}}
+  {{- else -}}
+    {{- $text = partial "plain-text.html" $content -}}
+  {{- end -}}
   {{- if not $full -}}
     {{- $max := .max_length | default 200 -}}
     {{- if gt (strings.RuneCount $text) $max -}}
       {{- $text = printf "%s..." (substr $text 0 (sub $max 3)) -}}
     {{- end -}}
   {{- end -}}
-  {{- $text -}}
+  {{- if .keep_entities -}}
+    {{- /* The search index is JSON: character references must survive as
+           written, not be HTML-escaped a second time. */ -}}
+    {{- $text | safeHTML -}}
+  {{- else -}}
+    {{- $text -}}
+  {{- end -}}
 {{- end -}}

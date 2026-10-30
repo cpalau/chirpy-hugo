@@ -14,14 +14,14 @@
         {{- range $i, $item := $segments }}
           {{- if eq $i 0 }}
             <span>
-              <a href="{{ "/" | relURL }}">{{ strings.FirstUpper $home }}</a>
+              <a href="{{ "" | relURL }}">{{ strings.FirstUpper $home }}</a>
             </span>
           {{- else if eq $i (sub $total 1) }}
             {{- $label := partial "display-title.html" $ }}
             <span>{{ $label }}</span>
           {{- else if in (slice "category" "tag") $kind }}
             <span>
-              <a href="{{ printf "/%s/" $item | relURL }}">{{ T (printf "tabs.%s" $item) | default $.Title }}</a>
+              <a href="{{ printf "%s/" $item | relURL }}">{{ T (printf "tabs.%s" $item) | default $.Title }}</a>
             </span>
           {{- end }}
         {{- end }}

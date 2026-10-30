@@ -1,0 +1,19 @@
+{{- /* Ports `assets/img/favicons/site.webmanifest`, which upstream renders with
+       Liquid (site title, description, icon paths). The static copy cannot be
+       shipped verbatim: it would serve the Liquid tags as text and the PWA
+       manifest would be invalid JSON. */ -}}
+{{- $icons := slice
+  (dict "src" (relURL "assets/img/favicons/web-app-manifest-192x192.png") "sizes" "192x192" "type" "image/png")
+  (dict "src" (relURL "assets/img/favicons/web-app-manifest-512x512.png") "sizes" "512x512" "type" "image/png" "purpose" "maskable")
+-}}
+{{- $manifest := dict
+  "name" .Site.Title
+  "short_name" .Site.Title
+  "description" (.Site.Params.description | default "")
+  "icons" $icons
+  "start_url" (relURL "index.html")
+  "theme_color" "#2a1e6b"
+  "background_color" "#ffffff"
+  "display" "standalone"
+-}}
+{{- $manifest | jsonify (dict "indent" "  ") -}}

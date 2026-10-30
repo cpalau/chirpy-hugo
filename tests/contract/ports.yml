@@ -332,6 +332,13 @@ files:
   "_data/origin/":
     target: data/origin/
     mode: copy
+  "assets/img/favicons/site.webmanifest":
+    target: layouts/home.manifest.webmanifest
+    mode: manual
+    note: >
+      Liquid asset (front matter plus site title/description). The static copy
+      would ship the Liquid tags as text and the PWA manifest would be invalid
+      JSON, so it is rendered by an output format instead.
 
 # ---------------------------------------------------------------------------
 # Plugins and site configuration
@@ -391,9 +398,6 @@ new_files:
   "layouts/_partials/content.html":
     mode: new
     replaces: "_includes/refactor-content.html (R1, R3, G-39); there is no table render hook API, so the wrapper is applied here"
-  "layouts/_markup/render-link.html":
-    mode: new
-    reason: internal link resolution and external-link attributes
   "layouts/_shortcodes/prompt.html":
     mode: new
     replaces: kramdown prompt IAL (D-01)
@@ -403,9 +407,18 @@ new_files:
   "layouts/_shortcodes/img.html":
     mode: new
     replaces: kramdown image IAL (D-01); Goldmark does not support inline attributes on images
-  "layouts/_partials/task-list.html":
+  "layouts/home.feed.xml":
     mode: new
-    replaces: "_includes/refactor-content.html (R3)"
+    replaces: "assets/feed.xml (hand-written Atom feed)"
+  "layouts/home.swconf.js":
+    mode: new
+    replaces: "assets/js/data/swconf.js (Liquid service-worker config)"
+  "layouts/home.manifest.webmanifest":
+    mode: new
+    replaces: "assets/img/favicons/site.webmanifest (Liquid PWA manifest)"
+  "layouts/sitemap.xml":
+    mode: new
+    replaces: "jekyll-sitemap; excludes the section listing and adds pagination"
 
 # ---------------------------------------------------------------------------
 # Not part of the theme runtime

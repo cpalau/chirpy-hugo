@@ -8,7 +8,7 @@
     "categories" (delimit (.Params.categories | default slice) ", ")
     "tags" (delimit (.Params.tags | default slice) ", ")
     "date" (.Date.Format "2006-01-02 15:04:05 -0700")
-    "content" (partial "post-summary.html" (dict "post" . "full_text" true))
+    "content" (partial "post-summary.html" (dict "post" . "full_text" true "keep_entities" true "content" (partial "content.html" .)))
   ) -}}
 {{- end -}}
 {{- $json := "" -}}

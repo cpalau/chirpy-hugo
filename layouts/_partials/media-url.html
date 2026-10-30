@@ -12,6 +12,10 @@
     {{- $url = replace $url "///" "/" -}}
     {{- $url = replace $url "//" "/" -}}
     {{- $url = replace $url ":/" "://" -}}
+    {{- /* Jekyll's relative_url prepends the baseURL path; Hugo's relURL and
+           absURL drop it when the input starts with a slash, so it is
+           removed first. */ -}}
+    {{- $url = strings.TrimPrefix "/" $url -}}
     {{- if not (strings.Contains $url "://") -}}
       {{- if $.absolute -}}
         {{- $url = absURL $url -}}
