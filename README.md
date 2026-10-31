@@ -16,7 +16,7 @@
 
   [**Live Demo** →][demo]
 
-  [![Devices Mockup](images/devices-mockup.png)][demo]
+  [![Devices Mockup](https://raw.githubusercontent.com/cpalau/chirpy-hugo/main/images/devices-mockup.png)][demo]
 
 </div>
 
