@@ -5,6 +5,8 @@
 # documented in docs/CONFIG.md.
 
 tagline = ""
+# Optional longer title for the home page (browser tab and og:title).
+home_title = ""
 description = ""
 
 # Footer tooltip. Hugo has no notion of the theme's own version at render time.

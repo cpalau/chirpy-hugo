@@ -22,6 +22,23 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.5.5] - 2026-10-31
+
+### Added
+
+- `params.home_title`: optional longer title for the home page, used by
+  `<title>` and `og:title` without changing the sidebar brand.
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [1.5.4] - 2026-10-31
 
 ### Added

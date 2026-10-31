@@ -38,7 +38,7 @@
   <meta name="fediverse:creator" content="{{ . }}">
   {{- end }}
 
-  {{- $titleText := .Site.Title -}}
+  {{- $titleText := partial "site-title.html" . -}}
   {{- if ne $kind "home" -}}
     {{- $titleText = printf "%s | %s" (partial "display-title.html" .) .Site.Title -}}
   {{- end }}

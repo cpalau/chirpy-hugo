@@ -31,6 +31,7 @@ Rules:
 | `timezone` | `timeZone` | IANA name |
 | `title` | `title` | |
 | `tagline` | `params.tagline` | sidebar subtitle |
+| — | `params.home_title` | optional longer title for the home page (tab and `og:title`) |
 | `description` | `params.description` | meta + feed |
 | `url` | `baseURL` | must end with `/` |
 | `baseurl` | `baseURL` path component | subdirectory deployments |

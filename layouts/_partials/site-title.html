@@ -1,0 +1,10 @@
+{{- /* The site title, with an optional override for the home page.
+
+       `params.home_title` lets a site show a longer, more descriptive title in
+       the browser tab and in `og:title` without changing the brand shown in the
+       sidebar. Empty by default, so the home page keeps the site title. */ -}}
+{{- $title := site.Title -}}
+{{- if and .IsHome site.Params.home_title -}}
+  {{- $title = site.Params.home_title -}}
+{{- end -}}
+{{- return $title -}}

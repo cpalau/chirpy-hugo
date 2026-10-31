@@ -10,7 +10,7 @@
 {{- $desc := partial "seo/description.html" . -}}
 
 {{- /* page_title: the title, plus `title_category` when it adds information. */ -}}
-{{- $title := cond (eq $kind "home") $site.Title (partial "display-title.html" .) -}}
+{{- $title := cond (eq $kind "home") (partial "site-title.html" .) (partial "display-title.html" .) -}}
 {{- $titleCategory := "" -}}
 {{- with .Params.title_category -}}
   {{- $titleCategory = printf "%v" . -}}
