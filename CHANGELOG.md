@@ -22,6 +22,26 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.5.4] - 2026-10-31
+
+### Added
+
+### Changed
+
+- **The theme is ready for the themes.gohugo.io gallery.** `theme.toml` now records the
+  upstream repository in `[original]`, the README mockup uses an absolute URL
+  (the gallery renders it from its own directory), and `AGENTS.md` documents
+  the current submission flow. No template, style or configuration change: the
+  rendered site is identical.
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [1.5.3] - 2026-10-30
 
 ### Added
