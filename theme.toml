@@ -44,4 +44,5 @@ min_version = "0.150.0"
 [original]
   name = "Chirpy"
   homepage = "https://github.com/cotes2020/jekyll-theme-chirpy"
+  repo = "https://github.com/cotes2020/jekyll-theme-chirpy"
   author = "Cotes Chung"
