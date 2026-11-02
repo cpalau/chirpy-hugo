@@ -348,6 +348,10 @@ Every item is mandatory; without them the suite is flaky and therefore useless.
       analytics, comments and CDN scripts are stubbed locally.
 - [ ] Local fonts only; no network font loading during tests.
 - [ ] `mask` on dynamic regions: pageviews, comment widgets, relative dates.
+- [ ] TOC panel frozen for the shot: the `fade-up` entrance animation and the
+      sticky gradient covers are disabled, and tocbot's runtime `is-active-link`
+      class is removed. A composited, scroll-driven TOC rasterizes its glyphs one
+      pixel apart from run to run; the static text is still compared pixel by pixel.
 - [ ] `reducedMotion: 'reduce'`.
 - [ ] Same HTTP server and same `baseURL` shape for both builds.
 

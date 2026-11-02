@@ -190,6 +190,16 @@ async function main() {
         // Force the theme attribute the same way the toggle does, instead of
         // relying on localStorage + matchMedia.
         await page.evaluate((t) => document.documentElement.setAttribute('data-bs-theme', t), theme);
+        // The TOC panel enters with a 0.8 s `fade-up` animation that changes its
+        // margin. A shot taken while it runs is not identical to one taken after
+        // it finishes (Playwright's `animations: 'disabled'` does not normalise
+        // the two states), and the fractional margin shifts glyphs by a pixel.
+        // The animation is cosmetic: freeze it for both sides of the comparison.
+        await page.addStyleTag({
+          content:
+            '#toc-wrapper { animation: none !important; } ' +
+            '#toc-wrapper::before, #toc-wrapper::after, .toc-border-cover { display: none !important; }',
+        });
         // Async stylesheets (font icons, lightbox, polyfill) are applied on
         // load; wait for the sheet before waiting for its fonts.
         await page.evaluate(async () => {
@@ -234,16 +244,20 @@ async function main() {
         await page.setViewportSize({ width: viewport.width, height: Math.min(pageHeight, 9000) });
         await page.evaluate(() => window.scrollTo(0, 0));
         // tocbot's scrollspy recomputes its offsets when the viewport changes and
-        // marks a different entry as active for a few frames. Wait until the
-        // active entry stops changing, otherwise the TOC column is a flake.
+        // marks a different entry as active for a few frames. Its active class is
+        // tocbot's default `is-active-link` (the same one the theme styles), and
+        // only the desktop TOC is populated here: wait until the highlighted
+        // entry exists and stops changing, otherwise the TOC column is a flake.
         await page.evaluate(async () => {
-          const active = () => document.querySelector('#toc .toc-link.active')?.getAttribute('href') ?? '';
+          if (document.querySelectorAll('#toc .toc-link').length === 0) return;
+          const active = () =>
+            document.querySelector('#toc .toc-link.is-active-link')?.getAttribute('href') ?? '';
           const deadline = Date.now() + 2000;
           let last = null;
           let stable = 0;
           while (Date.now() < deadline) {
             const current = active();
-            if (current === last) stable += 1;
+            if (current !== '' && current === last) stable += 1;
             else {
               stable = 0;
               last = current;
@@ -251,6 +265,18 @@ async function main() {
             if (stable >= 3) return;
             await new Promise((resolve) => setTimeout(resolve, 100));
           }
+        });
+        await page.waitForTimeout(80);
+
+        // The highlighted entry is runtime state owned by tocbot's scrollspy: it
+        // depends on the scroll position, swaps the font face to SemiBold and
+        // adds an inline marker that changes the line box. Comparing it makes the
+        // whole TOC column depend on when the scrollspy last ran, so drop the
+        // runtime class and compare the panel in its static, unhighlighted state.
+        await page.evaluate(() => {
+          document
+            .querySelectorAll('#toc .is-active-link, #toc .toc-list-item.is-active-li')
+            .forEach((el) => el.classList.remove('is-active-link', 'is-active-li'));
         });
         await page.waitForTimeout(80);
 
