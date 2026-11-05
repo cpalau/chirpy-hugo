@@ -445,6 +445,12 @@ performance and 6.3 s LCP on mobile, and 92 accessibility on post pages
 (D-20, D-21). The desktop profile is where the port proves parity (99 vs 100
 performance). Budgets live in `tests/performance/budgets.json`.
 
+A single throttled mobile run swings by seconds on a shared runner (the same
+oracle page has measured from 1.7 s to 6.7 s LCP), so the mobile rule compares
+the **median of three interleaved runs per side**. The extra runs happen only
+when the first pair is over budget; a real regression still reproduces in the
+median.
+
 `npm run test:deploy` is the fast deployment check CI runs on every PR: it
 builds `exampleSite` with a subdirectory `baseURL` and `--minify` and validates
 the emitted HTML. It exists because the development build at the root hides

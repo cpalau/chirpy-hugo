@@ -108,6 +108,24 @@ async function lighthouse(url, { desktop }) {
 const score = (report, category) => Math.round((report.categories[category].score ?? 0) * 100);
 const metric = (report, key) => report.audits[key].numericValue;
 
+/**
+ * A single mobile Lighthouse run is a throttled simulation on a shared CI
+ * runner; the same oracle page has measured between 1.7 s and 6.7 s LCP across
+ * runs. Compare the median of a few runs before declaring a regression, and
+ * only pay for the extra runs when the first pair is over budget.
+ */
+const MOBILE_SAMPLES = 3;
+
+const median = (values) => {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)];
+};
+
+const mobileStats = (report) => ({
+  performance: score(report, 'performance'),
+  lcp: metric(report, 'largest-contentful-paint'),
+});
+
 const servers = [];
 for (const [side, port] of Object.entries(PORTS)) {
   const dir = side === 'hugo' ? HUGO : ORACLE;
@@ -154,20 +172,53 @@ try {
             `LCP ${(metric(ours, 'largest-contentful-paint') / 1000).toFixed(2)} s`,
         );
       } else if (fs.existsSync(ORACLE)) {
-        const theirs = await lighthouse(`http://127.0.0.1:${PORTS.oracle}${page}`, { desktop: false });
-        const perfDelta = score(ours, 'performance') - score(theirs, 'performance');
-        const lcpDelta = (metric(ours, 'largest-contentful-paint') - metric(theirs, 'largest-contentful-paint')) / 1000;
-        if (perfDelta < -BUDGETS.mobile['performance-delta']) {
-          fail(`${label}: performance ${perfDelta} points below Jekyll`);
+        const oursSamples = [mobileStats(ours)];
+        const theirsSamples = [
+          mobileStats(await lighthouse(`http://127.0.0.1:${PORTS.oracle}${page}`, { desktop: false })),
+        ];
+
+        const deltas = () => ({
+          performance:
+            median(oursSamples.map((sample) => sample.performance)) -
+            median(theirsSamples.map((sample) => sample.performance)),
+          lcp:
+            (median(oursSamples.map((sample) => sample.lcp)) - median(theirsSamples.map((sample) => sample.lcp))) / 1000,
+        });
+        const overBudget = ({ performance, lcp }) =>
+          performance < -BUDGETS.mobile['performance-delta'] ||
+          lcp > BUDGETS.mobile['largest-contentful-paint-delta'];
+
+        let delta = deltas();
+        let sampled = false;
+        if (overBudget(delta)) {
+          sampled = true;
+          console.log(`  note  ${label}: first pair over budget, re-measuring (median of ${MOBILE_SAMPLES})`);
+          for (let index = 1; index < MOBILE_SAMPLES; index += 1) {
+            oursSamples.push(mobileStats(await lighthouse(`http://127.0.0.1:${PORTS.hugo}${page}`, { desktop: false })));
+            theirsSamples.push(
+              mobileStats(await lighthouse(`http://127.0.0.1:${PORTS.oracle}${page}`, { desktop: false })),
+            );
+          }
+          delta = deltas();
         }
-        if (lcpDelta > BUDGETS.mobile['largest-contentful-paint-delta']) {
-          fail(`${label}: LCP ${lcpDelta.toFixed(2)} s slower than Jekyll`);
+
+        const failed = overBudget(delta);
+        if (failed) {
+          if (delta.performance < -BUDGETS.mobile['performance-delta']) {
+            fail(`${label}: performance ${delta.performance} points below Jekyll`);
+          }
+          if (delta.lcp > BUDGETS.mobile['largest-contentful-paint-delta']) {
+            fail(`${label}: LCP ${delta.lcp.toFixed(2)} s slower than Jekyll`);
+          }
+        } else {
+          console.log(
+            `  ok    ${label}: perf ${median(oursSamples.map((sample) => sample.performance))} ` +
+              `(Jekyll ${median(theirsSamples.map((sample) => sample.performance))}), ` +
+              `LCP ${(median(oursSamples.map((sample) => sample.lcp)) / 1000).toFixed(2)} s ` +
+              `(Jekyll ${(median(theirsSamples.map((sample) => sample.lcp)) / 1000).toFixed(2)} s)` +
+              (sampled ? ` [median of ${MOBILE_SAMPLES}]` : ''),
+          );
         }
-        console.log(
-          `  ok    ${label}: perf ${score(ours, 'performance')} (Jekyll ${score(theirs, 'performance')}), ` +
-            `LCP ${(metric(ours, 'largest-contentful-paint') / 1000).toFixed(2)} s ` +
-            `(Jekyll ${(metric(theirs, 'largest-contentful-paint') / 1000).toFixed(2)} s)`,
-        );
       } else {
         console.log(`  skip  ${label}: no oracle build to compare with`);
       }

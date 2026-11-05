@@ -13,6 +13,12 @@ content:
 - mobile: the port may not be more than 5 performance points or 1.5 s of LCP
   worse than Jekyll.
 
+Mobile is a throttled simulation, and one run is not evidence: the same oracle
+page has measured between 1.7 s and 6.7 s LCP on a busy runner. The gate
+therefore samples both sides three times and compares medians. It only pays for
+the extra runs when the first pair is over budget, and a reproducible
+regression still fails.
+
 The test server compresses text responses, because GitHub Pages does and an
 uncompressed server would report a compression opportunity that production does
 not have.
