@@ -161,7 +161,7 @@ off the URL, so its type is `WebPage` and it has no `name`/`sameAs`/`WebSite`.
 | `facebook.admins/publisher/app_id` | `params.facebook.*` | `""` |
 | `google_site_verification` | `params.google_site_verification` | `""` |
 | `social.name`, `social.links` | `params.social.*` | as shipped |
-| `lang`, `locale` | `languageCode`, `locale` | `en` |
+| `lang`, `locale` | `locale` | `en` |
 | page `seo.*`, `canonical_url`, `title_category`, `seo_description_max_words` | same front matter keys | — |
 
 ## 10. Declared divergences

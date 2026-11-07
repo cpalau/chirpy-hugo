@@ -37,7 +37,7 @@ Legend
 | # | Feature | Jekyll | Hugo | Status | Verify |
 |---|---|---|---|---|---|
 | C1 | Theme import | `theme: jekyll-theme-chirpy` | Hugo Module (`module.imports`) | ✅ | G1 |
-| C2 | Site language | `lang` | `defaultContentLanguage`, `languageCode` | ✅ | G7 |
+| C2 | Site language | `lang` | `defaultContentLanguage`, `locale` | ✅ | G7 |
 | C3 | Timezone | `timezone` | `timeZone` | ✅ | G4 |
 | C4 | Title, tagline, description | `title`, `tagline`, `description` | `title`, `params.tagline`, `params.description` | ✅ | G4 |
 | C5 | Canonical URL | `url` + `baseurl` | `baseURL` | ✅ | G4 |

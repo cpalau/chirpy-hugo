@@ -27,7 +27,7 @@ Rules:
 
 | Jekyll `_config.yml` | Hugo | Notes |
 |---|---|---|
-| `lang` | `defaultContentLanguage` + `languageCode` | |
+| `lang` | `defaultContentLanguage` + `locale` | |
 | `timezone` | `timeZone` | IANA name |
 | `title` | `title` | |
 | `tagline` | `params.tagline` | sidebar subtitle |
