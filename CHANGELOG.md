@@ -22,6 +22,24 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.6.1] - 2026-11-07
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+- `filtered-list` now resolves for section pages: the layout lives in
+  `layouts/_default/filtered-list.html`, so a section `_index.md` with
+  `layout: filtered-list` uses it instead of the generic section listing.
+
+### Security
+
 ## [1.6.0] - 2026-11-07
 
 ### Added
