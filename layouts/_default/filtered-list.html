@@ -15,7 +15,6 @@
 {{- end -}}
 
 {{- $posts = sort $posts "Date" "desc" -}}
-{{- $pag := .Paginate $posts -}}
 
 <article class="px-1">
   <h1 class="dynamic-title">{{ partial "display-title.html" . }}</h1>
@@ -28,15 +27,23 @@
 </article>
 
 {{- if gt (len $posts) 0 }}
+  {{- if eq .Kind "section" }}
+    {{- $pag := .Paginate $posts }}
 <div id="post-list" class="flex-grow-1 px-xl-1" data-filtered-list="{{ .Params.filter_tag | default .Params.filter_category }}">
   {{- range $pag.Pages }}
   {{ partial "post-card.html" . }}
   {{- end }}
 </div>
-
-{{- if gt $pag.TotalPages 1 }}
+    {{- if gt $pag.TotalPages 1 }}
 {{ partial "post-paginator.html" $pag }}
-{{- end }}
+    {{- end }}
+  {{- else }}
+<div id="post-list" class="flex-grow-1 px-xl-1" data-filtered-list="{{ .Params.filter_tag | default .Params.filter_category }}">
+  {{- range $posts }}
+  {{ partial "post-card.html" . }}
+  {{- end }}
+</div>
+  {{- end }}
 {{- else }}
 <article class="px-1">
   <div class="content">

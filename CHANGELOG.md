@@ -22,6 +22,23 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.6.2] - 2026-11-07
+
+### Added
+
+- `filtered-list` now also works on a regular page: it renders every matching
+  post without pagination. Sections keep the paginated branch.
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [1.6.1] - 2026-11-07
 
 ### Added
