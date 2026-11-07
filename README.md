@@ -9,6 +9,9 @@
   A port of the Chirpy Jekyll theme that renders the same HTML, and therefore
   the same pixels.
 
+  **Real deployment:** [cristianpalau.com](https://cristianpalau.com/) is a
+  production blog built with this theme.
+
   [![CI][badge-ci]][ci]&nbsp;
   [![GitHub license][badge-license]][license]&nbsp;
   [![Release][badge-release]][release]&nbsp;
