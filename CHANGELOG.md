@@ -22,6 +22,26 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.6.0] - 2026-11-07
+
+### Added
+
+- `filtered-list.html`: generic page layout that lists posts by `filter_tag` or
+  `filter_category` with the same card as the home page, plus pagination and an
+  empty state.
+- `post-card.html`: extracted from `home.html` so the home feed and filtered
+  lists share one card markup.
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [1.5.5] - 2026-10-31
 
 ### Added
