@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  HUGO_VERSION: 0.168.0
+  HUGO_VERSION: 0.169.0
   NODE_VERSION: 24
 
 jobs:
@@ -64,6 +64,13 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
+
+      # The exampleSite overrides `locale`, `label` and `direction`, so it
+      # cannot catch a deprecation in the theme's own defaults. Build the
+      # theme root as a site: warnings are errors and this is the config a
+      # consumer inherits.
+      - name: Theme defaults build (warnings are errors)
+        run: hugo --panicOnWarning --gc --minify -d "$RUNNER_TEMP/theme"
 
       - name: Cache the pinned upstream tree
         uses: actions/cache@v6
