@@ -22,6 +22,29 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.6.3] - 2026-11-07
+
+### Added
+
+### Changed
+
+- CI, Pages and Visual now pin Hugo 0.169.0, the version used in production.
+  The build job also renders the theme root, so a deprecation in the defaults
+  inherited by a consumer fails before a deployment does.
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+- The default `languages.toml` uses `label`, `locale` and `direction` instead of
+  the `languageName`, `languageCode` and `languageDirection` keys Hugo
+  deprecated in 0.158. The theme builds again with Hugo 0.169 and
+  `--panicOnWarning`.
+
+### Security
+
 ## [1.6.2] - 2026-11-07
 
 ### Added
