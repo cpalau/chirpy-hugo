@@ -138,6 +138,7 @@ Legend
 | H12 | Category collapse tree | `category-collapse.js` | unchanged JS | ✅ | G3 |
 | H13 | Recently-updated list | `update-list.html` | `update-list.html` | ✅ | G4 |
 | H14 | Hidden posts excluded | `home.html` (`hidden != true`) | same | ✅ | G4 |
+| H15 | Filtered list page | — (site-specific) | `filtered-list.html` + `post-card.html` | ✅ | G4/example |
 
 ---
 

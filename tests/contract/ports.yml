@@ -384,6 +384,12 @@ files:
 # Hugo-only files (no upstream counterpart)
 # ---------------------------------------------------------------------------
 new_files:
+  "layouts/_partials/post-card.html":
+    mode: new
+    reason: extracts the home post card so filtered lists render the same markup
+  "layouts/filtered-list.html":
+    mode: new
+    reason: generic page layout that lists posts by filter_tag or filter_category using post-card.html
   "layouts/section.html":
     mode: new
     reason: Hugo generates section listings; upstream has no such URL (parity handled in F3)

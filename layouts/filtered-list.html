@@ -1,0 +1,47 @@
+{{- /* Generic filtered list.
+       A page opts in with `layout: filtered-list` and sets `filter_tag` and/or
+       `filter_category`. It reuses the same post card as the home listing, so
+       a curated section looks identical to the main feed. */ -}}
+{{- define "main" -}}
+{{- $all := partial "posts-visible.html" . -}}
+{{- $posts := $all -}}
+
+{{- with .Params.filter_tag -}}
+  {{- $posts = where $posts "Params.tags" "intersect" (slice .) -}}
+{{- end -}}
+
+{{- with .Params.filter_category -}}
+  {{- $posts = where $posts "Params.categories" "intersect" (slice .) -}}
+{{- end -}}
+
+{{- $posts = sort $posts "Date" "desc" -}}
+{{- $pag := .Paginate $posts -}}
+
+<article class="px-1">
+  <h1 class="dynamic-title">{{ partial "display-title.html" . }}</h1>
+  {{- with .Description }}
+  <p class="post-desc fw-light mb-4">{{ . }}</p>
+  {{- end }}
+  {{- with .Content }}
+  <div class="content mb-4">{{ . }}</div>
+  {{- end }}
+</article>
+
+{{- if gt (len $posts) 0 }}
+<div id="post-list" class="flex-grow-1 px-xl-1" data-filtered-list="{{ .Params.filter_tag | default .Params.filter_category }}">
+  {{- range $pag.Pages }}
+  {{ partial "post-card.html" . }}
+  {{- end }}
+</div>
+
+{{- if gt $pag.TotalPages 1 }}
+{{ partial "post-paginator.html" $pag }}
+{{- end }}
+{{- else }}
+<article class="px-1">
+  <div class="content">
+    <p>{{ .Params.empty_text | default (T "post.no_posts" | default "No posts yet.") }}</p>
+  </div>
+</article>
+{{- end }}
+{{- end }}
