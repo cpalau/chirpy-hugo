@@ -46,6 +46,7 @@ export default {
         'tests',
         'theme',
         'docs',
+        'readme',
         'features',
         'example',
         'contract',

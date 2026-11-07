@@ -45,7 +45,7 @@ Every commit is **in English** and follows Conventional Commits:
 ### 1.2 Scopes
 
 `partials`, `layouts`, `shortcodes`, `markup`, `assets`, `config`, `i18n`,
-`scripts`, `tests`, `docs`, `upstream`, `starter`, `release`.
+`scripts`, `tests`, `docs`, `readme`, `upstream`, `starter`, `release`.
 
 ### 1.3 Breaking changes
 
