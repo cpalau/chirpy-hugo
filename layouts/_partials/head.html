@@ -32,6 +32,10 @@
   <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Regular.woff2" | relURL }}">
   {{- end }}
 
+  {{- /* El artículo es largo (diagramas SVG, código, tablas): con un vCPU y
+         CPU x4 de Lighthouse, el layout de todo el documento retrasa el primer
+         pintado. Se difiere el contenido por debajo del pliegue. */}}
+  <style>main .content > *:nth-child(n+6){content-visibility:auto;contain-intrinsic-size:auto 320px}</style>
   <!-- Setup Open Graph image -->
   {{ partial "seo.html" . }}
 
