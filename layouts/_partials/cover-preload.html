@@ -1,0 +1,39 @@
+{{- /* Precarga de la imagen LCP.
+
+       Debe coincidir EXACTAMENTE con el <source type="image/avif"> que emite
+       cover-picture.html: mismo srcset y mismo `sizes`. Si no coinciden, el
+       navegador descarga dos veces la imagen.
+
+       Los separadores se emiten como `&#32;` (igual que el viewport de
+       head.html): el minificador de Hugo convierte los espacios de un atributo
+       sin comillas en `%20`, lo que rompería el srcset. Con la entidad, el
+       navegador ve espacios reales.
+
+       Context: dict "page" "src" "sizes". */ -}}
+{{- $page := .page -}}
+{{- $sizes := .sizes | default "100vw" -}}
+{{- $res := "" -}}
+{{- with .src -}}
+  {{- with $page.Resources.GetMatch (path.Base .) -}}
+    {{- if in (slice "jpeg" "png" "webp") (lower .MediaType.SubType) -}}{{ $res = . }}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $res -}}
+  {{- $w := $res.Width -}}
+  {{- $widths := slice -}}
+  {{- range (slice 480 800 1200) -}}
+    {{- if le . $w -}}{{ $widths = $widths | append . }}{{- end -}}
+  {{- end -}}
+  {{- if eq (len $widths) 0 -}}{{ $widths = slice $w }}{{- end -}}
+  {{- if lt (index $widths (sub (len $widths) 1)) $w -}}{{ $widths = $widths | append $w }}{{- end -}}
+  {{- $avif := slice -}}
+  {{- range $widths -}}
+    {{- $a := $res.Resize (printf "%dx avif q50" .) -}}
+    {{- $avif = $avif | append (printf "%s&#32;%dw" $a.RelPermalink .) -}}
+  {{- end -}}
+  {{- printf `<link rel="preload" as="image" type="image/avif" fetchpriority="high" imagesrcset="%s" imagesizes="%s">` (delimit $avif ",&#32;") $sizes | safeHTML -}}
+{{- else -}}
+  {{- with .src -}}
+  <link rel="preload" as="image" href="{{ partial "media-url.html" (dict "src" . "subpath" $page.Params.media_subpath) }}">
+  {{- end -}}
+{{- end -}}

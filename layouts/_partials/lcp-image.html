@@ -1,14 +1,16 @@
-{{- /* URL of the image most likely to be the Largest Contentful Paint element:
-       the page's cover, or on the home page the cover of the first card.
-       Returns an empty string when there is nothing to preload. */ -}}
-{{- $url := "" -}}
+{{- /* Imagen candidata a LCP: la portada de la página o, en la home, la de la
+       primera tarjeta. Devuelve un dict {page, src} o "" si no hay ninguna.
+
+       El `<link rel=preload>` lo emite cover-preload.html, que necesita la
+       página (para resolver el recurso del bundle) y el src. */ -}}
 {{- $page := . -}}
+{{- $out := "" -}}
 {{- with .Params.image -}}
   {{- with (partial "image-data.html" .).src -}}
-    {{- $url = partial "media-url.html" (dict "src" . "subpath" $page.Params.media_subpath) -}}
+    {{- $out = dict "page" $page "src" . -}}
   {{- end -}}
 {{- end -}}
-{{- if and (not $url) (eq .Kind "home") -}}
+{{- if and (not $out) (eq .Kind "home") -}}
   {{- $all := where .Site.RegularPages "Type" "posts" -}}
   {{- $pinned := sort (uniq (append (where $all "Params.pin" true) (where $all "Params.pin" "true"))) "Date" "desc" -}}
   {{- $candidate := "" -}}
@@ -22,9 +24,9 @@
   {{- with $candidate -}}
     {{- with .Params.image -}}
       {{- with (partial "image-data.html" .).src -}}
-        {{- $url = partial "media-url.html" (dict "src" . "subpath" $candidate.Params.media_subpath) -}}
+        {{- $out = dict "page" $candidate "src" . -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- return $url -}}
+{{- return $out -}}

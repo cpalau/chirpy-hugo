@@ -1,0 +1,59 @@
+{{- /* Portada responsive: AVIF + WebP + JPEG de respaldo.
+
+       Las portadas son recursos del bundle de la página (`cover.jpg`), así que
+       se redimensionan en el build y se sirven con `srcset`. El objetivo es el
+       LCP: la portada de una tarjeta se muestra a ~380 px y se servía a 1200 px
+       (150 KB). Con AVIF a 1200 px baja a ~40-70 KB.
+
+       Context: dict "page" "src" "alt" "sizes" "priority" "mode" "class".
+       - mode "preview" (tarjeta) envuelve en <div class="preview-img">
+       - mode "popup" (portada del post) envuelve en <a class="popup img-link">
+       - priority=true => loading="eager" fetchpriority="high" (imagen LCP)
+       Si el src no es un recurso del bundle (p. ej. /assets/img/...), delega en
+       image.html y mantiene el comportamiento anterior. */ -}}
+{{- $page := .page -}}
+{{- $src := .src -}}
+{{- $alt := .alt | default "" -}}
+{{- $sizes := .sizes | default "100vw" -}}
+{{- $priority := .priority | default false -}}
+{{- $mode := .mode | default "preview" -}}
+{{- $extra := .class | default "" -}}
+{{- $res := "" -}}
+{{- with $src -}}
+  {{- with $page.Resources.GetMatch (path.Base .) -}}
+    {{- if in (slice "jpeg" "png" "webp") (lower .MediaType.SubType) -}}{{ $res = . }}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $res -}}
+  {{- $w := $res.Width -}}
+  {{- $widths := slice -}}
+  {{- range (slice 480 800 1200) -}}
+    {{- if le . $w -}}{{ $widths = $widths | append . }}{{- end -}}
+  {{- end -}}
+  {{- if eq (len $widths) 0 -}}{{ $widths = slice $w }}{{- end -}}
+  {{- if lt (index $widths (sub (len $widths) 1)) $w -}}{{ $widths = $widths | append $w }}{{- end -}}
+  {{- $avif := slice -}}
+  {{- $webp := slice -}}
+  {{- range $widths -}}
+    {{- $a := $res.Resize (printf "%dx avif q50" .) -}}
+    {{- $p := $res.Resize (printf "%dx webp q78" .) -}}
+    {{- $avif = $avif | append (printf "%s %dw" $a.RelPermalink .) -}}
+    {{- $webp = $webp | append (printf "%s %dw" $p.RelPermalink .) -}}
+  {{- end -}}
+  {{- $fallback := $res.Resize (printf "%dx q82" (index $widths (sub (len $widths) 1))) -}}
+  {{- $attrs := cond $priority `loading="eager" fetchpriority="high" decoding="async"` `loading="lazy" decoding="async"` -}}
+  {{- $pic := printf `<picture style="display:contents"><source type="image/avif" srcset="%s" sizes="%s"><source type="image/webp" srcset="%s" sizes="%s"><img src="%s" width="%d" height="%d" alt="%s" %s></picture>`
+        (delimit $avif ", ") $sizes (delimit $webp ", ") $sizes $fallback.RelPermalink $res.Width $res.Height $alt $attrs -}}
+  {{- if eq $mode "popup" -}}
+    {{- printf `<a href="%s" class="popup img-link preview-img %s">%s</a>` $res.RelPermalink $extra $pic | safeHTML -}}
+  {{- else -}}
+    {{- printf `<div class="preview-img %s">%s</div>` $extra $pic | safeHTML -}}
+  {{- end -}}
+{{- else -}}
+  {{- partial "image.html" (dict
+        "src" $src
+        "alt" $alt
+        "class" (printf "preview-img %s" $extra)
+        "page" $page
+        "mode" $mode) -}}
+{{- end -}}

@@ -1,19 +1,26 @@
 {{- /* Post card used by the home listing and by filtered lists.
-       Context: the page. Renders the same markup as the original inline card
-       in home.html so both listings stay visually identical. */ -}}
+       Context: dict "page" (the post) "priority" (bool, primera tarjeta) o
+       directamente la página (compatibilidad). */ -}}
 {{- $page := . -}}
+{{- $priority := false -}}
+{{- if reflect.IsMap . -}}
+  {{- $page = .page -}}
+  {{- $priority = .priority | default false -}}
+{{- end -}}
+{{- with $page -}}
 <article class="card-wrapper card">
-  <a href="{{ .RelPermalink }}" class="post-preview row g-0 flex-md-row-reverse">
+  <a href="{{ $page.RelPermalink }}" class="post-preview row g-0 flex-md-row-reverse">
     {{- $col := "12" -}}
-    {{- with .Params.image }}
+    {{- with $page.Params.image }}
     {{- $preview := partial "image-data.html" . }}
     <div class="col-md-5">
-      {{ partial "image.html" (dict
+      {{ partial "cover-picture.html" (dict
+        "page" $page
         "src" $preview.src
         "alt" (or $preview.alt "Preview Image")
-        "class" (printf "preview-img%s" (cond (not $preview.no_bg) "" " no-bg"))
-        "lqip" $preview.lqip
-        "page" $page
+        "class" (cond (not $preview.no_bg) "" "no-bg")
+        "sizes" "(min-width: 768px) 40vw, 100vw"
+        "priority" $priority
         "mode" "preview"
       ) }}
     </div>
@@ -21,7 +28,7 @@
     {{- end }}
     <div class="col-md-{{ $col }}">
       <div class="card-body d-flex flex-column">
-        <h1 class="card-title my-2 mt-md-0">{{ .Title }}</h1>
+        <h2 class="card-title my-2 mt-md-0">{{ $page.Title }}</h2>
 
         <div class="card-text content mt-0 mb-3">
           <p>{{ partial "post-summary.html" (dict "post" .) }}</p>
@@ -51,3 +58,4 @@
     </div>
   </a>
 </article>
+{{- end -}}

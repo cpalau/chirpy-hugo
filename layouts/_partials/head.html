@@ -21,13 +21,15 @@
          reaches it, and start the body font while the blocking CSS is still in
          flight. Both are appended last so the DOM order is untouched. */ -}}
   {{- with partial "lcp-image.html" . }}
-  <link rel="preload" as="image" href="{{ . }}">
+  {{- $sizes := "(min-width: 1200px) 960px, (min-width: 768px) 90vw, 100vw" -}}
+  {{- if ne $.Kind "page" -}}
+    {{- $sizes = "(min-width: 768px) 40vw, 100vw" -}}
+  {{- end -}}
+  {{- partial "cover-preload.html" (dict "page" .page "src" .src "sizes" $sizes) }}
   {{- end }}
   {{- if .Site.Params.assets.self_host.enabled }}
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Regular.woff2" | relURL }}" fetchpriority="high">
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-SemiBold.woff2" | relURL }}">
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Black.woff2" | relURL }}">
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Lato/Lato-Regular.woff2" | relURL }}">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Lato/Lato-Regular.woff2" | relURL }}" fetchpriority="high">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Regular.woff2" | relURL }}">
   {{- end }}
 
   <!-- Setup Open Graph image -->

@@ -30,8 +30,8 @@
   {{- if eq .Kind "section" }}
     {{- $pag := .Paginate $posts }}
 <div id="post-list" class="flex-grow-1 px-xl-1" data-filtered-list="{{ .Params.filter_tag | default .Params.filter_category }}">
-  {{- range $pag.Pages }}
-  {{ partial "post-card.html" . }}
+  {{- range $i, $p := $pag.Pages }}
+  {{ partial "post-card.html" (dict "page" $p "priority" (eq $i 0)) }}
   {{- end }}
 </div>
     {{- if gt $pag.TotalPages 1 }}
@@ -39,8 +39,8 @@
     {{- end }}
   {{- else }}
 <div id="post-list" class="flex-grow-1 px-xl-1" data-filtered-list="{{ .Params.filter_tag | default .Params.filter_category }}">
-  {{- range $posts }}
-  {{ partial "post-card.html" . }}
+  {{- range $i, $p := $posts }}
+  {{ partial "post-card.html" (dict "page" $p "priority" (eq $i 0)) }}
   {{- end }}
 </div>
   {{- end }}

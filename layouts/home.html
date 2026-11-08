@@ -35,8 +35,8 @@
   {{- $posts = $posts | append (after $normalStart $allNormal | first $normalSize) -}}
 {{- end -}}
 <div id="post-list" class="flex-grow-1 px-xl-1">
-  {{- range $posts }}
-  {{ partial "post-card.html" . }}
+  {{- range $i, $p := $posts }}
+  {{ partial "post-card.html" (dict "page" $p "priority" (eq $i 0)) }}
   {{- end }}
 </div>
 

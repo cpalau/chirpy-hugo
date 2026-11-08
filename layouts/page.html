@@ -34,14 +34,14 @@
       {{- with .Params.image }}
       {{- $preview := partial "image-data.html" . }}
       <div class="mt-3 mb-3">
-        {{ partial "image.html" (dict
+        {{ partial "cover-picture.html" (dict
+          "page" $
           "src" $preview.src
           "alt" (or $preview.alt "Preview Image")
-          "class" (printf "preview-img%s" (cond (not $preview.no_bg) "" " no-bg"))
-          "width" "1200"
-          "height" "630"
-          "lqip" $preview.lqip
-          "page" $
+          "class" (cond (not $preview.no_bg) "" "no-bg")
+          "sizes" "(min-width: 1200px) 960px, (min-width: 768px) 90vw, 100vw"
+          "priority" true
+          "mode" "popup"
         ) }}
         {{- with $preview.alt -}}
         <figcaption class="text-center pt-2 pb-2">{{ . }}</figcaption>
