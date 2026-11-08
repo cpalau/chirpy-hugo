@@ -34,7 +34,7 @@
 {{- end -}}
 {{- with $imgClasses }}{{ $img = printf `%s class="%s"` $img (delimit . " ") }}{{ end -}}
 {{- with $dims }}{{ $img = printf "%s %s" $img (delimit . " ") }}{{ end -}}
-{{- if not $lqip }}{{ $img = printf `%s loading="lazy"` $img }}{{ end -}}
+{{- if not $lqip }}{{ $img = printf `%s loading="lazy" fetchpriority="low"` $img }}{{ end -}}
 {{- $img = printf "%s>" $img -}}
 {{- $wrap := printf "popup img-link %s" (delimit $wrapperClasses " ") -}}
 {{- if eq (.mode | default "popup") "preview" -}}

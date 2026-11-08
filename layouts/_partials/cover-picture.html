@@ -47,7 +47,7 @@
     {{- $webp = $webp | append (printf "%s %dw" $p.RelPermalink .) -}}
   {{- end -}}
   {{- $fallback := $res.Resize (printf "%dx q82" (index $widths (sub (len $widths) 1))) -}}
-  {{- $attrs := cond $priority `loading="eager" fetchpriority="high" decoding="async"` `loading="lazy" decoding="async"` -}}
+  {{- $attrs := cond $priority `loading="eager" fetchpriority="high" decoding="async"` `loading="lazy" decoding="async" fetchpriority="low"` -}}
   {{- $pic := printf `<picture style="display:contents"><source type="image/avif" srcset="%s" sizes="%s"><source type="image/webp" srcset="%s" sizes="%s"><img src="%s" width="%d" height="%d" alt="%s" %s></picture>`
         (delimit $avif ", ") $sizes (delimit $webp ", ") $sizes $fallback.RelPermalink $res.Width $res.Height $alt $attrs -}}
   {{- if eq $mode "popup" -}}
