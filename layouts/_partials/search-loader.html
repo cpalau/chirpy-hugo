@@ -6,31 +6,50 @@
        `<` inside an interpolated JS string, and the executed JS must stay
        byte-identical to upstream. Only the JSON path and the i18n string are
        interpolated, and neither contains `<`. */ -}}
+{{- /* El índice pesa ~260 KB comprimido y se parsea en el hilo principal. No se
+       carga hasta que el usuario abre el buscador: antes se hacía en
+       DOMContentLoaded en todas las páginas y competía con la imagen LCP. */ -}}
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    SimpleJekyllSearch({
-      searchInput: document.getElementById('search-input'),
-      resultsContainer: document.getElementById('search-results'),
-      json: '{{ "assets/js/data/search.json" | relURL }}',
-      searchResultTemplate: ' <article class="px-1 px-sm-2 px-lg-4 px-xl-0"> <header> <h2><a href="{url}">{title}</a></h2> <div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags} </div> </header> <p>{content}</p> </article>',
-      noResultsText: '<p class="mt-5">{{ T "search.no_results" }}</p>',
-      templateMiddleware: function(prop, value, template) {
-        if (prop === 'categories') {
-          if (value === '') {
-            return `${value}`;
-          } else {
-            return `<div class="me-sm-4"><i class="far fa-folder fa-fw"></i>${value}</div>`;
+  (() => {
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      SimpleJekyllSearch({
+        searchInput: document.getElementById('search-input'),
+        resultsContainer: document.getElementById('search-results'),
+        json: '{{ "assets/js/data/search.json" | relURL }}',
+        searchResultTemplate: ' <article class="px-1 px-sm-2 px-lg-4 px-xl-0"> <header> <h2><a href="{url}">{title}</a></h2> <div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags} </div> </header> <p>{content}</p> </article>',
+        noResultsText: '<p class="mt-5">{{ T "search.no_results" }}</p>',
+        templateMiddleware: function(prop, value, template) {
+          if (prop === 'categories') {
+            if (value === '') {
+              return `${value}`;
+            } else {
+              return `<div class="me-sm-4"><i class="far fa-folder fa-fw"></i>${value}</div>`;
+            }
           }
-        }
 
-        if (prop === 'tags') {
-          if (value === '') {
-            return `${value}`;
-          } else {
-            return `<div><i class="fa fa-tag fa-fw"></i>${value}</div>`;
+          if (prop === 'tags') {
+            if (value === '') {
+              return `${value}`;
+            } else {
+              return `<div><i class="fa fa-tag fa-fw"></i>${value}</div>`;
+            }
           }
         }
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const once = { once: true, passive: true };
+      for (const id of ['search-input', 'search-trigger']) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        el.addEventListener('focus', start, once);
+        el.addEventListener('click', start, once);
+        el.addEventListener('keydown', start, once);
       }
     });
-  });
+  })();
 </script>

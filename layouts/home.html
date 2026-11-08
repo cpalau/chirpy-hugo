@@ -34,6 +34,9 @@
   {{- end -}}
   {{- $posts = $posts | append (after $normalStart $allNormal | first $normalSize) -}}
 {{- end -}}
+{{- /* Las tarjetas usan h2 (varias por página); el listado necesita su propio
+       h1 para la jerarquía y el audit SEO. */ -}}
+<h1 class="visually-hidden">{{ site.Title }}{{ with $pag }}{{ if gt .PageNumber 1 }} — página {{ .PageNumber }}{{ end }}{{ end }}</h1>
 <div id="post-list" class="flex-grow-1 px-xl-1">
   {{- range $i, $p := $posts }}
   {{ partial "post-card.html" (dict "page" $p "priority" (eq $i 0)) }}
