@@ -14,8 +14,14 @@
 {{- $sizes := .sizes | default "100vw" -}}
 {{- $res := "" -}}
 {{- with .src -}}
-  {{- with $page.Resources.GetMatch (path.Base .) -}}
+  {{- $rel := strings.TrimPrefix "/" . -}}
+  {{- with $page.Resources.GetMatch $rel -}}
     {{- if in (slice "jpeg" "png" "webp") (lower .MediaType.SubType) -}}{{ $res = . }}{{- end -}}
+  {{- end -}}
+  {{- if not $res -}}
+    {{- with $page.Resources.GetMatch (path.Base $rel) -}}
+      {{- if in (slice "jpeg" "png" "webp") (lower .MediaType.SubType) -}}{{ $res = . }}{{- end -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}
 {{- if $res -}}
