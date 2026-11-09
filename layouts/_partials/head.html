@@ -90,7 +90,15 @@
   {{- $file := "assets/css/jekyll-theme-chirpy.css" -}}
   {{- if eq $theme "light" }}{{ $file = "assets/css/jekyll-theme-chirpy-light.css" }}
   {{- else if eq $theme "dark" }}{{ $file = "assets/css/jekyll-theme-chirpy-dark.css" }}{{ end }}
+  {{- /* Hoja de estilos crítica: se inlinea. Era la única petición
+         render-blocking que quedaba (108 KB, 16 KB brotli) y su RTT retrasaba
+         el primer pintado (y con él el LCP). Se pierde la caché de CSS entre
+         páginas a cambio de ~150-300 ms en la primera visita. */ -}}
+  {{- with readFile (printf "static/%s" $file) }}
+  <style>{{ . | safeCSS }}</style>
+  {{- else }}
   <link rel="stylesheet" href="{{ $file | relURL }}">
+  {{- end }}
 
   <!-- Web Font -->
   <link rel="stylesheet" href="{{ partial "lib-url.html" $origin.webfonts }}">
