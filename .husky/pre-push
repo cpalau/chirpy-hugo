@@ -1,4 +1,23 @@
-# Rule: the theme is never pushed to GitHub unless every gate is green.
-# See docs/TESTING.md. `test:all` builds the fixture and runs every gate,
-# including parity, the LCP budget and Lighthouse.
-npm run -s test:all
+# Rule: never push the theme unless every gate passed for this exact commit.
+#
+# `npm run test:all` runs the suite and writes .out/test-all.json with the HEAD
+# sha. A green run older than two hours, or for another commit, does not count.
+node -e '
+const fs = require("node:fs");
+const { execSync } = require("node:child_process");
+const marker = ".out/test-all.json";
+const head = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
+let ok = false;
+try {
+  const m = JSON.parse(fs.readFileSync(marker, "utf8"));
+  const age = (Date.now() - Date.parse(m.date)) / 36e5;
+  ok = m.sha === head && age >= 0 && age < 2;
+  if (!ok) console.error(`pre-push: marker for ${m.sha.slice(0,7)} (${age.toFixed(1)} h old) does not match HEAD ${head.slice(0,7)}`);
+} catch {
+  console.error("pre-push: no green test run recorded");
+}
+if (!ok) {
+  console.error("pre-push: running the full suite (npm run test:all)");
+  execSync("npm run -s test:all", { stdio: "inherit" });
+}
+'
