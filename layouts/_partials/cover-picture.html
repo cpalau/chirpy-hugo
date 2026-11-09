@@ -54,7 +54,7 @@
   {{- $avif := slice -}}
   {{- $webp := slice -}}
   {{- range $widths -}}
-    {{- $a := $res.Resize (printf "%dx avif q50" .) -}}
+    {{- $a := $res.Resize (printf "%dx avif q45" .) -}}
     {{- $p := $res.Resize (printf "%dx webp q78" .) -}}
     {{- $avif = $avif | append (printf "%s %dw" $a.RelPermalink .) -}}
     {{- $webp = $webp | append (printf "%s %dw" $p.RelPermalink .) -}}

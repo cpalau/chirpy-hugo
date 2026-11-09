@@ -34,7 +34,7 @@
   {{- if lt (index $widths (sub (len $widths) 1)) $w -}}{{ $widths = $widths | append $w }}{{- end -}}
   {{- $avif := slice -}}
   {{- range $widths -}}
-    {{- $a := $res.Resize (printf "%dx avif q50" .) -}}
+    {{- $a := $res.Resize (printf "%dx avif q45" .) -}}
     {{- $avif = $avif | append (printf "%s&#32;%dw" $a.RelPermalink .) -}}
   {{- end -}}
   {{- printf `<link rel="preload" as="image" type="image/avif" fetchpriority="high" imagesrcset="%s" imagesizes="%s">` (delimit $avif ",&#32;") $sizes | safeHTML -}}
