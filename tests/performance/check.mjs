@@ -124,6 +124,7 @@ const median = (values) => {
 const mobileStats = (report) => ({
   performance: score(report, 'performance'),
   lcp: metric(report, 'largest-contentful-paint'),
+  tbt: metric(report, 'total-blocking-time'),
 });
 
 const servers = [];
@@ -173,6 +174,11 @@ try {
         );
       } else if (fs.existsSync(ORACLE)) {
         const oursSamples = [mobileStats(ours)];
+        const mobileTbt = median(oursSamples.map((sample) => sample.tbt));
+        const tbtBudget = BUDGETS.mobile['total-blocking-time'];
+        if (tbtBudget && mobileTbt > tbtBudget) {
+          fail(`${label}: TBT ${Math.round(mobileTbt)} ms > ${tbtBudget} ms (mobile budget)`);
+        }
         const theirsSamples = [
           mobileStats(await lighthouse(`http://127.0.0.1:${PORTS.oracle}${page}`, { desktop: false })),
         ];

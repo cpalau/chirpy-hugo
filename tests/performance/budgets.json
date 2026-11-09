@@ -5,7 +5,8 @@
     "(its own build scores 67-76 and 6.7 s LCP here) or on accessibility (92, see D-20), so the",
     "absolute budgets apply to the desktop profile, where the port matches the",
     "original (99 vs 100 performance), and the mobile profile is compared with",
-    "the Jekyll build instead. See D-21 in docs/COMPATIBILITY.md."
+    "the Jekyll build instead. See D-21 in docs/COMPATIBILITY.md.",
+    "Mobile TBT is absolute (600 ms): the JS bundles are upstream and cannot be trimmed here, so this catches a regression that puts more scripts on the critical path (e.g. loading the lightbox or clipboard eagerly again)."
   ],
   "desktop": {
     "performance": 95,
@@ -18,6 +19,7 @@
   },
   "mobile": {
     "performance-delta": 5,
-    "largest-contentful-paint-delta": 1.5
+    "largest-contentful-paint-delta": 1.5,
+    "total-blocking-time": 600
   }
 }

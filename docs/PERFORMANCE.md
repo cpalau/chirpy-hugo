@@ -112,3 +112,13 @@ node scripts/vendor.mjs --check      # verify (runs in CI)
 ```
 
 Bump the `PIN` in `scripts/vendor.mjs` together with the upstream theme release.
+
+## TBT is bounded by the upstream bundles
+
+`assets/js/dist/*.min.js` are the published bundles (D-10): this repo does not
+compile them, so the JavaScript executed on first load cannot be trimmed here
+without forking upstream. What the theme controls is *what* is requested and
+when: the search index is deferred to the first gesture (D-28), the asciinema
+player is `defer`red, and the stylesheet is inlined. Gate 6b now budgets
+**mobile TBT at 600 ms** (desktop stays at 200 ms), so putting another library
+back on the critical path fails the suite.
