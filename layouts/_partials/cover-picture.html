@@ -18,6 +18,9 @@
 {{- $priority := .priority | default false -}}
 {{- $mode := .mode | default "preview" -}}
 {{- $extra := .class | default "" -}}
+{{- $lqip := .lqip | default "" -}}
+{{- $width := .width | default "" -}}
+{{- $height := .height | default "" -}}
 {{- $res := "" -}}
 {{- with $src -}}
   {{- $rel := strings.TrimPrefix "/" . -}}
@@ -30,7 +33,17 @@
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- if $res -}}
+{{- if $lqip -}}
+  {{- partial "image.html" (dict
+        "src" $src
+        "alt" $alt
+        "class" (printf "preview-img %s" $extra)
+        "lqip" $lqip
+        "width" $width
+        "height" $height
+        "page" $page
+        "mode" $mode) -}}
+{{- else if $res -}}
   {{- $w := $res.Width -}}
   {{- $widths := slice -}}
   {{- range (slice 480 800 1200) -}}
@@ -60,6 +73,9 @@
         "src" $src
         "alt" $alt
         "class" (printf "preview-img %s" $extra)
+        "width" $width
+        "height" $height
+        "lqip" $lqip
         "page" $page
         "mode" $mode) -}}
 {{- end -}}

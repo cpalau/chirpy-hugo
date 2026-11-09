@@ -408,6 +408,39 @@ coupling.
 
 ---
 
+## D-28 — Performance: the LCP budget
+
+Measured on a 1 vCPU VPS with the real blog (Lighthouse 12, mobile, 4G, CPU
+×4): the home page went from LCP 3.2 s to 2.1 s and a post with five diagrams
+from 4.0 s to 2.4–2.6 s; the home page weight dropped from 1,812 KiB to 418 KiB.
+The theme therefore owns these decisions:
+
+- **Responsive covers.** A cover that is a page-bundle resource is rendered as
+  `<picture>` with AVIF and WebP `srcset` at 480/800/1200w, explicit
+  `width`/`height`, and a single inlined `imagesrcset`/`imagesizes` preload that
+  must match the AVIF source (a mismatch downloads the image twice). Covers
+  that are not bundle resources, and covers with `lqip`, keep the upstream
+  `image.html` path.
+- **Priority.** The first card on a listing and the post cover are
+  `loading="eager"` + `fetchpriority="high"`; every other image is `lazy` +
+  `fetchpriority="low"` so the LCP candidate is not competing with diagrams.
+- **Inline CSS.** The precompiled theme stylesheet is inlined with `readFile`
+  instead of requested: it was the last render-blocking resource. Trade-off:
+  the CSS is no longer cached across pages, but the first paint gains a full
+  round trip. `<link>` remains as a fallback if the file cannot be read.
+- **Headings.** Listing cards are `h2`; the listing itself owns a visually
+  hidden `h1` (`main h1.visually-hidden`), so a page no longer has ten `h1`s.
+- **Deferred search.** `SimpleJekyllSearch` is initialised from the first
+  gesture (focus/click/keydown) instead of `DOMContentLoaded`: the JSON index
+  is ~260 KB compressed and its parse competed with the LCP.
+- **Content visibility.** Article blocks below the fold use
+  `content-visibility:auto`, so the first paint does not lay out the whole
+  document (diagrams, code, tables).
+
+Gate 4 exempts exactly the nodes this decision changes (`style`, the removed
+stylesheet link, the hidden `h1`, `.card-title`, the last inline body script
+and `img@fetchpriority`); every other difference still fails.
+
 ## D-27 — Git-based last modified for a file with one commit
 
 | | |

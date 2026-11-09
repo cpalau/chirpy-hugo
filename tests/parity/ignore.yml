@@ -13,6 +13,12 @@ selectors:
   - 'head link[media="print"]@media | D-22 | async stylesheets (icons, lightbox, polyfill, toc)'
   - 'head link[media="print"]@onload | D-22 | the swap that applies the async stylesheet'
   - 'head link[rel="preload"] | D-22 | LCP image and body font preloads, appended last'
+  - 'head style | D-28 | the critical CSS is inlined instead of a blocking stylesheet'
+  - 'head link[href=/assets/css/jekyll-theme-chirpy.css] | D-28 | the stylesheet is inlined, not requested'
+  - 'main h1.visually-hidden | D-28 | the listing owns an h1; cards are h2'
+  - '#post-list .card-title | D-28 | card titles are h2, not h1'
+  - 'body script:last-of-type | D-28 | the search loader is deferred until the first gesture'
+  - 'img@fetchpriority | D-28 | non-LCP images are deprioritised with fetchpriority=low'
 
 # Canonicalization note: Go's html/template re-encodes JS string literals
 # inside <script> (\/, \u003c, \", \n). The comparator normalises those

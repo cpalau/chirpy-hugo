@@ -1,0 +1,4 @@
+# Rule: the theme is never pushed to GitHub unless every gate is green.
+# See docs/TESTING.md. `test:all` builds the fixture and runs every gate,
+# including parity, the LCP budget and Lighthouse.
+npm run -s test:all

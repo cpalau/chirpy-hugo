@@ -30,6 +30,8 @@
   {{- if .Site.Params.assets.self_host.enabled }}
   <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Lato/Lato-Regular.woff2" | relURL }}" fetchpriority="high">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Regular.woff2" | relURL }}">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-SemiBold.woff2" | relURL }}">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Black.woff2" | relURL }}">
   {{- end }}
 
   {{- /* El artículo es largo (diagramas SVG, código, tablas): con un vCPU y

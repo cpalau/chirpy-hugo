@@ -495,6 +495,13 @@ Visual-test determinism rules (see `docs/TESTING.md`):
 
 ---
 
+### 7.x Never push without a green suite
+
+`git push` to GitHub is gated by `.husky/pre-push`, which runs
+`npm run test:all` (every gate, including parity, the LCP markup test and the
+Lighthouse budgets). A red gate means no push: fix it first. This is not a
+convention, it is enforced.
+
 ## 8. i18n rules
 
 Full contract in `docs/I18N.md`. Summary:

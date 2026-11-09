@@ -168,7 +168,16 @@ async function staticChecks(viewport, page, url, errors, failed) {
 
 async function desktop(context) {
   const { page, errors, failed } = await newPage(context);
+  const indexRequests = [];
+  page.on('request', (request) => {
+    if (request.url().includes('search.json')) indexRequests.push(request.url());
+  });
   await page.goto(`${base}/`, { waitUntil: 'load' });
+  await page.waitForTimeout(250);
+  check('desktop', 'home: the search index is not fetched on load', indexRequests.length === 0, indexRequests[0]);
+  await page.locator('#search-input').click();
+  await page.waitForTimeout(600);
+  check('desktop', 'home: the search index is fetched when the search opens', indexRequests.length > 0);
   const href = await page.locator('a.post-preview').first().getAttribute('href');
   const post = new URL(href, `${base}/`).toString();
   const postPath = new URL(post).pathname.replace(BASE_PATH, '');

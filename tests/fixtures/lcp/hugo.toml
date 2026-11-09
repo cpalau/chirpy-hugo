@@ -1,0 +1,10 @@
+# Minimal consumer used by tests/lcp/check.mjs to exercise the responsive cover
+# pipeline (a page bundle that really owns its cover as a resource).
+baseURL = "https://example.com/"
+title = "LCP Fixture"
+locale = "en"
+timeZone = "UTC"
+enableRobotsTXT = true
+
+[params]
+  theme_mode = "dual"

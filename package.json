@@ -25,7 +25,7 @@
     "test:config": "node scripts/check-config.mjs",
     "test:contract": "node tests/contract/selectors.mjs",
     "test:deploy": "node tests/adoption/check.mjs --deploy-only",
-    "test:fast": "npm run -s test:build && npm run -s test:deploy && npm run -s test:ui && npm run -s test:html && npm run -s test:outputs && npm run -s test:seo:demo && npm run -s test:seo:ext",
+    "test:fast": "npm run -s test:build && npm run -s test:deploy && npm run -s test:ui && npm run -s test:html && npm run -s test:outputs && npm run -s test:seo:demo && npm run -s test:seo:ext && npm run -s test:lcp",
     "test:features": "node tests/adoption/check.mjs --features-only",
     "test:html": "node tests/html/check.mjs",
     "test:i18n": "node scripts/i18n.mjs --check",
@@ -46,7 +46,10 @@
     "test:visual": "node scripts/visual-run.mjs",
     "vendor:apply": "node scripts/vendor.mjs --apply",
     "vendor:check": "node scripts/vendor.mjs --check",
-    "vendor:generate": "node scripts/vendor.mjs --generate"
+    "vendor:generate": "node scripts/vendor.mjs --generate",
+    "test:lcp": "node tests/lcp/check.mjs",
+    "build:fixture": "hugo -s tests/fixtures/hugo --themesDir \"$PWD/..\" --theme chirpy-hugo -d \"$PWD/.out/hugo\"",
+    "test:all": "npm run -s build:fixture && npm run -s test:build && npm run -s test:deploy && npm run -s test:html && npm run -s test:outputs && npm run -s test:seo:demo && npm run -s test:seo:ext && npm run -s test:lcp && npm run -s test:ui && npm run -s test:a11y && npm run -s test:contract && npm run -s test:parity && npm run -s test:config && npm run -s test:vendor && npm run -s test:i18n && npm run -s test:qa && npm run -s test:release && npm run -s test:performance"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

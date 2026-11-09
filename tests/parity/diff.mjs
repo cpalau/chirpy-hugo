@@ -121,6 +121,13 @@ function matches(node, selector) {
     }
     return i < 0;
   }
+  if (selector.includes(':last-of-type')) {
+    const parent = node.parentNode;
+    if (!parent) return false;
+    const sameTag = (parent.childNodes || []).filter((n) => n.tagName === node.tagName);
+    if (sameTag[sameTag.length - 1] !== node) return false;
+    selector = selector.replace(/:last-of-type/g, '');
+  }
   const nth = selector.match(/:nth-of-type\((\d+)\)/);
   if (nth) {
     const wanted = Number(nth[1]);

@@ -614,3 +614,12 @@ browsers cached by version; Hugo binary cached by version.
 - A snapshot update without a matching upstream change or documented
   divergence is rejected in review.
 - `npm run test:visual:update` must never be run blindly in CI.
+
+## Pre-push rule
+
+The theme is **never** pushed to GitHub unless every gate is green. The
+`pre-push` hook runs `npm run test:all`, which builds the fixture and runs
+build, deploy, HTML, outputs, SEO (demo + extensions), LCP, UI, a11y, DOM
+contract, parity, config, vendor, i18n, QA, release and the Lighthouse budgets.
+`git push --no-verify` is only acceptable to recover from a broken machine, and
+the next push must be preceded by a green `npm run test:all`.
