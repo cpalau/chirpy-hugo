@@ -86,6 +86,15 @@ check('preload declares imagesrcset', preloadSrcset.length > 0);
 check('preload declares imagesizes', /imagesizes="[^"]+"/.test(preload));
 check('preload srcset matches the AVIF source', avifSrcset === preloadSrcset, `${avifSrcset.slice(0, 40)} vs ${preloadSrcset.slice(0, 40)}`);
 
+console.log('\ninline images');
+const inline = [...post.matchAll(/<picture[^>]*>([\s\S]*?)<\/picture>/g)].map((m) => m[0]).find((p) => p.includes('shot'));
+check('inline image is a responsive picture', Boolean(inline));
+check('inline AVIF + WebP sources', /type=image\/avif/.test(inline ?? '') && /type=image\/webp/.test(inline ?? ''));
+check('inline srcset has 480w and 800w', /480w/.test(inline ?? '') && /800w/.test(inline ?? ''));
+check('inline img keeps width/height', /<img[^>]*\swidth=\d+/.test(inline ?? '') && /<img[^>]*\sheight=\d+/.test(inline ?? ''));
+check('inline img is lazy + low', /loading=lazy/.test(inline ?? '') && /fetchpriority=low/.test(inline ?? ''));
+check('inline image keeps the popup link', /<a href="?\/posts\/demo\/shot\.webp"? class="?popup img-link/.test(post));
+
 console.log('\nrender path');
 check('theme CSS is inlined', /<style>[\s\S]*?\.preview-img[\s\S]*?<\/style>/.test(home));
 check('no blocking theme stylesheet', !/<link rel=stylesheet href=["']?\/assets\/css\/jekyll-theme-chirpy/.test(home));

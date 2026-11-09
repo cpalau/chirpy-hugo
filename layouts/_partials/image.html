@@ -1,7 +1,12 @@
 {{- /* Final image markup, shared by render-image.html and the `img` shortcode.
        Reproduces refactor-content's R4/R5: classes move to the wrapper, width
        and height stay on the <img>, loading="lazy" unless there is a LQIP.
-       Context: dict src alt class width height lqip page mode ("popup" | "preview"). */ -}}
+       Context: dict src alt class width height lqip page mode ("popup" | "preview").
+
+       If `src` is a raster resource of the page bundle, the image is served as
+       a <picture> with AVIF/WebP srcset (480/800/1200w) and the original as the
+       fallback, so a 1280px screenshot is not sent to a 380px slot. Images that
+       are not bundle resources keep the upstream single-file path. */ -}}
 {{- $src := .src -}}
 {{- $alt := .alt | default "" -}}
 {{- $class := .class | default "" -}}
@@ -22,10 +27,36 @@
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- with .width }}{{ $dims = $dims | append (printf `width="%v"` .) }}{{ end -}}
-{{- with .height }}{{ $dims = $dims | append (printf `height="%v"` .) }}{{ end -}}
+
+{{- $res := "" -}}
+{{- if and (not $lqip) $src -}}
+  {{- with .page.Resources.GetMatch (path.Base $src) -}}
+    {{- if in (slice "jpeg" "png" "webp") (lower .MediaType.SubType) -}}{{ $res = . }}{{- end -}}
+  {{- end -}}
+{{- end -}}
+
 {{- $img := "" -}}
-{{- if $lqip -}}
+{{- if $res -}}
+  {{- $w := $res.Width -}}
+  {{- $widths := slice -}}
+  {{- range (slice 480 800 1200) -}}
+    {{- if le . $w -}}{{ $widths = $widths | append . }}{{- end -}}
+  {{- end -}}
+  {{- if eq (len $widths) 0 -}}{{ $widths = slice $w }}{{- end -}}
+  {{- if lt (index $widths (sub (len $widths) 1)) $w -}}{{ $widths = $widths | append $w }}{{- end -}}
+  {{- $avif := slice -}}
+  {{- $webp := slice -}}
+  {{- range $widths -}}
+    {{- $a := $res.Resize (printf "%dx avif q50" .) -}}
+    {{- $p := $res.Resize (printf "%dx webp q78" .) -}}
+    {{- $avif = $avif | append (printf "%s %dw" $a.RelPermalink .) -}}
+    {{- $webp = $webp | append (printf "%s %dw" $p.RelPermalink .) -}}
+  {{- end -}}
+  {{- $sizes := "(min-width: 1200px) 760px, (min-width: 768px) 90vw, 100vw" -}}
+  {{- $dims = slice (printf `width="%d"` $res.Width) (printf `height="%d"` $res.Height) -}}
+  {{- $img = printf `<picture style="display:contents"><source type="image/avif" srcset="%s" sizes="%s"><source type="image/webp" srcset="%s" sizes="%s"><img src="%s" alt="%s"`
+        (delimit $avif ", ") $sizes (delimit $webp ", ") $sizes $res.RelPermalink $alt -}}
+{{- else if $lqip -}}
   {{- $img = printf `<img data-src="%s" data-lqip="true" src="%s" alt="%s"` $url $lqip $alt -}}
   {{- $wrapperClasses = $wrapperClasses | append "blur" -}}
 {{- else -}}
@@ -33,12 +64,20 @@
   {{- $wrapperClasses = $wrapperClasses | append "shimmer" -}}
 {{- end -}}
 {{- with $imgClasses }}{{ $img = printf `%s class="%s"` $img (delimit . " ") }}{{ end -}}
+{{- with .width }}{{ if not $res }}{{ $dims = $dims | append (printf `width="%v"` .) }}{{ end }}{{ end -}}
+{{- with .height }}{{ if not $res }}{{ $dims = $dims | append (printf `height="%v"` .) }}{{ end }}{{ end -}}
 {{- with $dims }}{{ $img = printf "%s %s" $img (delimit . " ") }}{{ end -}}
-{{- if not $lqip }}{{ $img = printf `%s loading="lazy" fetchpriority="low"` $img }}{{ end -}}
-{{- $img = printf "%s>" $img -}}
+{{- if $res -}}
+  {{- $img = printf `%s loading="lazy" decoding="async" fetchpriority="low"></picture>` $img -}}
+{{- else if not $lqip -}}
+  {{- $img = printf `%s loading="lazy"` $img -}}
+{{- end -}}
+{{- if not $res }}{{ $img = printf "%s>" $img }}{{ end -}}
+{{- $href := $url -}}
+{{- if $res }}{{ $href = $res.RelPermalink }}{{ end -}}
 {{- $wrap := printf "popup img-link %s" (delimit $wrapperClasses " ") -}}
 {{- if eq (.mode | default "popup") "preview" -}}
   {{- printf `<div class="%s">%s</div>` (delimit $wrapperClasses " ") $img | safeHTML -}}
 {{- else -}}
-  {{- printf `<a href="%s" class="%s">%s</a>` $url $wrap $img | safeHTML -}}
+  {{- printf `<a href="%s" class="%s">%s</a>` $href $wrap $img | safeHTML -}}
 {{- end -}}
