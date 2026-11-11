@@ -12,6 +12,20 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.9.0] - 2026-11-11
+
+### Added
+
 - `params.assets.dayjs_locale`: load a Day.js locale file served by the site
   (`:LOCALE` is the language code). In self-host mode upstream only ships
   `en.js`, so `dayjs.locale("es")` silently fell back to English and every
