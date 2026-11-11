@@ -164,6 +164,8 @@ defaultContentLanguageInSubdir = false
   sitemap_limit = 3
   image_object = true
   noindex_404 = true
+  term_description = "Everything published about {term}, from the basics to the details."
+  term_title = "Posts about {term}"
 
 [params.a11y]
   allow_zoom = true

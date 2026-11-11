@@ -380,6 +380,8 @@ site is byte-identical.
 | B17 | `noindex` on the 404 page | the error page is not content | `params.seo.noindex_404` | G4c |
 | B18 | pinch-zoom allowed | `user-scalable=no` fails WCAG 1.4.4 (D-24) | `params.a11y.allow_zoom` | G4c |
 | B19 | capped search index | the full-text index grows with the archive | `params.search.content_chars` | G4c |
+| B20 | term description template | term pages share the site description | `params.seo.term_description` | G4c |
+| B21 | term title template | a bare term is a weak `<title>` | `params.seo.term_title` | G4c |
 
 They are documented in [`SEO.md`](SEO.md#11-beyond-upstream) and
 [`CONFIG.md`](CONFIG.md#121-beyond-upstream-opt-in).

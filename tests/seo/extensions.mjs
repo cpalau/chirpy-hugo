@@ -205,6 +205,15 @@ expect('search.json has entries', search.length > 0, `${search.length}`);
 expect('search entries are capped', search.every((entry) => [...entry.content].length <= 40), search.map((e) => [...e.content].length).join(','));
 expect('search entries end on a whole word', search.every((entry) => !/&[#a-zA-Z0-9]*$/.test(entry.content)));
 
+/* term title and description templates */
+const term = page('categories/guides');
+has('term <title> uses the template', term, /<title>Posts about guides \| /);
+has('term og:title uses the template', term, '<meta property="og:title" content="Posts about guides"');
+// The fixture also caps descriptions at 60 characters, so only the start is fixed.
+has('term description uses the template', term, '<meta name="description" content="Everything published about guides, from the');
+expect('term H1 keeps the bare term', !/<h1[^>]*>\s*Posts about/.test(term));
+expect('post <title> is untouched', /<title>Hello SEO \| /.test(page('posts/hello')));
+
 /* Standards over the extension build (separate process: it validates all pages) */
 const standards = spawnSync(process.execPath, [path.join(ROOT, 'tests/seo/check.mjs'), '--standards', OUT], {
   encoding: 'utf8',

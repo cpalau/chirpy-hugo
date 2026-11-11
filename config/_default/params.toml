@@ -78,6 +78,12 @@ google_site_verification = ""
   image_object = false
   # `noindex` on the 404 page.
   noindex_404 = false
+  # Meta description of a term page without its own `description`. `{term}`
+  # is the displayed term. Empty keeps upstream (the site description).
+  term_description = ""
+  # <title>, og:title and JSON-LD headline of a term page, e.g.
+  # "Posts about {term}". The H1 is unchanged. Empty keeps upstream.
+  term_title = ""
 
 # Beyond-upstream accessibility. Off by default for byte parity.
 [a11y]

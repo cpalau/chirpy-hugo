@@ -29,6 +29,13 @@
          escape the attribute exactly once. Hugo's `plainify` would insert a
          space where an inline tag was (`favicons/ .`). */ -}}
   {{- $text = $first | $page.RenderString | replaceRE `<[^>]+>` "" | htmlUnescape -}}
+{{- else if eq $page.Kind "term" -}}
+  {{- /* Beyond upstream (opt-in, `params.seo.term_description`): every term
+         page would otherwise share the site description. `{term}` is the
+         term as the page displays it. */ -}}
+  {{- with site.Params.seo.term_description -}}
+    {{- $text = replace . "{term}" (partial "display-title.html" $page) -}}
+  {{- end -}}
 {{- end -}}
 {{- if not $text }}{{ $text = site.Params.description }}{{ end -}}
 

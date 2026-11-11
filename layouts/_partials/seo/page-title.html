@@ -1,0 +1,13 @@
+{{- /* The title used in <title>, og:title, twitter:title and the JSON-LD
+       headline. It is `display-title.html` except on a term page when
+       `params.seo.term_title` is set (beyond upstream, opt-in): a bare tag
+       name such as "python" makes a short, ambiguous search result.
+       `{term}` is replaced with the displayed term. The visible H1 is not
+       affected. Returns a string. */ -}}
+{{- $title := partial "display-title.html" . -}}
+{{- if eq .Kind "term" -}}
+  {{- with site.Params.seo.term_title -}}
+    {{- $title = replace . "{term}" $title -}}
+  {{- end -}}
+{{- end -}}
+{{- return $title -}}
