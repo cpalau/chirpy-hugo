@@ -301,7 +301,9 @@ function standards(rel, page) {
     }
     if (typeof ld.image === 'string') require(/^https?:\/\//.test(ld.image), 'JSON-LD: image is not absolute');
     if (ld.image && typeof ld.image === 'object') {
-      require(ld.image['@type'] === 'imageObject', 'JSON-LD: image must be an imageObject');
+      // `imageObject` is upstream (jekyll-seo-tag); `ImageObject` is the
+      // schema.org type emitted with `params.seo.image_object`.
+      require(['imageObject', 'ImageObject'].includes(ld.image['@type']), 'JSON-LD: image must be an imageObject or ImageObject');
       require(/^https?:\/\//.test(ld.image.url ?? ''), 'JSON-LD: image.url is not absolute');
     }
     if (ld.mainEntityOfPage) require(/^https?:\/\//.test(ld.mainEntityOfPage['@id'] ?? ''), 'JSON-LD: mainEntityOfPage needs an absolute @id');

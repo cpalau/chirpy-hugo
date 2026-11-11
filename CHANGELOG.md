@@ -12,6 +12,18 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+- `params.seo.image_object`: emit the JSON-LD image as a valid schema.org
+  `ImageObject` (capitalised type, `alt` as `caption`, no `lqip`).
+- `params.seo.noindex_404`: `noindex` on the 404 page.
+- `params.a11y.allow_zoom`: drop `user-scalable=no` from the viewport so
+  pinch-zoom works (WCAG 1.4.4).
+- `params.search.content_chars`: cap each `search.json` entry at a number of
+  characters, cut at a word boundary, so the index stays small on large
+  archives.
+
+All four are off by default; a site that does not enable them renders the
+same HTML as before.
+
 ### Changed
 
 ### Deprecated

@@ -528,6 +528,9 @@ rejects a merged value.
 Blocking pinch-zoom is an accessibility defect (Lighthouse `meta-viewport`,
 upstream has the same one). It is declared in D-20 with the rest of the
 inherited debt; parity wins here because the value is part of the document.
+A site can opt out with `params.a11y.allow_zoom` (B18): the viewport then
+drops `user-scalable=no` and keeps the other directives. The default stays
+byte-identical to upstream.
 
 ---
 

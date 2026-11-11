@@ -105,6 +105,11 @@
   {{- $hidden := eq (printf "%v" .Params.hidden) "true" -}}
   {{- $noindex = and $site.Params.seo.noindex_hidden $hidden -}}
 {{- end -}}
+{{- /* Beyond upstream (opt-in, `params.seo.noindex_404`): the error page is
+       not content and must not be indexed under its own URL. */ -}}
+{{- if and (not $noindex) $site.Params.seo.noindex_404 (eq .Kind "404") -}}
+  {{- $noindex = true -}}
+{{- end -}}
 {{- $robots := slice -}}
 {{- if $noindex }}{{ $robots = $robots | append "noindex" "follow" }}{{ end -}}
 {{- with $site.Params.seo.max_image_preview -}}
@@ -286,9 +291,16 @@
   {{- if or (eq $image.path "") (eq (len $image.meta) 1) -}}
     {{- $ld = $ld | append (printf `"image":%s` (partial "jsonify.html" .)) -}}
   {{- else -}}
+    {{- /* Beyond upstream (opt-in, `params.seo.image_object`): schema.org
+           types are case-sensitive and `ImageObject` has no `alt` or `lqip`
+           property. The opt-in emits `ImageObject`, maps `alt` to `caption`
+           and drops `lqip` (a base64 placeholder, not metadata). */ -}}
+    {{- $schema := $site.Params.seo.image_object -}}
     {{- $img := slice -}}
-    {{- with $image.meta.alt }}{{ $img = $img | append (printf `"alt":%s` (partial "jsonify.html" .)) }}{{ end -}}
-    {{- with $image.meta.lqip }}{{ $img = $img | append (printf `"lqip":%s` (partial "jsonify.html" .)) }}{{ end -}}
+    {{- with $image.meta.alt }}{{ $img = $img | append (printf `%s:%s` (cond $schema `"caption"` `"alt"`) (partial "jsonify.html" .)) }}{{ end -}}
+    {{- if not $schema -}}
+      {{- with $image.meta.lqip }}{{ $img = $img | append (printf `"lqip":%s` (partial "jsonify.html" .)) }}{{ end -}}
+    {{- end -}}
     {{- with $image.meta.width }}{{ $img = $img | append (printf `"width":%v` .) }}{{ end -}}
     {{- with $image.meta.height }}{{ $img = $img | append (printf `"height":%v` .) }}{{ end -}}
     {{- range $key, $value := $image.meta -}}
@@ -297,7 +309,7 @@
       {{- end -}}
     {{- end -}}
     {{- $img = $img | append (printf `"url":%s` (partial "jsonify.html" .)) -}}
-    {{- $img = $img | append `"@type":"imageObject"` -}}
+    {{- $img = $img | append (cond $schema `"@type":"ImageObject"` `"@type":"imageObject"`) -}}
     {{- $ld = $ld | append (printf `"image":{%s}` (delimit $img ",")) -}}
   {{- end -}}
 {{- end -}}

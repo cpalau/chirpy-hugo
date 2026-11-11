@@ -17,7 +17,9 @@
  *   · the JSON-LD image fallback;
  *   · article section/tag/author;
  *   · og:image type and dimensions read from the asset;
- *   · the sitemap limit warning.
+ *   · the sitemap limit warning;
+ *   · schema.org ImageObject, noindex on 404, zoomable viewport and the
+ *     search.json content cap.
  *
  * It finishes by running the standards gate over the same build, so the new
  * JSON-LD and card metadata are validated, not only asserted.
@@ -177,6 +179,31 @@ const termCrumbs = [...page('categories/guides').matchAll(/<script type="applica
   .map((match) => JSON.parse(match[1]))
   .find((ld) => ld['@type'] === 'BreadcrumbList');
 expect('term has a three-level breadcrumb', termCrumbs?.itemListElement?.length === 3, `${termCrumbs?.itemListElement?.length} items`);
+
+/* schema.org ImageObject */
+const posting = [...page('posts/hello').matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+  .map((match) => JSON.parse(match[1]))
+  .find((ld) => ld['@type'] === 'BlogPosting');
+expect('JSON-LD image is an ImageObject', posting?.image?.['@type'] === 'ImageObject', posting?.image?.['@type']);
+expect('ImageObject carries the alt as caption', posting?.image?.caption === 'Cover', posting?.image?.caption);
+expect('ImageObject has no alt or lqip', posting?.image && !('alt' in posting.image) && !('lqip' in posting.image));
+
+/* 404 noindex */
+const notFoundFile = path.join(OUT, '404.html');
+const notFound = fs.existsSync(notFoundFile) ? fs.readFileSync(notFoundFile, 'utf8') : '';
+has('404 page is noindex', notFound, /<meta name="robots" content="noindex, follow/);
+
+/* viewport allows zoom */
+const viewport = /<meta\s+name="viewport"\s+content="([^"]*)"/.exec(page('posts/hello'))?.[1] ?? '';
+expect('viewport does not block zoom', viewport !== '' && !viewport.includes('user-scalable'), viewport);
+expect('viewport keeps initial-scale', viewport.includes('initial-scale=1'), viewport);
+
+/* search.json content cap */
+const searchFile = path.join(OUT, 'assets/js/data/search.json');
+const search = fs.existsSync(searchFile) ? JSON.parse(fs.readFileSync(searchFile, 'utf8')) : [];
+expect('search.json has entries', search.length > 0, `${search.length}`);
+expect('search entries are capped', search.every((entry) => [...entry.content].length <= 40), search.map((e) => [...e.content].length).join(','));
+expect('search entries end on a whole word', search.every((entry) => !/&[#a-zA-Z0-9]*$/.test(entry.content)));
 
 /* Standards over the extension build (separate process: it validates all pages) */
 const standards = spawnSync(process.execPath, [path.join(ROOT, 'tests/seo/check.mjs'), '--standards', OUT], {

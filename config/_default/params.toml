@@ -73,6 +73,22 @@ google_site_verification = ""
   max_image_preview = ""
   # Add the post cover to the sitemap with the image extension.
   image_sitemap = false
+  # JSON-LD image as a valid schema.org `ImageObject` (upstream emits
+  # `imageObject` with `alt` and `lqip`, which are not schema.org properties).
+  image_object = false
+  # `noindex` on the 404 page.
+  noindex_404 = false
+
+# Beyond-upstream accessibility. Off by default for byte parity.
+[a11y]
+  # Remove `user-scalable=no` from the viewport so pinch-zoom works (D-24).
+  allow_zoom = false
+
+# Beyond-upstream search.
+[search]
+  # Cap each search.json entry at this many characters (0 = upstream: full
+  # text). Keeps the index small on large archives.
+  content_chars = 0
 
 # Site-owned footer line. `:author` is `social.name` (linked to the first
 # social link), `:year` is the current year. Empty keeps the upstream

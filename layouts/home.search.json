@@ -1,14 +1,24 @@
 {{- /* search index, Q2: every value goes through the Ruby-compatible jsonify
        wrapper. Schema matches upstream assets/js/data/search.json. */ -}}
+{{- /* Beyond upstream (opt-in, `params.search.content_chars`): upstream
+       indexes the full text of every post, so the file grows with the archive
+       and a phone downloads all of it on the first search. A positive value
+       caps each entry at that many characters, cut at a word boundary and
+       never inside a character reference. 0 keeps the upstream index. */ -}}
+{{- $cap := int (.Site.Params.search.content_chars | default 0) -}}
 {{- $out := slice -}}
 {{- range where .Site.RegularPages "Type" "posts" -}}
+  {{- $content := partial "post-summary.html" (dict "post" . "full_text" true "keep_entities" true "content" (partial "content.html" .)) -}}
+  {{- if and (gt $cap 0) (gt (strings.RuneCount $content) $cap) -}}
+    {{- $content = substr $content 0 $cap | replaceRE `\s+\S*$` "" | replaceRE `&#?[a-zA-Z0-9]*$` "" -}}
+  {{- end -}}
   {{- $out = $out | append (dict
     "title" .Title
     "url" .RelPermalink
     "categories" (delimit (.Params.categories | default slice) ", ")
     "tags" (delimit (.Params.tags | default slice) ", ")
     "date" (.Date.Format "2006-01-02 15:04:05 -0700")
-    "content" (partial "post-summary.html" (dict "post" . "full_text" true "keep_entities" true "content" (partial "content.html" .)))
+    "content" $content
   ) -}}
 {{- end -}}
 {{- $json := "" -}}

@@ -162,3 +162,11 @@ defaultContentLanguageInSubdir = false
   article_meta = true
   image_metadata = true
   sitemap_limit = 3
+  image_object = true
+  noindex_404 = true
+
+[params.a11y]
+  allow_zoom = true
+
+[params.search]
+  content_chars = 40

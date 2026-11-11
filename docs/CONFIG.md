@@ -371,6 +371,10 @@ rendered HTML stays byte-identical to the original until a site enables one.
 | `params.seo.sitemap_limit` | `50000` | warn when the sitemap grows past the protocol limit |
 | `params.seo.max_image_preview` | `""` | `max-image-preview:large\|standard\|none`; Google Discover requires `large` for big thumbnails |
 | `params.seo.image_sitemap` | `false` | add each post cover to the sitemap with the image extension |
+| `params.seo.image_object` | `false` | JSON-LD image as a schema.org `ImageObject`: the type is capitalised, `alt` becomes `caption` and the `lqip` placeholder is dropped |
+| `params.seo.noindex_404` | `false` | `noindex` on the 404 page |
+| `params.a11y.allow_zoom` | `false` | drop `user-scalable=no` from the viewport so pinch-zoom works (WCAG 1.4.4, D-24) |
+| `params.search.content_chars` | `0` | cap each `search.json` entry at this many characters, cut at a word boundary (0 keeps the full text, as upstream) |
 
 `dir="rtl"` and `hreflang` need no switch: they only render when the site
 declares a language direction or has translations, so a monolingual LTR site is

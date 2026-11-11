@@ -197,6 +197,8 @@ the parity gates stay green.
 | `params.seo.sitemap_limit` | `50000` | a sitemap above the protocol limit is invalid; the build warns with the count | G4c |
 | `params.seo.max_image_preview` | `""` | Google Discover requires `max-image-preview:large` for large thumbnails | G4c |
 | `params.seo.image_sitemap` | `false` | image sitemap entries for post covers, which Google still recommends | G4c |
+| `params.seo.image_object` | `false` | schema.org types are case-sensitive: the gem's `imageObject` with `alt`/`lqip` is not a valid `ImageObject` | G4c |
+| `params.seo.noindex_404` | `false` | the error page is not content; without it the 404 is indexable under `/404.html` | G4c |
 | `llms.txt` (output format) | off | a concise, machine-readable summary for AI agents (Lighthouse audits for it) | G4c |
 | `og:locale:alternate` | automatic | translations advertise each other's locale | G4c |
 
