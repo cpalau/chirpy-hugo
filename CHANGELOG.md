@@ -12,6 +12,20 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.7.0] - 2026-11-11
+
+### Added
+
 - `params.seo.image_object`: emit the JSON-LD image as a valid schema.org
   `ImageObject` (capitalised type, `alt` as `caption`, no `lqip`).
 - `params.seo.noindex_404`: `noindex` on the 404 page.
