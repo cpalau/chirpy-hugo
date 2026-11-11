@@ -382,6 +382,7 @@ site is byte-identical.
 | B19 | capped search index | the full-text index grows with the archive | `params.search.content_chars` | G4c |
 | B20 | term description template | term pages share the site description | `params.seo.term_description` | G4c |
 | B21 | term title template | a bare term is a weak `<title>` | `params.seo.term_title` | G4c |
+| B22 | site-served Day.js locale | self-host ships only `en.js`; dates come out in English | `params.assets.dayjs_locale` | G4c |
 
 They are documented in [`SEO.md`](SEO.md#11-beyond-upstream) and
 [`CONFIG.md`](CONFIG.md#121-beyond-upstream-opt-in).

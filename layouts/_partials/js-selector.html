@@ -27,7 +27,13 @@
 {{- if in (slice "home" "post" "archives" "category" "tag") $kind -}}
   {{- $locale := index (split .Lang "-") 0 -}}
   {{- $urls = $urls | append $dayjs.common -}}
-  {{- $urls = $urls | append (replace $dayjs.locale ":LOCALE" $locale) -}}
+  {{- /* Beyond upstream (opt-in, `params.assets.dayjs_locale`): in self-host
+         mode upstream only ships `locale/en.js`, so `dayjs.locale("es")` has
+         nothing to load and every date is rewritten in English. A site can
+         serve its own locale file; `:LOCALE` is the language code. */ -}}
+  {{- $localeURL := $dayjs.locale -}}
+  {{- with site.Params.assets.dayjs_locale }}{{ $localeURL = . }}{{ end -}}
+  {{- $urls = $urls | append (replace $localeURL ":LOCALE" $locale) -}}
   {{- $urls = $urls | append $dayjs.relativeTime -}}
   {{- $urls = $urls | append $dayjs.localizedFormat -}}
 {{- end -}}

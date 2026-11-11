@@ -214,6 +214,11 @@ has('term description uses the template', term, '<meta name="description" conten
 expect('term H1 keeps the bare term', !/<h1[^>]*>\s*Posts about/.test(term));
 expect('post <title> is untouched', /<title>Hello SEO \| /.test(page('posts/hello')));
 
+/* Day.js locale file */
+has('es page loads the site es locale', page('es/posts/hello'), /<script defer src="\/assets\/js\/dayjs\/es\.js"><\/script>/);
+has('en page loads the site en locale', page('posts/hello'), /<script defer src="\/assets\/js\/dayjs\/en\.js"><\/script>/);
+expect('upstream locale path is replaced', !page('es/posts/hello').includes('/assets/lib/dayjs/locale/'));
+
 /* Standards over the extension build (separate process: it validates all pages) */
 const standards = spawnSync(process.execPath, [path.join(ROOT, 'tests/seo/check.mjs'), '--standards', OUT], {
   encoding: 'utf8',

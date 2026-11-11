@@ -165,6 +165,12 @@ google_site_verification = ""
   url = ""
   static_url = false
 
+[assets]
+  # Day.js locale file, with `:LOCALE` replaced by the language code, e.g.
+  # "/assets/js/dayjs/locale/:LOCALE.js" served from the site's static/.
+  # Empty keeps upstream (self-host ships only `en.js`, so dates are English).
+  dayjs_locale = ""
+
 [assets.self_host]
   enabled = true
   env = ""

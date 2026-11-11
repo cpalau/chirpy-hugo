@@ -172,3 +172,6 @@ defaultContentLanguageInSubdir = false
 
 [params.search]
   content_chars = 40
+
+[params.assets]
+  dayjs_locale = "/assets/js/dayjs/:LOCALE.js"
