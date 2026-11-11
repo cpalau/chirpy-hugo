@@ -1,8 +1,8 @@
-{{- /* Imagen candidata a LCP: la portada de la página o, en la home, la de la
-       primera tarjeta. Devuelve un dict {page, src} o "" si no hay ninguna.
+{{- /* LCP image candidate: the page cover or, on the home page, the cover of
+       the first card. Returns a dict {page, src}, or "" when there is none.
 
-       El `<link rel=preload>` lo emite cover-preload.html, que necesita la
-       página (para resolver el recurso del bundle) y el src. */ -}}
+       The `<link rel=preload>` is emitted by cover-preload.html, which needs
+       the page (to resolve the bundle resource) and the src. */ -}}
 {{- $page := . -}}
 {{- $out := "" -}}
 {{- with .Params.image -}}
