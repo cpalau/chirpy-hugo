@@ -12,13 +12,26 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+- `params.a11y.post_nav_titles`: name the previous/next post links
+  "Previous: <title>" so their accessible name contains the visible title
+  (WCAG 2.5.3, axe `label-content-name-mismatch`). Off by default.
+
 ### Changed
+
+- The hidden home `h1` on page 2 and later reads "<site> — N/total" instead of
+  the hard-coded Spanish "— página N", so it works in any language.
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+- Goldmark task lists now render like upstream. The checkbox replacement only
+  matched kramdown's markup, so Hugo sites kept bullets and bare
+  `<input type="checkbox">` controls, each one an unlabelled form field (axe
+  `label`, critical). Items now get `task-list-item`, the list `task-list`,
+  and the check/circle icons.
 
 ### Security
 

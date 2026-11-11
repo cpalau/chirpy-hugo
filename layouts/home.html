@@ -35,8 +35,10 @@
   {{- $posts = $posts | append (after $normalStart $allNormal | first $normalSize) -}}
 {{- end -}}
 {{- /* The cards use h2 (several per page); the listing needs its own h1
-       for the heading hierarchy and the SEO audit. */ -}}
-<h1 class="visually-hidden">{{ site.Title }}{{ with $pag }}{{ if gt .PageNumber 1 }} — página {{ .PageNumber }}{{ end }}{{ end }}</h1>
+       for the heading hierarchy and the SEO audit. From page 2 on it carries
+       "N/total" so each page has a distinct h1 in any language (the theme
+       ships no translation key for "page"). */ -}}
+<h1 class="visually-hidden">{{ site.Title }}{{ with $pag }}{{ if gt .PageNumber 1 }} — {{ .PageNumber }}/{{ .TotalPages }}{{ end }}{{ end }}</h1>
 <div id="post-list" class="flex-grow-1 px-xl-1">
   {{- range $i, $p := $posts }}
   {{ partial "post-card.html" (dict "page" $p "priority" (eq $i 0)) }}

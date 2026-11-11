@@ -214,6 +214,21 @@ has('term description uses the template', term, '<meta name="description" conten
 expect('term H1 keeps the bare term', !/<h1[^>]*>\s*Posts about/.test(term));
 expect('post <title> is untouched', /<title>Hello SEO \| /.test(page('posts/hello')));
 
+/* Goldmark task lists render like upstream (R3) */
+const tasks = page('posts/tasks');
+has('task list gets the upstream class', tasks, '<ul class="task-list">');
+has('checked item becomes the check icon', tasks, /<li class="task-list-item">\s*<i class="fas fa-check-circle fa-fw checked"><\/i>\s*Done item/);
+has('pending item becomes the circle icon', tasks, /<li class="task-list-item">\s*<i class="far fa-circle fa-fw"><\/i>\s*Pending item/);
+expect('no bare checkbox is left', !/<input[^>]*type="checkbox"/.test(tasks));
+expect('a plain list keeps no task class', /<ul>\s*<li>First<\/li>/.test(tasks));
+
+/* previous/next links name the visible title (WCAG 2.5.3) */
+const navLinks = [...(page('posts/tasks').match(/<nav class="post-navigation[\s\S]*?<\/nav>/)?.[0] ?? '')
+  .matchAll(/<a [^>]*aria-label="([^"]*)"[^>]*>\s*<p>([^<]*)<\/p>/g)];
+expect('post nav has links', navLinks.length > 0, `${navLinks.length}`);
+expect('each accessible name ends with the visible title', navLinks.every(([, label, text]) => label.endsWith(`: ${text.trim()}`)),
+  navLinks.map(([, l, t]) => `${l} | ${t}`).join(' ; '));
+
 /* Day.js locale file */
 has('es page loads the site es locale', page('es/posts/hello'), /<script defer src="\/assets\/js\/dayjs\/es\.js"><\/script>/);
 has('en page loads the site en locale', page('posts/hello'), /<script defer src="\/assets\/js\/dayjs\/en\.js"><\/script>/);

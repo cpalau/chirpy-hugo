@@ -667,7 +667,7 @@ exist on both sides are:
 | `button-name` | serious | `#back-to-top` is an icon with no accessible name |
 | `color-contrast` | serious | syntax highlighting and taxonomy links |
 | `aria-allowed-attr` | critical | the category cards |
-| `label-content-name-mismatch` | serious | share and copy controls |
+| `label-content-name-mismatch` | serious | share and copy controls; previous/next post links (opt-out: `params.a11y.post_nav_titles`, B23) |
 | `link-in-text-block` | serious | inline links in taxonomy copy |
 
 Fixing them means changing the markup or the stylesheet, which breaks Gate 4

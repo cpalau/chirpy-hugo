@@ -22,6 +22,17 @@
 {{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="disabled" ?/?>` `<i class="far fa-circle fa-fw"></i>` $c -}}
 {{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="" checked="">` `<i class="fas fa-check-circle fa-fw checked"></i>` $c -}}
 {{- $c = replaceRE `<input type="checkbox" class="task-list-item-checkbox" disabled="">` `<i class="far fa-circle fa-fw"></i>` $c -}}
+{{- /* Goldmark's own output carries no classes: `<li><input checked=""
+       disabled="" type="checkbox">`. Without this the forms above never
+       match, the list keeps its bullets and bare checkboxes, and every box is
+       an unlabelled form control (axe `label`, critical). Give the item and
+       the list the kramdown classes the SCSS targets, then swap the input
+       for the upstream icon. */ -}}
+{{- if strings.Contains $c `type="checkbox">` -}}
+  {{- $c = replaceRE `<li>(\s*)<input checked="" disabled="" type="checkbox">` `<li class="task-list-item">${1}<i class="fas fa-check-circle fa-fw checked"></i>` $c -}}
+  {{- $c = replaceRE `<li>(\s*)<input disabled="" type="checkbox">` `<li class="task-list-item">${1}<i class="far fa-circle fa-fw"></i>` $c -}}
+  {{- $c = replaceRE `<ul>(\s*)<li class="task-list-item">` `<ul class="task-list">${1}<li class="task-list-item">` $c -}}
+{{- end -}}
 {{- /* Footnotes (D-16): Goldmark wraps the list in an <hr>, names the backlink
        differently and numbers the ids (`fn:1`), while kramdown uses the author's
        label (`fn:ial`). The label cannot be recovered from the rendered HTML,

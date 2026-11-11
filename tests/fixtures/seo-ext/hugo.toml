@@ -169,6 +169,7 @@ defaultContentLanguageInSubdir = false
 
 [params.a11y]
   allow_zoom = true
+  post_nav_titles = true
 
 [params.search]
   content_chars = 40

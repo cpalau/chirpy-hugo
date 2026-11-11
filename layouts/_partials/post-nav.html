@@ -2,9 +2,15 @@
        Q3: Jekyll's previous = older -> .NextInSection, next = newer -> .PrevInSection. */ -}}
 {{- $previous := .PrevInSection -}}
 {{- $next := .NextInSection -}}
+{{- /* Beyond upstream (opt-in, `params.a11y.post_nav_titles`): upstream names
+       each link only "Previous"/"Next" while it shows the post title, so the
+       accessible name does not contain the visible text (WCAG 2.5.3, axe
+       `label-content-name-mismatch`): a voice-control user who says the title
+       cannot activate it. The opt-in prefixes the direction to the title. */ -}}
+{{- $withTitles := site.Params.a11y.post_nav_titles -}}
 <nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation">
   {{- with $previous }}
-  <a href="{{ .RelPermalink }}" class="btn btn-outline-primary" aria-label="{{ T "post.button.previous" }}">
+  <a href="{{ .RelPermalink }}" class="btn btn-outline-primary" aria-label="{{ T "post.button.previous" }}{{ if $withTitles }}: {{ .Title }}{{ end }}">
     <p>{{ .Title }}</p>
   </a>
   {{- else }}
@@ -14,7 +20,7 @@
   {{- end }}
 
   {{- with $next }}
-  <a href="{{ .RelPermalink }}" class="btn btn-outline-primary" aria-label="{{ T "post.button.next" }}">
+  <a href="{{ .RelPermalink }}" class="btn btn-outline-primary" aria-label="{{ T "post.button.next" }}{{ if $withTitles }}: {{ .Title }}{{ end }}">
     <p>{{ .Title }}</p>
   </a>
   {{- else }}

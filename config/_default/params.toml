@@ -89,6 +89,9 @@ google_site_verification = ""
 [a11y]
   # Remove `user-scalable=no` from the viewport so pinch-zoom works (D-24).
   allow_zoom = false
+  # Name the previous/next post links "Previous: <title>" so the accessible
+  # name contains the visible title (WCAG 2.5.3). Upstream: only "Previous".
+  post_nav_titles = false
 
 # Beyond-upstream search.
 [search]

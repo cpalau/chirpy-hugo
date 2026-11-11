@@ -377,6 +377,7 @@ rendered HTML stays byte-identical to the original until a site enables one.
 | `params.seo.term_title` | `""` | `<title>`, `og:title` and JSON-LD headline of a term page, e.g. `"Posts about {term}"`; the H1 is unchanged |
 | `params.assets.dayjs_locale` | `""` | Day.js locale file the site serves, with `:LOCALE` replaced by the language code (e.g. `"/assets/js/dayjs/:LOCALE.js"`); in self-host mode upstream only ships `en.js`, so dates are rewritten in English |
 | `params.a11y.allow_zoom` | `false` | drop `user-scalable=no` from the viewport so pinch-zoom works (WCAG 1.4.4, D-24) |
+| `params.a11y.post_nav_titles` | `false` | name the previous/next post links "Previous: <title>" so the accessible name contains the visible title (WCAG 2.5.3) |
 | `params.search.content_chars` | `0` | cap each `search.json` entry at this many characters, cut at a word boundary (0 keeps the full text, as upstream) |
 
 `dir="rtl"` and `hreflang` need no switch: they only render when the site
