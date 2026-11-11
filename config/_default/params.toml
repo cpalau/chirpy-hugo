@@ -93,6 +93,13 @@ google_site_verification = ""
   # name contains the visible title (WCAG 2.5.3). Upstream: only "Previous".
   post_nav_titles = false
 
+# Beyond-upstream performance. Off by default for pixel parity (G5).
+[performance]
+  # `content-visibility:auto` for article blocks below the fold: faster first
+  # paint on long posts, but text antialiasing and image heights no longer
+  # match upstream pixel for pixel.
+  content_visibility = false
+
 # Beyond-upstream search.
 [search]
   # Cap each search.json entry at this many characters (0 = upstream: full

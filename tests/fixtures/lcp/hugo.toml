@@ -8,3 +8,7 @@ enableRobotsTXT = true
 
 [params]
   theme_mode = "dual"
+
+  # Opt-in render-path optimisation the LCP gate verifies.
+  [params.performance]
+    content_visibility = true

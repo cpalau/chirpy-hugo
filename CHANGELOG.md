@@ -12,13 +12,29 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+- `params.performance.content_visibility`: the below-the-fold
+  `content-visibility:auto` rule, now opt-in (see Changed).
+
 ### Changed
+
+- `content-visibility:auto` on article blocks is now opt-in
+  (`params.performance.content_visibility`). It made every post differ from
+  upstream pixel by pixel (text antialiasing, image heights), so the visual
+  gate failed. Sites that want the faster first paint on long posts set the
+  parameter.
+- `npm run test:all` now runs the visual gate (G5). It was outside the list,
+  which is how the visible listing h1 and the content-visibility drift went
+  unnoticed since v1.6.x.
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+- The listing `h1` added in v1.6.x (`h1.visually-hidden`) rendered as a large
+  visible title above the cards: the purged Bootstrap shipped with the theme
+  has no `.visually-hidden` rule. The theme now inlines it.
 
 ### Security
 

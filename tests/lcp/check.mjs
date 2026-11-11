@@ -15,7 +15,8 @@
  *   4. the preload carries `imagesrcset`/`imagesizes` matching the AVIF source
  *      (a mismatch would download the image twice);
  *   5. the stylesheet is inlined (no render-blocking theme CSS request) and the
- *      above-the-fold layout keeps `content-visibility` for the article body;
+ *      above-the-fold layout keeps `content-visibility` for the article body
+ *      (`params.performance.content_visibility`, on in this fixture);
  *   6. the search index is no longer fetched on load: SimpleJekyllSearch is
  *      initialised from a user gesture.
  */
@@ -98,7 +99,7 @@ check('inline image keeps the popup link', /<a href="?\/posts\/demo\/shot\.webp"
 console.log('\nrender path');
 check('theme CSS is inlined', /<style>[\s\S]*?\.preview-img[\s\S]*?<\/style>/.test(home));
 check('no blocking theme stylesheet', !/<link rel=stylesheet href=["']?\/assets\/css\/jekyll-theme-chirpy/.test(home));
-check('content-visibility for the article body', /content-visibility:auto/.test(post));
+check('content-visibility for the article body (opt-in)', /content-visibility:auto/.test(post));
 
 console.log('\nsearch');
 const loader = home.indexOf('SimpleJekyllSearch(');

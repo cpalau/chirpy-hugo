@@ -32,6 +32,9 @@ run "lcp" npm run -s test:lcp
 run "deploy" npm run -s test:deploy
 run "contract" npm run -s test:contract
 run "parity" npm run -s test:parity
+# G5 was outside this list, so a pixel regression shipped for several
+# releases while every other gate stayed green.
+run "visual" npm run -s test:visual
 run "config" npm run -s test:config
 run "vendor" npm run -s test:vendor
 run "i18n" npm run -s test:i18n

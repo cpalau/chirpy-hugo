@@ -433,9 +433,15 @@ The theme therefore owns these decisions:
 - **Deferred search.** `SimpleJekyllSearch` is initialised from the first
   gesture (focus/click/keydown) instead of `DOMContentLoaded`: the JSON index
   is ~260 KB compressed and its parse competed with the LCP.
-- **Content visibility.** Article blocks below the fold use
+- **Content visibility (opt-in since v1.11.0).** With
+  `params.performance.content_visibility`, article blocks below the fold use
   `content-visibility:auto`, so the first paint does not lay out the whole
-  document (diagrams, code, tables).
+  document (diagrams, code, tables). It is off by default because the browser
+  paints those blocks in their own layers: text antialiasing and, through
+  `contain-intrinsic-size`, image heights change, and G5 fails on every post.
+  Without it the fixture still scores 93-94 on mobile (Jekyll: 66-72).
+- **Hidden h1.** The theme ships the `.visually-hidden` rule itself: the purged
+  Bootstrap does not contain it, and until v1.11.0 the h1 rendered visibly.
 
 Gate 4 exempts exactly the nodes this decision changes (`style`, the removed
 stylesheet link, the hidden `h1`, `.card-title`, the last inline body script

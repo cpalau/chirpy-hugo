@@ -43,10 +43,23 @@
   <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Black.woff2" | relURL }}">
   {{- end }}
 
-  {{- /* Long articles (SVG diagrams, code, tables): with one vCPU and
-         Lighthouse's 4x CPU throttling, laying out the whole document delays
-         the first paint. Content below the fold is deferred. */}}
+  {{- /* `.visually-hidden` (Bootstrap's rule) for the listing h1 that home.html
+         adds (D-28). The purged Bootstrap shipped with the theme does not
+         include it, because upstream never uses the class, so without this the
+         "hidden" h1 rendered as a visible title above the cards and broke the
+         visual gate (G5) on every home page. */}}
+  <style>.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}</style>
+  {{- /* Beyond upstream (opt-in, `params.performance.content_visibility`):
+         long articles (SVG diagrams, code, tables) on one vCPU with
+         Lighthouse's 4x CPU throttling spend the first paint laying out the
+         whole document; deferring blocks below the fold helps. It is opt-in
+         because the browser paints those blocks in their own layers, which
+         changes text antialiasing and, through `contain-intrinsic-size`, the
+         height of images: the page is no longer pixel-identical to upstream
+         (G5). */}}
+  {{- if site.Params.performance.content_visibility }}
   <style>main .content > *:nth-child(n+4){content-visibility:auto;contain-intrinsic-size:auto 320px}</style>
+  {{- end }}
   <!-- Setup Open Graph image -->
   {{ partial "seo.html" . }}
 

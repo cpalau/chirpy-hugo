@@ -383,6 +383,7 @@ site is byte-identical.
 | B20 | term description template | term pages share the site description | `params.seo.term_description` | G4c |
 | B21 | term title template | a bare term is a weak `<title>` | `params.seo.term_title` | G4c |
 | B22 | site-served Day.js locale | self-host ships only `en.js`; dates come out in English | `params.assets.dayjs_locale` | G4c |
+| B24 | deferred layout below the fold | long posts on slow CPUs | `params.performance.content_visibility` | LCP gate |
 | B23 | post nav names include the title | "Previous" alone does not contain the visible title (WCAG 2.5.3) | `params.a11y.post_nav_titles` | G4c |
 
 They are documented in [`SEO.md`](SEO.md#11-beyond-upstream) and
