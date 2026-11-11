@@ -1,6 +1,6 @@
 {{- /* Post card used by the home listing and by filtered lists.
-       Context: dict "page" (the post) "priority" (bool, primera tarjeta) o
-       directamente la página (compatibilidad). */ -}}
+       Context: dict "page" (the post) "priority" (bool, first card), or the
+       page itself (backwards compatibility). */ -}}
 {{- $page := . -}}
 {{- $priority := false -}}
 {{- if reflect.IsMap . -}}

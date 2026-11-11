@@ -1,16 +1,16 @@
-{{- /* Portada responsive: AVIF + WebP + JPEG de respaldo.
+{{- /* Responsive cover: AVIF + WebP + JPEG fallback.
 
-       Las portadas son recursos del bundle de la página (`cover.jpg`), así que
-       se redimensionan en el build y se sirven con `srcset`. El objetivo es el
-       LCP: la portada de una tarjeta se muestra a ~380 px y se servía a 1200 px
-       (150 KB). Con AVIF a 1200 px baja a ~40-70 KB.
+       Covers are page bundle resources (`cover.jpg`), so they are resized at
+       build time and served with `srcset`. The goal is the LCP: a card cover
+       is displayed at ~380 px and used to be served at 1200 px (150 KB). AVIF
+       at 1200 px brings it down to ~40-70 KB.
 
        Context: dict "page" "src" "alt" "sizes" "priority" "mode" "class".
-       - mode "preview" (tarjeta) envuelve en <div class="preview-img">
-       - mode "popup" (portada del post) envuelve en <a class="popup img-link">
-       - priority=true => loading="eager" fetchpriority="high" (imagen LCP)
-       Si el src no es un recurso del bundle (p. ej. /assets/img/...), delega en
-       image.html y mantiene el comportamiento anterior. */ -}}
+       - mode "preview" (card) wraps it in <div class="preview-img">
+       - mode "popup" (post cover) wraps it in <a class="popup img-link">
+       - priority=true => loading="eager" fetchpriority="high" (LCP image)
+       When the src is not a bundle resource (e.g. /assets/img/...), it
+       delegates to image.html and keeps the previous behaviour. */ -}}
 {{- $page := .page -}}
 {{- $src := .src -}}
 {{- $alt := .alt | default "" -}}

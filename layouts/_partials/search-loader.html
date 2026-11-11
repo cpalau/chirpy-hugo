@@ -6,9 +6,9 @@
        `<` inside an interpolated JS string, and the executed JS must stay
        byte-identical to upstream. Only the JSON path and the i18n string are
        interpolated, and neither contains `<`. */ -}}
-{{- /* El índice pesa ~260 KB comprimido y se parsea en el hilo principal. No se
-       carga hasta que el usuario abre el buscador: antes se hacía en
-       DOMContentLoaded en todas las páginas y competía con la imagen LCP. */ -}}
+{{- /* The index weighs ~260 KB compressed and is parsed on the main thread.
+       It is not loaded until the reader opens the search: it used to load on
+       DOMContentLoaded on every page and competed with the LCP image. */ -}}
 <script>
   (() => {
     let started = false;

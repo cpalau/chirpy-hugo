@@ -43,9 +43,9 @@
   <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ "assets/lib/fonts/Source_Sans_Pro/SourceSansPro-Black.woff2" | relURL }}">
   {{- end }}
 
-  {{- /* El artículo es largo (diagramas SVG, código, tablas): con un vCPU y
-         CPU x4 de Lighthouse, el layout de todo el documento retrasa el primer
-         pintado. Se difiere el contenido por debajo del pliegue. */}}
+  {{- /* Long articles (SVG diagrams, code, tables): with one vCPU and
+         Lighthouse's 4x CPU throttling, laying out the whole document delays
+         the first paint. Content below the fold is deferred. */}}
   <style>main .content > *:nth-child(n+4){content-visibility:auto;contain-intrinsic-size:auto 320px}</style>
   <!-- Setup Open Graph image -->
   {{ partial "seo.html" . }}
@@ -101,10 +101,10 @@
   {{- $file := "assets/css/jekyll-theme-chirpy.css" -}}
   {{- if eq $theme "light" }}{{ $file = "assets/css/jekyll-theme-chirpy-light.css" }}
   {{- else if eq $theme "dark" }}{{ $file = "assets/css/jekyll-theme-chirpy-dark.css" }}{{ end }}
-  {{- /* Hoja de estilos crítica: se inlinea. Era la única petición
-         render-blocking que quedaba (108 KB, 16 KB brotli) y su RTT retrasaba
-         el primer pintado (y con él el LCP). Se pierde la caché de CSS entre
-         páginas a cambio de ~150-300 ms en la primera visita. */ -}}
+  {{- /* Critical stylesheet, inlined. It was the last render-blocking
+         request (108 KB, 16 KB brotli) and its round trip delayed the first
+         paint, and with it the LCP. CSS caching across pages is traded for
+         ~150-300 ms on the first visit. */ -}}
   {{- with readFile (printf "static/%s" $file) }}
   <style>{{ . | safeCSS }}</style>
   {{- else }}

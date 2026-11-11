@@ -1,13 +1,13 @@
-{{- /* Precarga de la imagen LCP.
+{{- /* Preload of the LCP image.
 
-       Debe coincidir EXACTAMENTE con el <source type="image/avif"> que emite
-       cover-picture.html: mismo srcset y mismo `sizes`. Si no coinciden, el
-       navegador descarga dos veces la imagen.
+       It must match EXACTLY the <source type="image/avif"> emitted by
+       cover-picture.html: same srcset and same `sizes`. If they differ, the
+       browser downloads the image twice.
 
-       Los separadores se emiten como `&#32;` (igual que el viewport de
-       head.html): el minificador de Hugo convierte los espacios de un atributo
-       sin comillas en `%20`, lo que rompería el srcset. Con la entidad, el
-       navegador ve espacios reales.
+       Separators are emitted as `&#32;` (like the viewport in head.html):
+       Hugo's minifier turns the spaces of an unquoted attribute into `%20`,
+       which would break the srcset. With the entity, the browser sees real
+       spaces.
 
        Context: dict "page" "src" "sizes". */ -}}
 {{- $page := .page -}}
