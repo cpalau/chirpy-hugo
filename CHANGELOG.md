@@ -12,6 +12,20 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.11.0] - 2026-11-11
+
+### Added
+
 - `params.performance.content_visibility`: the below-the-fold
   `content-visibility:auto` rule, now opt-in (see Changed).
 
