@@ -12,6 +12,20 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.10.0] - 2026-11-11
+
+### Added
+
 - `params.a11y.post_nav_titles`: name the previous/next post links
   "Previous: <title>" so their accessible name contains the visible title
   (WCAG 2.5.3, axe `label-content-name-mismatch`). Off by default.
