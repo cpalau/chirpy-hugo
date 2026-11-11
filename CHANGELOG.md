@@ -12,6 +12,20 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.8.0] - 2026-11-11
+
+### Added
+
 - `params.seo.term_description`: a template for the meta description of tag
   and category pages without their own `description`. `{term}` is the term.
 - `params.seo.term_title`: a template for the `<title>`, `og:title` and
