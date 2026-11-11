@@ -2,7 +2,8 @@
 {{- $kind := partial "page-kind.html" . -}}
 {{- if eq $kind "post" -}}
   {{- $enableToc := partial "toc/enabled.html" . -}}
-  {{- $labels := partial "taxonomy-labels.html" . -}}
+  {{- $categoryLabels := partial "taxonomy-labels.html" (dict "page" . "taxonomy" "categories") -}}
+  {{- $tagLabels := partial "taxonomy-labels.html" (dict "page" . "taxonomy" "tags") -}}
   {{- $lang := .Lang -}}
   {{- $params := .Site.Params -}}
 <article class="px-1" data-toc="{{ $enableToc }}">
@@ -126,7 +127,7 @@
       {{- with .Params.categories }}
       <div class="post-meta">
         <i class="far fa-folder-open fa-fw me-1"></i>
-        {{ range $i, $c := . }}{{ if $i }}, {{ end }}<a href="{{ printf "categories/%s/" (urlquery (partial "slugify.html" $c)) | relURL }}">{{ index $labels (lower $c) | default $c }}</a>{{ end }}
+        {{ range $i, $c := . }}{{ if $i }}, {{ end }}<a href="{{ printf "categories/%s/" (urlquery (partial "slugify.html" $c)) | relURL }}">{{ index $categoryLabels (lower $c) | default $c }}</a>{{ end }}
       </div>
       {{- end }}
 
@@ -136,7 +137,7 @@
     {{- with .Params.tags }}
     <div class="post-tags">
       <i class="fa fa-tags fa-fw me-1"></i>
-      {{ range . }}<a href="{{ printf "tags/%s/" (urlquery (partial "slugify.html" .)) | relURL }}" class="post-tag no-text-decoration">{{ index $labels (lower .) | default . }}</a> {{ end }}
+      {{ range . }}<a href="{{ printf "tags/%s/" (urlquery (partial "slugify.html" .)) | relURL }}" class="post-tag no-text-decoration">{{ index $tagLabels (lower .) | default . }}</a> {{ end }}
     </div>
     {{- end }}
 

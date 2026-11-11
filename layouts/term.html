@@ -1,7 +1,6 @@
 {{- /* Ports _layouts/category.html and _layouts/tag.html. */ -}}
 {{- define "main" }}
 {{- $isCategory := eq .Type "categories" }}
-{{- $labels := partial "taxonomy-labels.html" . }}
 <article class="px-1">
 <div id="page-{{ if $isCategory }}category{{ else }}tag{{ end }}">
   <h1 class="ps-lg-2">

@@ -10,7 +10,7 @@
 {{- end -}}
 {{- $sizes = sort $sizes "size" "desc" -}}
 {{- $tagStrings = partial "sort-natural.html" $tagStrings -}}
-{{- $labels := partial "taxonomy-labels.html" . -}}
+{{- $labels := partial "taxonomy-labels.html" (dict "page" . "taxonomy" "tags") -}}
 {{- $trending := slice -}}
 {{- range first $max $sizes -}}
   {{- $size := .size -}}

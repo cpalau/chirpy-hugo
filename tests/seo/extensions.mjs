@@ -229,6 +229,10 @@ expect('post nav has links', navLinks.length > 0, `${navLinks.length}`);
 expect('each accessible name ends with the visible title', navLinks.every(([, label, text]) => label.endsWith(`: ${text.trim()}`)),
   navLinks.map(([, l, t]) => `${l} | ${t}`).join(' ; '));
 
+/* a tag and a category with the same name keep their own labels */
+has('category page shows the category label', page('categories/mixed'), /<title>Posts about Mixed \| /);
+has('tag page shows the tag label', page('tags/mixed'), /<title>Posts about mixed \| /);
+
 /* Day.js locale file */
 has('es page loads the site es locale', page('es/posts/hello'), /<script defer src="\/assets\/js\/dayjs\/es\.js"><\/script>/);
 has('en page loads the site en locale', page('posts/hello'), /<script defer src="\/assets\/js\/dayjs\/en\.js"><\/script>/);

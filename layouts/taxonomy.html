@@ -1,7 +1,7 @@
 {{- /* Ports _layouts/categories.html and _layouts/tags.html.
        Upstream nests them in page.html, which adds the title and `.content`. */ -}}
 {{- define "main" }}
-{{- $labels := partial "taxonomy-labels.html" . }}
+{{- $labels := partial "taxonomy-labels.html" (dict "page" . "taxonomy" .Type) }}
 {{- if eq .Type "categories" }}
 <article class="px-1">
   <h1 class="dynamic-title">{{ partial "display-title.html" . }}</h1>

@@ -20,6 +20,11 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Fixed
 
+- A tag and a category with the same name (`seo` and `SEO`) shared one label
+  map, so the category page showed the tag's lowercase spelling. Jekyll keeps
+  `site.tags` and `site.categories` apart; `taxonomy-labels.html` now builds
+  one map per taxonomy (`dict "page" . "taxonomy" "tags|categories"`).
+
 ### Security
 
 ## [1.11.0] - 2026-11-11

@@ -4,7 +4,7 @@
 {{- $kind := partial "page-kind.html" . -}}
 {{- $title := .Title -}}
 {{- if in (slice "taxonomy" "term" "tag" "category") $kind -}}
-  {{- $title = index (partial "taxonomy-labels.html" .) (lower .Title) | default .Title -}}
+  {{- $title = index (partial "taxonomy-labels.html" (dict "page" . "taxonomy" .Type)) (lower .Title) | default .Title -}}
 {{- else if eq $kind "page" -}}
   {{- $key := index (split (strings.Trim (partial "content-path.html" .) "/") "/") 0 -}}
   {{- if in (slice "about" "archives" "categories" "tags") $key -}}
