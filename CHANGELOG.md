@@ -22,6 +22,26 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.12.0] - 2026-11-12
+
+### Added
+
+- `params.a11y.control_names` (B25, off by default): accessible names for the
+  icon-only table-of-contents button (the `panel.toc` label) and the heading
+  anchors (the heading text, so no new translation string). Upstream leaves
+  both nameless, which fails axe `button-name` and `link-name` (Lighthouse
+  accessibility 92 on a post).
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [1.11.1] - 2026-11-11
 
 ### Added
