@@ -92,6 +92,9 @@ google_site_verification = ""
   # Name the previous/next post links "Previous: <title>" so the accessible
   # name contains the visible title (WCAG 2.5.3). Upstream: only "Previous".
   post_nav_titles = false
+  # Give the icon-only TOC button and the heading anchors an accessible name
+  # (WCAG 2.4.4 / 4.1.2, axe `button-name` and `link-name`). Upstream: none.
+  control_names = false
 
 # Beyond-upstream performance. Off by default for pixel parity (G5).
 [performance]

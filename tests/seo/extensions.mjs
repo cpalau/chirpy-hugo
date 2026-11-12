@@ -229,6 +229,12 @@ expect('post nav has links', navLinks.length > 0, `${navLinks.length}`);
 expect('each accessible name ends with the visible title', navLinks.every(([, label, text]) => label.endsWith(`: ${text.trim()}`)),
   navLinks.map(([, l, t]) => `${l} | ${t}`).join(' ; '));
 
+/* icon-only controls get an accessible name (B25) */
+const sections = page('posts/headings');
+has('TOC button is named', sections, /<button type="button" class="toc-trigger btn me-1" aria-label="Contents">/);
+has('heading anchor names its section', sections, /<a href="#first-section" class="anchor text-muted" aria-label="First section">/);
+has('anchor name escapes the heading text', sections, /aria-label="Second &amp; last"/);
+
 /* a tag and a category with the same name keep their own labels */
 has('category page shows the category label', page('categories/mixed'), /<title>Posts about Mixed \| /);
 has('tag page shows the tag label', page('tags/mixed'), /<title>Posts about mixed \| /);

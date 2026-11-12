@@ -7,8 +7,16 @@
     {{- $extra = printf `%s %s="%s"` $extra $name $value -}}
   {{- end -}}
 {{- end -}}
+{{- /* Beyond upstream (opt-in, `params.a11y.control_names`): upstream's anchor
+       holds only an icon, so it has no accessible name (WCAG 2.4.4, axe
+       `link-name`). The opt-in names it with the heading text: no new
+       translation string (the catalogue is generated from upstream). */ -}}
+{{- $anchorName := "" -}}
+{{- if site.Params.a11y.control_names -}}
+  {{- $anchorName = .PlainText -}}
+{{- end -}}
 {{- if in (slice 2 3 4 5) .Level -}}
-<h{{ .Level }} id="{{ .Anchor }}"{{ $extra | safeHTMLAttr }}><span class="me-2">{{ .Text | safeHTML }}</span><a {{ printf `href="#%s"` .Anchor | safeHTMLAttr }} class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h{{ .Level }}>
+<h{{ .Level }} id="{{ .Anchor }}"{{ $extra | safeHTMLAttr }}><span class="me-2">{{ .Text | safeHTML }}</span><a {{ printf `href="#%s"` .Anchor | safeHTMLAttr }} class="anchor text-muted"{{ with $anchorName }} aria-label="{{ . }}"{{ end }}><i class="fas fa-hashtag"></i></a></h{{ .Level }}>
 {{- else -}}
 <h{{ .Level }} id="{{ .Anchor }}"{{ $extra | safeHTMLAttr }}>{{ .Text | safeHTML }}</h{{ .Level }}>
 {{- end -}}

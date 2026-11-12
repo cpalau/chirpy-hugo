@@ -101,7 +101,9 @@
   {{- if $enableToc }}
   <div id="toc-bar" class="d-flex align-items-center justify-content-between invisible">
     <span class="label text-truncate">{{ .Title }}</span>
-    <button type="button" class="toc-trigger btn me-1"><i class="fa-solid fa-list-ul fa-fw"></i></button>
+    {{- /* Beyond upstream (opt-in, `params.a11y.control_names`): the icon-only
+           button gets the TOC label as its accessible name (axe `button-name`). */}}
+    <button type="button" class="toc-trigger btn me-1"{{ if site.Params.a11y.control_names }} aria-label="{{ T "panel.toc" }}"{{ end }}><i class="fa-solid fa-list-ul fa-fw"></i></button>
   </div>
 
   <button id="toc-solo-trigger" type="button" class="toc-trigger btn btn-outline-secondary btn-sm">
