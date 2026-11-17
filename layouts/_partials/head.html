@@ -70,7 +70,14 @@
 
   {{- $titleText := partial "site-title.html" . -}}
   {{- if ne $kind "home" -}}
-    {{- $titleText = printf "%s | %s" (partial "seo/page-title.html" .) .Site.Title -}}
+    {{- $titleText = partial "seo/page-title.html" . -}}
+    {{- /* Beyond upstream (opt-in, `params.seo.title_suffix`): the gem always
+           appends " | <site title>". A descriptive post title can spend those
+           characters better, so a site may turn the suffix off. Default true
+           keeps the rendered HTML byte-identical to the Jekyll original. */ -}}
+    {{- if ne site.Params.seo.title_suffix false -}}
+      {{- $titleText = printf "%s | %s" $titleText .Site.Title -}}
+    {{- end -}}
   {{- end }}
   <title>{{ $titleText }}</title>
 

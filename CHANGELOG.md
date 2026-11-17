@@ -22,6 +22,25 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Security
 
+## [1.13.0] - 2026-11-17
+
+### Added
+
+- `params.seo.title_suffix` (default `true`): turn off the `" | <site title>"`
+  suffix that the gem appends to the `<title>` of every page but the home page.
+  A descriptive post title can then use the whole 50-60 character budget. The
+  default keeps the rendered HTML byte-identical to the Jekyll original.
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [1.12.0] - 2026-11-12
 
 ### Added

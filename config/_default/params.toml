@@ -84,6 +84,9 @@ google_site_verification = ""
   # <title>, og:title and JSON-LD headline of a term page, e.g.
   # "Posts about {term}". The H1 is unchanged. Empty keeps upstream.
   term_title = ""
+  # Append " | <site title>" to the <title> of every page but the home page.
+  # Turn it off to spend the 50-60 characters on the post title instead.
+  title_suffix = true
 
 # Beyond-upstream accessibility. Off by default for byte parity.
 [a11y]

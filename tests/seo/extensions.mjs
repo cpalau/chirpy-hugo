@@ -113,6 +113,14 @@ expect(
   !page('posts/hello').includes('noindex') && page('posts/hello').includes('max-image-preview:large'),
 );
 
+/* title suffix */
+{
+  const title = page('posts/hello').match(/<title>(.*?)<\/title>/)?.[1] ?? '';
+  expect('title omits the site suffix when disabled', title === 'Hello SEO', title);
+  const home = fs.readFileSync(path.join(OUT, 'index.html'), 'utf8');
+  expect('home page keeps the site title', home.includes('<title>My Site</title>'));
+}
+
 /* og:locale:alternate */
 has('es page lists the other locales', page('es/posts/hello'), '<meta property="og:locale:alternate" content="en"');
 has('es page lists the RTL locale', page('es/posts/hello'), '<meta property="og:locale:alternate" content="ar"');
@@ -207,12 +215,12 @@ expect('search entries end on a whole word', search.every((entry) => !/&[#a-zA-Z
 
 /* term title and description templates */
 const term = page('categories/guides');
-has('term <title> uses the template', term, /<title>Posts about guides \| /);
+has('term <title> uses the template', term, '<title>Posts about guides</title>');
 has('term og:title uses the template', term, '<meta property="og:title" content="Posts about guides"');
 // The fixture also caps descriptions at 60 characters, so only the start is fixed.
 has('term description uses the template', term, '<meta name="description" content="Everything published about guides, from the');
 expect('term H1 keeps the bare term', !/<h1[^>]*>\s*Posts about/.test(term));
-expect('post <title> is untouched', /<title>Hello SEO \| /.test(page('posts/hello')));
+expect('post <title> is untouched', page('posts/hello').includes('<title>Hello SEO</title>'));
 
 /* Goldmark task lists render like upstream (R3) */
 const tasks = page('posts/tasks');
@@ -236,8 +244,8 @@ has('heading anchor names its section', sections, /<a href="#first-section" clas
 has('anchor name escapes the heading text', sections, /aria-label="Second &amp; last"/);
 
 /* a tag and a category with the same name keep their own labels */
-has('category page shows the category label', page('categories/mixed'), /<title>Posts about Mixed \| /);
-has('tag page shows the tag label', page('tags/mixed'), /<title>Posts about mixed \| /);
+has('category page shows the category label', page('categories/mixed'), '<title>Posts about Mixed</title>');
+has('tag page shows the tag label', page('tags/mixed'), '<title>Posts about mixed</title>');
 
 /* Day.js locale file */
 has('es page loads the site es locale', page('es/posts/hello'), /<script defer src="\/assets\/js\/dayjs\/es\.js"><\/script>/);

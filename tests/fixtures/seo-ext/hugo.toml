@@ -166,6 +166,7 @@ defaultContentLanguageInSubdir = false
   noindex_404 = true
   term_description = "Everything published about {term}, from the basics to the details."
   term_title = "Posts about {term}"
+  title_suffix = false
 
 [params.a11y]
   allow_zoom = true

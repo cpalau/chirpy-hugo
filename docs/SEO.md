@@ -201,6 +201,7 @@ the parity gates stay green.
 | `params.seo.noindex_404` | `false` | the error page is not content; without it the 404 is indexable under `/404.html` | G4c |
 | `params.seo.term_description` | `""` | every tag and category page otherwise shares the site description (duplicate meta descriptions) | G4c |
 | `params.seo.term_title` | `""` | a bare term ("python") is a short, ambiguous title in search results | G4c |
+| `params.seo.title_suffix` | `true` | the gem appends `" | <site title>"` to every `<title>`; a descriptive post title may need those 16 characters | G4c |
 | `llms.txt` (output format) | off | a concise, machine-readable summary for AI agents (Lighthouse audits for it) | G4c |
 | `og:locale:alternate` | automatic | translations advertise each other's locale | G4c |
 
