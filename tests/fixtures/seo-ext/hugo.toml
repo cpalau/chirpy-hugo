@@ -168,6 +168,9 @@ defaultContentLanguageInSubdir = false
   term_title = "Posts about {term}"
   title_suffix = false
 
+[params.layout]
+  anchor_no_wrap = true
+
 [params.a11y]
   allow_zoom = true
   post_nav_titles = true

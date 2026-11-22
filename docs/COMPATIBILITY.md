@@ -408,6 +408,46 @@ coupling.
 
 ---
 
+## D-29 — Heading anchor out of the flow (opt-in)
+
+| | |
+|---|---|
+| Status | open (opt-in, off by default) |
+| Affects | `h2`–`h5` in posts and pages, hover devices only |
+| Upstream | `%anchor` hides `.anchor` with `visibility:hidden; opacity:0` under `@media (hover: hover)` and shows it on `:hover` |
+| This port | with `params.layout.anchor_no_wrap = true`, `h2>a.anchor` … `h5>a.anchor` get `position:absolute` under the same media query |
+| Blast radius | the anchor can overhang the heading box by up to its own width (~20 px) when the last line is full; nothing else moves |
+
+### Why it cannot be reproduced
+
+It is not a parity gap but an upstream layout bug. `visibility:hidden` keeps
+the box in the line, so when a heading's text fills its last line the
+invisible anchor wraps onto a line of its own and leaves an empty gap under the
+heading. Whether it happens depends on the viewport width: measured on a real
+post with six long H2s, one gap at 1280 px and at 1600 px, three at 1920 px.
+
+### Decision
+
+Opt-in, so the default output stays byte- and pixel-identical to upstream.
+With the switch on, the anchor is absolutely positioned without offsets: it
+keeps its static position at the end of the heading text but no longer takes
+part in line breaking. Touch devices (`hover: none`) are untouched because
+upstream keeps the anchor visible there.
+
+### Verification
+
+- `tests/seo/extensions.mjs` proves the rule is emitted when the switch is on.
+- G4/G5 run with the switch off and stay at zero differences.
+- Manual measurement (Playwright, the post above): with the rule, zero gaps at
+  1100/1280/1600/1920 px; the anchor overhangs by at most 21 px, and only on
+  hover.
+
+### Fallback
+
+Turn the switch off.
+
+---
+
 ## D-28 — Performance: the LCP budget
 
 Measured on a 1 vCPU VPS with the real blog (Lighthouse 12, mobile, 4G, CPU

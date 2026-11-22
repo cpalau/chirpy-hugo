@@ -12,6 +12,13 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+- `params.layout.anchor_no_wrap` (default `false`): on hover devices, take the
+  hidden heading anchor out of the flow. Upstream hides it with
+  `visibility:hidden`, which still takes up space, so a heading whose text
+  fills its last line left an empty line under it, depending on the viewport
+  width (D-29). The default keeps the rendered HTML byte-identical to the
+  Jekyll original.
+
 ### Changed
 
 ### Deprecated

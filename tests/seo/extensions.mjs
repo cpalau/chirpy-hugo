@@ -243,6 +243,13 @@ has('TOC button is named', sections, /<button type="button" class="toc-trigger b
 has('heading anchor names its section', sections, /<a href="#first-section" class="anchor text-muted" aria-label="First section">/);
 has('anchor name escapes the heading text', sections, /aria-label="Second &amp; last"/);
 
+/* heading anchors stay out of the flow (D-29) */
+has(
+  'hidden heading anchor is taken out of the flow on hover devices',
+  page('posts/hello'),
+  '@media (hover:hover){h2>a.anchor,h3>a.anchor,h4>a.anchor,h5>a.anchor{position:absolute}}',
+);
+
 /* a tag and a category with the same name keep their own labels */
 has('category page shows the category label', page('categories/mixed'), '<title>Posts about Mixed</title>');
 has('tag page shows the tag label', page('tags/mixed'), '<title>Posts about mixed</title>');

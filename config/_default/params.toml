@@ -106,6 +106,13 @@ google_site_verification = ""
   # match upstream pixel for pixel.
   content_visibility = false
 
+# Beyond-upstream layout. Off by default for pixel parity (G5).
+[layout]
+  # Keep the hidden heading anchor out of the flow on hover devices, so a
+  # heading that fills its last line does not leave an empty line under it
+  # (D-29). Upstream: the invisible anchor wraps and leaves the gap.
+  anchor_no_wrap = false
+
 # Beyond-upstream search.
 [search]
   # Cap each search.json entry at this many characters (0 = upstream: full
