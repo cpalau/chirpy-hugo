@@ -250,6 +250,31 @@ has(
   '@media (hover:hover){h2>a.anchor,h3>a.anchor,h4>a.anchor,h5>a.anchor{position:absolute}}',
 );
 
+/* post actions above the fold (D-30) and print support (D-31) */
+const post = page('posts/hello');
+has('top action row sits next to the dates', post, /<div class="post-meta-top [^"]*">\s*<div class="post-dates">/);
+has('top row has a print button', post, /<div class="post-actions" data-post-actions>\s*<button type="button" class="btn post-action" data-print data-bs-toggle="tooltip"[^>]*aria-label="Print this">/);
+has('top row copies the permalink', post, 'data-copy-link="http://127.0.0.1:4100/posts/hello/"');
+has('top row has the system share button', post, 'class="btn post-action" data-native-share data-title="Hello SEO"');
+has('top row keeps the network links', post, /<a class="post-action" data-share-net href="https:\/\/twitter\.com\/intent\/tweet\?/);
+has('bottom share bar is kept with "both"', post, '<div class="share-wrapper');
+// "Hello SEO - My Site": `&`, `#` and `+` would cut a mailto subject, so it is fully encoded.
+has('mailto share link encodes the subject', post, 'href="mailto:?subject=Hello%20SEO%20-%20My%20Site&amp;body=http%3A%2F%2F127.0.0.1%3A4100%2Fposts%2Fhello%2F"');
+expect('mailto share link opens no blank tab', !/href="mailto:[^"]*" target="_blank"/.test(post));
+has('web share links keep the upstream encoding', post, 'href="https://twitter.com/intent/tweet?text=Hello%20SEO%20-%20My%20Site&amp;url=http%3A%2F%2F127.0.0.1%3A4100%2Fposts%2Fhello%2F" target="_blank" rel="noopener"');
+has('bottom share bar has a print button', post, /<button type="button" class="btn text-start" data-print data-bs-toggle="tooltip"[^>]*aria-label="Print this">/);
+has('print header is hidden on screen', post, /<div class="print-header" hidden/);
+has('print header shows the post URL without scheme', post, '<div class="print-url">127.0.0.1:4100/posts/hello</div>');
+has('print header logo defaults to the avatar', post, '<img class="print-logo" src="/img/cover.png" alt="My Site"');
+has('QR code names its address', post, 'alt="QR 127.0.0.1:4100/posts/hello"');
+// html/template writes `+` as `&#43;` inside the attribute; the browser decodes it.
+has('QR code is inlined as a PNG data URI', post, /<img class="print-qr" src="data:image\/png;base64,(?:[A-Za-z0-9/=]|&#43;){200,}"/);
+has('cover mode is on the article', post, 'data-print-cover="full"');
+has('print stylesheet is print-only', post, /<link rel="stylesheet" href="\/chirpy-hugo\/print\.min\.[0-9a-f]+\.css" media="print" integrity="sha256-/);
+has('page footers carry the post URL', post, '@page{@bottom-left{content:"127.0.0.1:4100/posts/hello"');
+has('post tools script is deferred', post, /<script defer src="\/chirpy-hugo\/post-tools\.[0-9a-f]+\.js" integrity="sha256-/);
+expect('pages that are not posts get no print assets', !page('').includes('chirpy-hugo/print'));
+
 /* a tag and a category with the same name keep their own labels */
 has('category page shows the category label', page('categories/mixed'), '<title>Posts about Mixed</title>');
 has('tag page shows the tag label', page('tags/mixed'), '<title>Posts about mixed</title>');

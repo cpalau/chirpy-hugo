@@ -1,0 +1,42 @@
+{{- /*
+  Beyond upstream (opt-in, `params.post_actions.position` = "top" or "both",
+  D-30): a compact action row on the line of the post dates, visible without
+  scrolling. Upstream only has the share bar under the post.
+
+  - Print (with `params.print.enabled`).
+  - Copy link. Upstream's handler binds `#copy-link` by id, and that id
+    belongs to the bottom bar, so this button is wired by post-tools.js.
+  - Share: the network links of `data/share` on pointer devices; on touch
+    devices, one button that opens the system share sheet. Mastodon needs a
+    web component and stays in the bottom bar only.
+
+  Every control is in its final place at first paint, so the row never
+  shifts (CLS): which share control shows on a touch device is decided by CSS
+  (`pointer: coarse`), and the script only corrects the rare cases, a touch
+  browser without the Web Share API or an in-app browser that ignores
+  `window.print()`.
+*/ -}}
+{{- $share := T "post.share" -}}
+{{- $copy := T "post.button.share_link.title" -}}
+<div class="post-actions" data-post-actions>
+  {{- if site.Params.print.enabled }}
+  {{- $print := site.Params.print.labels.print | default "Print" }}
+  <button type="button" class="btn post-action" data-print data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $print }}" aria-label="{{ $print }}">
+    <i class="fa-solid fa-print fa-fw pe-none"></i>
+  </button>
+  {{- end }}
+  <button type="button" class="btn post-action" data-copy-link="{{ .Permalink }}" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $copy }}" aria-label="{{ $copy }}">
+    <i class="fa-solid fa-link fa-fw pe-none"></i>
+  </button>
+  <button type="button" class="btn post-action" data-native-share data-title="{{ .Title }}" data-url="{{ .Permalink }}" aria-label="{{ $share }}">
+    <i class="fa-solid fa-share-nodes fa-fw pe-none"></i>
+  </button>
+  {{- range hugo.Data.share.platforms }}
+    {{- if and .link (ne .type "Mastodon") }}
+      {{- $link := partial "share-link.html" (dict "page" $ "link" .link) }}
+  <a class="post-action" data-share-net href="{{ $link }}"{{ if not (strings.HasPrefix $link "mailto:") }} target="_blank" rel="noopener"{{ end }} data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ .type }}" aria-label="{{ .type }}">
+    <i class="fa-fw {{ .icon }}"></i>
+  </a>
+    {{- end }}
+  {{- end }}
+</div>

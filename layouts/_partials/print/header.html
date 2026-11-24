@@ -1,0 +1,37 @@
+{{- /*
+  Beyond upstream (opt-in, `params.print.enabled`, D-31): the brand block at
+  the top of a printed post. It is `hidden` on screen (no screen CSS needed,
+  no layout shift, ignored by assistive technology) and print.css shows it.
+
+  The QR code is generated at build time with `images.QR` and inlined as a
+  data URI: a lazy or not yet fetched image would print blank, and an inline
+  one is always there. Two pixels per module keep it around a kilobyte;
+  print.css scales it with `image-rendering: pixelated`, so it stays sharp.
+
+  The labels and the print date are read by post-tools.js.
+*/ -}}
+{{- $p := site.Params.print -}}
+{{- $labels := $p.labels | default dict -}}
+{{- $logo := $p.logo | default site.Params.avatar -}}
+{{- $url := .Permalink | strings.TrimPrefix "https://" | strings.TrimPrefix "http://" | strings.TrimSuffix "/" -}}
+<div class="print-header" hidden
+  data-print-label-links="{{ $labels.links | default "Links in this article" }}"
+  data-print-label-interactive="{{ $labels.interactive | default "Interactive content: open the online version to use it." }}"
+  data-print-label-video="{{ $labels.video | default "Video:" }}">
+  {{- with $logo }}
+  <img class="print-logo" src="{{ partial "media-url.html" (dict "src" .) }}" alt="{{ site.Title }}" width="56" height="56">
+  {{- end }}
+  <div class="print-brand">
+    <div class="print-site">{{ site.Title }}</div>
+    {{- with site.Params.tagline }}
+    <div class="print-tagline">{{ . }}</div>
+    {{- end }}
+    <div class="print-url">{{ $url }}</div>
+    <div class="print-date" data-print-date="{{ $labels.printed | default "Printed on" }}"></div>
+  </div>
+  {{- if ne $p.qr false }}
+    {{- with images.QR .Permalink (dict "level" "medium" "scale" 2) }}
+  <img class="print-qr" src="{{ printf "data:image/png;base64,%s" (.Content | base64Encode) | safeURL }}" alt="QR {{ $url }}" width="{{ .Width }}" height="{{ .Height }}">
+    {{- end }}
+  {{- end }}
+</div>

@@ -113,6 +113,34 @@ google_site_verification = ""
   # (D-29). Upstream: the invisible anchor wraps and leaves the gap.
   anchor_no_wrap = false
 
+# Beyond-upstream post actions (D-30). Off by default for parity (G4/G5).
+[post_actions]
+  # Where the post actions live: "bottom" (upstream: the share bar under the
+  # post), "top" (a compact row next to the post dates) or "both".
+  position = "bottom"
+
+# Beyond-upstream print support (D-31). Off by default for parity (G4/G5).
+[print]
+  # Print stylesheet, branded print header, numbered link list and a print
+  # button in every post action row.
+  enabled = false
+  # Image in the print header; empty uses `avatar`.
+  logo = ""
+  # QR code with the post URL in the print header.
+  qr = true
+  # The cover on paper: "compact" (the whole image, 58 mm high), "full" or
+  # "none".
+  cover = "compact"
+
+# Labels the print feature adds. The translation catalogue is generated from
+# upstream, so these are parameters, not i18n keys.
+[print.labels]
+  print = "Print"
+  printed = "Printed on"
+  links = "Links in this article"
+  interactive = "Interactive content: open the online version to use it."
+  video = "Video:"
+
 # Beyond-upstream search.
 [search]
   # Cap each search.json entry at this many characters (0 = upstream: full

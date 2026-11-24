@@ -381,6 +381,12 @@ rendered HTML stays byte-identical to the original until a site enables one.
 | `params.a11y.post_nav_titles` | `false` | name the previous/next post links "Previous: <title>" so the accessible name contains the visible title (WCAG 2.5.3) |
 | `params.a11y.control_names` | `false` | accessible names for the icon-only TOC button (the `panel.toc` label) and the heading anchors (the heading text); upstream leaves both nameless (axe `button-name`, `link-name`) |
 | `params.layout.anchor_no_wrap` | `false` | on hover devices, take the hidden heading anchor out of the flow so a heading that fills its last line does not leave an empty line under it (D-29) |
+| `params.post_actions.position` | `"bottom"` | where the post actions live: `"bottom"` (upstream share bar), `"top"` (a compact row on the line of the post dates: print, copy link and the share links, swapped for the system share sheet on touch devices with the Web Share API) or `"both"` (D-30) |
+| `params.print.enabled` | `false` | print support for posts: a `media="print"` stylesheet, a brand header (logo, site title, tagline, URL, print date, QR code), page footers with the URL and page numbers, a numbered list of the links in the article, notes for embedded players, and a print button in every action row (D-31) |
+| `params.print.logo` | `""` | image in the print header; empty uses `params.avatar` |
+| `params.print.qr` | `true` | QR code with the post URL in the print header, generated at build time with `images.QR` and inlined |
+| `params.print.cover` | `"compact"` | the cover on paper: `"compact"` (the whole image, 58 mm high), `"full"` or `"none"` |
+| `params.print.labels.*` | English | `print`, `printed`, `links`, `interactive`, `video`: the texts the print feature adds (parameters, because the translation catalogue is generated from upstream) |
 | `params.search.content_chars` | `0` | cap each `search.json` entry at this many characters, cut at a word boundary (0 keeps the full text, as upstream) |
 
 `dir="rtl"` and `hreflang` need no switch: they only render when the site

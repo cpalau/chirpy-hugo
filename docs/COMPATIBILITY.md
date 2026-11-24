@@ -408,6 +408,101 @@ coupling.
 
 ---
 
+## D-31 — Print support (opt-in)
+
+| | |
+|---|---|
+| Status | open (opt-in, off by default) |
+| Affects | posts, print media only; on screen, `hidden` nodes and a print button |
+| Upstream | no print styles: the sidebar, top bar, panels, share bar and, in dark mode, the dark background all go to paper |
+| This port | with `params.print.enabled = true`: `print/header.html` (hidden brand block), `data-print-cover` on `<article>`, a print button in `post-sharing.html` and in the top row (D-30), `chirpy-hugo/print.css` (`media="print"`), a per-page `<style media="print">` with the `@page` footers, and `chirpy-hugo/post-tools.js` |
+| Blast radius | on screen, nothing visible changes: every print-only node is `hidden`. The share bar gains one button |
+
+### Why it cannot be reproduced
+
+It is not a parity gap but a missing feature: upstream has no `@media print`
+rule at all.
+
+### Decision
+
+Opt-in. The design rules:
+
+- Same URL for screen and paper: no print output format, no duplicate pages.
+- Paper is white: `post-tools.js` sets `data-bs-theme="light"` on
+  `beforeprint` and restores the reader's choice on `afterprint`.
+- Nothing depends on "background graphics", which browsers turn off by
+  default; the few tints (code, prompts) opt in with `print-color-adjust`.
+- The QR code is a build-time `images.QR` PNG inlined as a data URI, so it
+  prints even if the page never fetched it.
+- Links are numbered in reading order (one number per distinct URL) and listed
+  at the end, resolved against the canonical URL. Links whose text already is
+  the address, heading anchors, footnote links and image links are skipped.
+- Embedded players (`iframe`, `video`, `audio`) are replaced by a note with
+  their address; `data-print-fallback="text"` does the same for any element
+  and `data-print-note="text"` keeps the element and adds the note.
+- The print button awaits `chirpy:print` listeners (`event.detail.waitUntil`)
+  and pending images, then calls `window.print()`. Ctrl+P cannot wait, so the
+  print-only nodes are built when the page is idle.
+- In-app browsers of social apps ignore `window.print()`: the button is
+  removed there.
+
+### Verification
+
+- `tests/seo/extensions.mjs` builds a fixture with the switch on and asserts
+  the header, the inlined QR, the stylesheet, the footer rule, the cover mode
+  and the print button.
+- G4/G5 run with the switch off and stay at zero differences.
+- Manual: Chromium PDF (A4, with and without background graphics, light and
+  dark screen) and Firefox print emulation of long posts with code, maths,
+  tables, diagrams, embedded videos and interactive figures.
+
+### Fallback
+
+Turn the switch off.
+
+---
+
+## D-30 — Post actions above the fold (opt-in)
+
+| | |
+|---|---|
+| Status | open (opt-in, off by default) |
+| Affects | post header |
+| Upstream | the share bar (`post-sharing.html`) sits at the end of the post |
+| This port | with `params.post_actions.position = "top"` or `"both"`, the dates are wrapped in `.post-meta-top > .post-dates` next to `post-actions.html`; `"top"` drops the bottom share bar |
+| Blast radius | the dates get two wrapper `div`s; `time[data-ts]` keeps its attributes, so the Day.js rewrite still finds them |
+
+### Why it cannot be reproduced
+
+It is a layout choice, not a parity gap: the actions a reader needs before
+reading (print, keep the link) are only reachable after scrolling a whole
+post.
+
+### Decision
+
+Opt-in. The copy button is wired by `post-tools.js` because upstream binds
+`#copy-link` by id and that id belongs to the bottom bar. Every control is
+in its final place at first paint, so the row never causes a layout shift: on
+touch devices (`pointer: coarse`) CSS swaps the network links for the system
+share button, and the script only corrects the rare cases (no Web Share API:
+the links come back; an in-app browser that ignores `window.print()`: the
+print button goes). Both rows build platform URLs with `share-link.html`: a
+`mailto:` platform gets a fully encoded subject and no `target="_blank"`;
+web platforms keep the upstream URLs byte for byte. Mastodon needs a web
+component and stays in the bottom bar. The icons use the upstream share bar
+colour variables, so both rows match in light and dark mode.
+
+### Verification
+
+- `tests/seo/extensions.mjs` asserts the row, its buttons and the share links.
+- G4/G5 run with the switch off and stay at zero differences.
+
+### Fallback
+
+Set the position back to `"bottom"`.
+
+---
+
 ## D-29 — Heading anchor out of the flow (opt-in)
 
 | | |

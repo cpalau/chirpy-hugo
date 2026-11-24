@@ -71,6 +71,8 @@
   {{- if site.Params.layout.anchor_no_wrap }}
   <style>@media (hover:hover){h2>a.anchor,h3>a.anchor,h4>a.anchor,h5>a.anchor{position:absolute}}</style>
   {{- end }}
+  {{- /* Beyond upstream (opt-in): post actions (D-30) and print (D-31). */}}
+  {{- partial "post-tools.html" . }}
   <!-- Setup Open Graph image -->
   {{ partial "seo.html" . }}
 

@@ -181,3 +181,12 @@ defaultContentLanguageInSubdir = false
 
 [params.assets]
   dayjs_locale = "/assets/js/dayjs/:LOCALE.js"
+
+[params.post_actions]
+  position = "both"
+
+[params.print]
+  enabled = true
+  cover = "full"
+  [params.print.labels]
+    print = "Print this"

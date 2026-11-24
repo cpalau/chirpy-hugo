@@ -1,0 +1,22 @@
+{{- /*
+  Beyond upstream: the URL of one `data/share` platform for a page, shared by
+  the bottom share bar and the top action row (D-30).
+  Context: dict "page" "link". Returns a string.
+
+  Upstream fills TITLE with Jekyll's `uri_escape`, which leaves `&`, `#` and
+  `+` as they are: harmless in the upstream platforms, but a `mailto:` subject
+  would be cut at the first `&` or `#`. A `mailto:` link therefore gets a fully
+  encoded title (spaces as %20, which mail clients expect); every other
+  platform keeps the byte-identical upstream URL.
+*/ -}}
+{{- $page := .page -}}
+{{- $text := printf "%s - %s" $page.Title $page.Site.Title -}}
+{{- $title := "" -}}
+{{- if strings.HasPrefix .link "mailto:" -}}
+  {{- $title = replace ($text | urlquery) "+" "%20" -}}
+{{- else -}}
+  {{- $title = partial "uri-escape.html" $text -}}
+{{- end -}}
+{{- $link := replace .link "TITLE" $title -}}
+{{- $link = replace $link "URL" ($page.Permalink | urlquery) -}}
+{{- return $link -}}

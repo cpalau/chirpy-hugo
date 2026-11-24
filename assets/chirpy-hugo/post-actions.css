@@ -1,0 +1,65 @@
+/*
+ * Beyond upstream (opt-in, `params.post_actions.position`, D-30): the action
+ * row next to the post dates. Colours come from the upstream share bar
+ * variables, so both rows look alike in light and dark mode.
+ */
+.post-meta-top {
+  row-gap: 0.25rem;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  margin-inline-start: auto;
+  margin-inline-end: -0.4rem;
+}
+
+.post-actions .post-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--btn-share-color);
+  font-size: 1.0625rem;
+  line-height: 1;
+  transition:
+    color 0.2s ease-in-out,
+    background-color 0.2s ease-in-out;
+}
+
+.post-actions .post-action[hidden] {
+  display: none;
+}
+
+.post-actions .post-action:hover,
+.post-actions .post-action:focus-visible {
+  background-color: var(--sidebar-hover-bg);
+  color: var(--btn-share-hover-color);
+}
+
+.post-actions .post-action.is-done {
+  color: var(--btn-share-hover-color);
+}
+
+/* Touch devices: one system share button instead of one icon per network.
+   Decided in CSS so the row is final at first paint; post-tools.js adds
+   `no-native-share` where the Web Share API is missing. */
+.post-actions .post-action[data-native-share] {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .post-actions:not(.no-native-share) .post-action[data-native-share] {
+    display: inline-flex;
+  }
+
+  .post-actions:not(.no-native-share) .post-action[data-share-net] {
+    display: none;
+  }
+}

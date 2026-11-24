@@ -386,6 +386,8 @@ site is byte-identical.
 | B24 | deferred layout below the fold | long posts on slow CPUs | `params.performance.content_visibility` | LCP gate |
 | B23 | post nav names include the title | "Previous" alone does not contain the visible title (WCAG 2.5.3) | `params.a11y.post_nav_titles` | G4c |
 | B25 | names for icon-only controls | the TOC button and heading anchors have no accessible name (axe `button-name`, `link-name`) | `params.a11y.control_names` | G4c |
+| B26 | post actions above the fold | the share bar is only at the end of the post | `params.post_actions.position` | G4c |
+| B27 | print support | the printed page carries the sidebar, the panels and, in dark mode, a black background | `params.print.enabled` | G4c |
 
 They are documented in [`SEO.md`](SEO.md#11-beyond-upstream) and
 [`CONFIG.md`](CONFIG.md#121-beyond-upstream-opt-in).

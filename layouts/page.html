@@ -6,7 +6,13 @@
   {{- $tagLabels := partial "taxonomy-labels.html" (dict "page" . "taxonomy" "tags") -}}
   {{- $lang := .Lang -}}
   {{- $params := .Site.Params -}}
-<article class="px-1" data-toc="{{ $enableToc }}">
+  {{- /* Beyond upstream (opt-in, `params.post_actions.position`, D-30). */ -}}
+  {{- $actionsAt := $params.post_actions.position | default "bottom" -}}
+  {{- $actionsTop := in (slice "top" "both") $actionsAt -}}
+<article class="px-1" data-toc="{{ $enableToc }}"{{ if $params.print.enabled }} data-print-cover="{{ $params.print.cover | default "compact" }}"{{ end }}>
+  {{- if $params.print.enabled }}
+  {{ partial "print/header.html" . }}
+  {{- end }}
   <header>
     <h1 data-toc-skip>{{ .Title }}</h1>
     {{- with .Description }}
@@ -14,6 +20,11 @@
     {{- end }}
 
     <div class="post-meta text-muted">
+      {{- /* With the top action row (D-30) the dates share a line with it. */ -}}
+      {{- if $actionsTop }}
+      <div class="post-meta-top d-flex flex-wrap align-items-center justify-content-between column-gap-3">
+      <div class="post-dates">
+      {{- end }}
       <!-- published date -->
       <span>
         {{ T "post.posted" }}
@@ -30,6 +41,11 @@
         {{ T "post.updated" }}
         {{ partial "datetime.html" (dict "date" $lastmod "tooltip" true "lang" $lang) }}
       </span>
+      {{- end }}
+      {{- if $actionsTop }}
+      </div>
+      {{ partial "post-actions.html" . }}
+      </div>
       {{- end }}
 
       {{- with .Params.image }}
@@ -151,7 +167,9 @@
           {{ replace $tpl ":LICENSE_NAME" $link | safeHTML }}
         {{- end }}
       </div>
+      {{- if ne $actionsAt "top" }}
       {{ partial "post-sharing.html" . }}
+      {{- end }}
     </div>
   </div>
 </article>

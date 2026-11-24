@@ -1,0 +1,677 @@
+/*
+ * Beyond upstream (opt-in, `params.print.enabled`, D-31): print stylesheet
+ * for posts. Loaded with media="print", so it never touches the screen.
+ *
+ * Principles:
+ * - Paper is white: post-tools.js switches to the light palette before
+ *   printing, and every colour here is set explicitly anyway.
+ * - Nothing relies on background graphics, which browsers drop by default;
+ *   the few tints that help reading opt in with print-color-adjust.
+ * - Only the article is printed: the brand header, title, metadata, body and
+ *   the numbered list of links.
+ */
+
+@page {
+  margin: 16mm 17mm 18mm;
+}
+
+:root {
+  --print-ink: #111;
+  --print-soft: #444;
+  --print-faint: #777;
+  --print-rule: #c8c8c8;
+  --print-tint: #f4f4f4;
+  color-scheme: light;
+}
+
+/* No transition may be caught half-way when the print layout is applied. */
+*,
+*::before,
+*::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+html,
+body {
+  background: #fff !important;
+  color: var(--print-ink) !important;
+}
+
+html {
+  font-size: 10.5pt;
+}
+
+body {
+  font-size: 1rem;
+  line-height: 1.55;
+  orphans: 3;
+  widows: 3;
+}
+
+/* ---- everything that is not the article -------------------------------- */
+
+#sidebar,
+#topbar-wrapper,
+#panel-wrapper,
+#tail-wrapper,
+#search-result-wrapper,
+#back-to-top,
+#mask,
+#toc-bar,
+#toc-solo-trigger,
+#toc-popup,
+#disqus_thread,
+#comments,
+.post-tail-wrapper,
+.post-actions,
+.post-meta #pageviews,
+.post-meta #pageviews + *,
+.code-header button,
+.toast,
+.tooltip,
+noscript {
+  display: none !important;
+}
+
+#main-wrapper,
+#main-wrapper > .container,
+#main-wrapper .row,
+main,
+article {
+  display: block !important;
+  width: auto !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ---- print-only nodes --------------------------------------------------- */
+
+.print-header[hidden] {
+  display: flex !important;
+}
+
+.print-ref[hidden],
+.print-links[hidden],
+.print-note[hidden] {
+  display: revert !important;
+}
+
+/* ---- brand header ------------------------------------------------------- */
+
+.print-header {
+  align-items: center;
+  gap: 4.5mm;
+  margin: 0 0 7mm;
+  padding: 0 0 4mm;
+  border-bottom: 0.6pt solid var(--print-ink);
+  font-family: Lato, 'Microsoft Yahei', sans-serif;
+  break-inside: avoid;
+}
+
+.print-logo {
+  width: 14mm;
+  height: 14mm;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: grayscale(1);
+  flex: none;
+}
+
+.print-brand {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.print-site {
+  font-size: 13pt;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.print-tagline {
+  font-size: 8.5pt;
+  color: var(--print-soft);
+}
+
+.print-url {
+  margin-top: 1.2mm;
+  font-size: 8.5pt;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.print-date {
+  font-size: 7.5pt;
+  color: var(--print-faint);
+}
+
+.print-date:empty {
+  display: none;
+}
+
+.print-qr {
+  width: 19mm;
+  height: 19mm;
+  flex: none;
+  image-rendering: pixelated;
+}
+
+/* ---- post header: title, description, one metadata line ---------------- */
+
+article > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0;
+  margin: 0 0 6mm;
+  padding: 0 0 4mm;
+  border-bottom: 0.4pt solid var(--print-rule);
+}
+
+article > header > h1 {
+  flex: 0 0 100%;
+  margin: 0 0 2.5mm !important;
+  font-size: 21pt !important;
+  line-height: 1.18 !important;
+  color: var(--print-ink) !important;
+}
+
+article > header > .post-desc {
+  flex: 0 0 100%;
+  margin: 0 0 3mm !important;
+  font-size: 11.5pt;
+  line-height: 1.4;
+  color: var(--print-soft);
+  font-weight: 400 !important;
+}
+
+article > header .post-meta,
+article > header .post-meta-top,
+article > header .post-dates,
+article > header .post-meta > .d-flex,
+article > header .post-meta > .d-flex > div {
+  display: contents !important;
+}
+
+article > header .post-meta span {
+  font-size: 8.5pt;
+  color: var(--print-soft);
+}
+
+article > header .post-meta em,
+article > header .post-meta time,
+article > header .post-meta a {
+  color: var(--print-ink) !important;
+  font-weight: 600;
+  border: 0 !important;
+  text-decoration: none !important;
+}
+
+/* The action row sits inside the flattened metadata: hide it explicitly. */
+article > header .post-meta > .d-flex > div.post-actions {
+  display: none !important;
+}
+
+/* A middle dot between the metadata items: dates, author, reading time. */
+article > header .post-meta > span::before,
+article > header .post-meta .post-dates > span::before,
+article > header .post-meta > .d-flex:not(.post-meta-top) > span::before,
+article > header .post-meta .readtime::before {
+  content: '·';
+  margin: 0 0.55em;
+  color: var(--print-faint);
+}
+
+article > header .post-meta > span:first-of-type::before,
+article > header .post-meta .post-dates > span:first-child::before {
+  content: none;
+}
+
+/* ---- cover -------------------------------------------------------------- */
+
+article > header .post-meta > div:has(> .preview-img, > a > picture, > img) {
+  flex: 0 0 100%;
+  order: -1;
+  margin: 0 0 5mm !important;
+  break-inside: avoid;
+}
+
+article > header .post-meta .preview-img,
+article > header .post-meta .preview-img img {
+  display: block;
+  background: none !important;
+  box-shadow: none !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: auto !important;
+  border-radius: 1.5mm !important;
+}
+
+article > header .post-meta figcaption {
+  display: none;
+}
+
+/* "compact" (default): the whole illustration at a modest height. Covers
+   are drawings on white, so the empty sides vanish into the paper; cropping
+   would cut the subject out. */
+article[data-print-cover='compact'] > header .post-meta .preview-img img {
+  height: 58mm !important;
+  object-fit: contain !important;
+}
+
+article[data-print-cover='full'] > header .post-meta .preview-img img {
+  max-height: 110mm;
+  object-fit: contain !important;
+}
+
+article[data-print-cover='none'] > header .post-meta > div:has(> .preview-img, > a > picture, > img) {
+  display: none !important;
+}
+
+/* ---- body text ---------------------------------------------------------- */
+
+.content {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--print-ink);
+}
+
+.content p,
+.content li {
+  color: var(--print-ink);
+}
+
+.content > p,
+.content > ul,
+.content > ol {
+  margin-bottom: 0.7em;
+}
+
+.content h2,
+.content h3,
+.content h4,
+.content h5 {
+  color: var(--print-ink) !important;
+  break-after: avoid;
+  break-inside: avoid;
+  page-break-after: avoid;
+}
+
+.content h2 {
+  margin: 1.5em 0 0.55em !important;
+  padding-bottom: 1mm;
+  border-bottom: 0.4pt solid var(--print-rule);
+  font-size: 14.5pt !important;
+}
+
+.content h3 {
+  margin: 1.25em 0 0.45em !important;
+  font-size: 12pt !important;
+}
+
+.content h4,
+.content h5 {
+  margin: 1.1em 0 0.4em !important;
+  font-size: 10.5pt !important;
+}
+
+/* The heading permalink icon is a screen affordance. */
+.content .anchor {
+  display: none !important;
+}
+
+/* Links: dark text and a hairline; the number points into the link list. */
+.content a,
+.content a:not(.img-link) {
+  color: var(--print-ink) !important;
+  text-decoration: none !important;
+  border-bottom: 0.4pt solid var(--print-faint) !important;
+}
+
+.content a.img-link,
+.content a.popup {
+  border: 0 !important;
+}
+
+.print-ref {
+  margin-left: 0.08em;
+  font-size: 6.5pt;
+  font-weight: 600;
+  color: var(--print-soft);
+  vertical-align: super;
+  line-height: 0;
+}
+
+.content blockquote:not([class^='prompt-']) {
+  margin: 0.8em 0;
+  padding: 0.1em 0 0.1em 4mm;
+  border-left: 1.4pt solid var(--print-rule) !important;
+  color: var(--print-soft);
+}
+
+.content hr {
+  border-color: var(--print-rule);
+}
+
+/* ---- prompts (tip, info, warning, danger) -------------------------------- */
+
+.content blockquote[class^='prompt-'] {
+  padding: 2.5mm 4mm !important;
+  border: 0.5pt solid var(--print-rule) !important;
+  border-left: 2pt solid var(--print-soft) !important;
+  border-radius: 1mm !important;
+  background: var(--print-tint) !important;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+  color: var(--print-ink) !important;
+  break-inside: avoid;
+}
+
+/* The icon font may not be loaded for print; the border marks the box. */
+.content blockquote[class^='prompt-']::before {
+  display: none !important;
+}
+
+.content blockquote[class^='prompt-'] > p:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* ---- images and figures ------------------------------------------------- */
+
+.content img,
+.content svg,
+.content picture,
+.content video {
+  max-width: 100% !important;
+  height: auto;
+  break-inside: avoid;
+}
+
+/* An image never spans two pages: a tall diagram is scaled to fit one, with
+   room left for its caption. */
+.content img {
+  width: auto !important;
+  max-height: 205mm !important;
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+.content a.popup {
+  display: block;
+  text-align: center;
+}
+
+.content a.popup,
+.content figure,
+.content .fig,
+.content p:has(> a.popup),
+.content p:has(> img) {
+  break-inside: avoid;
+}
+
+.content img,
+.content .shimmer,
+.content a.popup {
+  box-shadow: none !important;
+  background: none !important;
+}
+
+/* Theme-specific light/dark twins: print the light one. */
+.content img.dark,
+.content .dark {
+  display: none !important;
+}
+
+.content img.light,
+.content .light {
+  display: revert !important;
+}
+
+/* Captions stay with their image. */
+.content a.popup + em,
+.content figcaption,
+.content .embed-video + em {
+  display: block;
+  margin-top: 1.5mm;
+  font-size: 8.5pt !important;
+  color: var(--print-soft) !important;
+  text-align: center;
+  break-before: avoid;
+}
+
+/* ---- code --------------------------------------------------------------- */
+
+.content code,
+.content kbd {
+  color: var(--print-ink) !important;
+}
+
+.content :not(pre, .highlight) > code {
+  padding: 0 0.25em !important;
+  border: 0.4pt solid var(--print-rule) !important;
+  border-radius: 0.6mm !important;
+  background: none !important;
+  font-size: 0.88em !important;
+}
+
+.content div[class^='language-'],
+.content .highlighter-rouge,
+.content .highlight {
+  box-shadow: none !important;
+}
+
+.content div[class^='language-'] {
+  margin: 0.6em 0 1em !important;
+  border: 0.5pt solid var(--print-rule) !important;
+  border-radius: 1.2mm !important;
+  background: var(--print-tint) !important;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+  overflow: visible !important;
+}
+
+.content .code-header {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 1.2mm 3mm !important;
+  border-bottom: 0.4pt solid var(--print-rule) !important;
+  background: none !important;
+  font-size: 7.5pt !important;
+  color: var(--print-soft) !important;
+  break-after: avoid;
+}
+
+/* The macOS-style traffic lights. */
+.content .code-header::before {
+  display: none !important;
+}
+
+.content .code-header span {
+  margin-left: 0 !important;
+  line-height: 1.3 !important;
+  color: var(--print-soft) !important;
+}
+
+.content .highlight {
+  padding: 0 !important;
+  background: none !important;
+  overflow: visible !important;
+}
+
+.content .highlight > code {
+  display: block !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+}
+
+.content .highlight pre,
+.content pre {
+  margin: 0 !important;
+  padding: 2.2mm 3mm !important;
+  overflow: visible !important;
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  font-size: 8pt !important;
+  line-height: 1.45 !important;
+  color: var(--print-ink) !important;
+  background: none !important;
+}
+
+/* Wrapped lines would no longer match the gutter, so it goes. */
+.content .highlight table td.rouge-gutter,
+.content .highlight .lineno,
+.content .highlight .gutter {
+  display: none !important;
+}
+
+.content .highlight table,
+.content .highlight table tbody,
+.content .highlight table tr,
+.content .highlight table td,
+.content .highlight table td.rouge-code {
+  display: block !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+/* Short blocks stay on one page; long ones flow. */
+.content div[class^='language-']:has(pre code) {
+  break-inside: auto;
+}
+
+/* ---- tables ------------------------------------------------------------- */
+
+.content .table-wrapper {
+  overflow: visible !important;
+  margin-bottom: 1em !important;
+}
+
+.content .table-wrapper > table {
+  width: 100% !important;
+  min-width: 0 !important;
+  border-collapse: collapse !important;
+  font-size: 8.5pt !important;
+}
+
+.content .table-wrapper > table thead {
+  display: table-header-group;
+  border-bottom: 0.8pt solid var(--print-ink) !important;
+}
+
+.content .table-wrapper > table thead th,
+.content .table-wrapper > table tbody tr td {
+  padding: 1.2mm 2mm !important;
+  white-space: normal !important;
+  color: var(--print-ink) !important;
+  background: none !important;
+}
+
+.content .table-wrapper > table tbody tr {
+  background: none !important;
+  border-bottom: 0.4pt solid var(--print-rule) !important;
+  break-inside: avoid;
+}
+
+.content .table-wrapper > table tbody tr:last-child {
+  border-bottom: 0.8pt solid var(--print-ink) !important;
+}
+
+/* ---- maths -------------------------------------------------------------- */
+
+.content .katex-display {
+  overflow: visible !important;
+  break-inside: avoid;
+}
+
+/* ---- footnotes ---------------------------------------------------------- */
+
+.content .footnotes {
+  margin-top: 6mm;
+  padding-top: 2mm;
+  border-top: 0.4pt solid var(--print-rule);
+  font-size: 8.5pt;
+}
+
+.content .footnotes .reversefootnote {
+  display: none !important;
+}
+
+/* ---- what paper cannot play --------------------------------------------- */
+
+.content iframe,
+.content video,
+.content audio,
+.content .embed-video,
+.content [data-print-fallback] {
+  display: none !important;
+}
+
+.print-note {
+  margin: 0.8em 0;
+  padding: 2mm 3mm;
+  border: 0.5pt dashed var(--print-faint);
+  border-radius: 1mm;
+  font-size: 8.5pt;
+  color: var(--print-soft);
+  break-inside: avoid;
+}
+
+.print-note-url {
+  font-weight: 600;
+  color: var(--print-ink);
+  overflow-wrap: anywhere;
+}
+
+/* ---- link list ---------------------------------------------------------- */
+
+.print-links {
+  margin-top: 9mm;
+  padding-top: 3mm;
+  border-top: 0.6pt solid var(--print-ink);
+  font-size: 8pt;
+  line-height: 1.4;
+  color: var(--print-soft);
+}
+
+.print-links-title {
+  margin: 0 0 2.5mm;
+  font-family: Lato, 'Microsoft Yahei', sans-serif;
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: var(--print-ink);
+  break-after: avoid;
+}
+
+.print-links ol {
+  margin: 0;
+  padding-left: 6mm;
+}
+
+.print-links li {
+  margin-bottom: 1mm;
+  padding-left: 1mm;
+  break-inside: avoid;
+}
+
+.print-links li::marker {
+  font-weight: 600;
+  color: var(--print-ink);
+}
+
+.print-link-text {
+  color: var(--print-ink);
+}
+
+.print-link-url {
+  overflow-wrap: anywhere;
+}
+
+.print-link-text + .print-link-url::before {
+  content: '— ';
+}

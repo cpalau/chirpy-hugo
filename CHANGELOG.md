@@ -12,6 +12,29 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+- `params.post_actions.position` (default `"bottom"`): `"top"` or `"both"`
+  add a compact action row on the line of the post dates, visible without
+  scrolling: print, copy link and the share links. On touch devices the
+  share links give way to one button that opens the system share sheet. The
+  row is final at first paint, so it causes no layout shift (D-30).
+- `params.print.enabled` (default `false`): print support for posts. A
+  `media="print"` stylesheet prints only the article, always in the light
+  palette and without relying on background graphics; a brand header carries
+  the logo, site title, tagline, post URL, print date and a QR code generated
+  at build time; page footers show the URL and the page number; the links of
+  the article are numbered and listed at the end; code wraps instead of being
+  cut; images, figures, table rows and short code blocks are not split across
+  pages; embedded players are replaced by a note with their address. A print
+  button joins every action row. Scripts can get ready before the button
+  prints by listening to `chirpy:print` (D-31).
+
+- `data/share` platforms may use a `mailto:` link: the title is fully encoded
+  for the subject and the link opens the mail client instead of a blank tab.
+  Web platforms keep the upstream URLs byte for byte.
+
+Both switches default off, so the rendered HTML stays byte-identical to the
+Jekyll original.
+
 ### Changed
 
 ### Deprecated
