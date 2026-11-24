@@ -20,6 +20,10 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Fixed
 
+- The top post action row (D-30) no longer hides the share links on touch
+  devices, where only print, copy link and the system share button were left.
+  The system share button now follows the links instead of replacing them.
+
 ### Security
 
 ## [1.15.0] - 2026-11-24

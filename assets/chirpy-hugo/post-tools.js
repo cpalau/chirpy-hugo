@@ -72,8 +72,7 @@
 
   document.querySelectorAll('[data-native-share]').forEach((button) => {
     if (!canShare) {
-      // CSS shows this button on touch devices; without the API, the network
-      // links come back.
+      // CSS shows this button on touch devices; without the API it hides.
       button.closest('[data-post-actions]')?.classList.add('no-native-share');
       return;
     }

@@ -256,6 +256,7 @@ has('top action row sits next to the dates', post, /<div class="post-meta-top [^
 has('top row has a print button', post, /<div class="post-actions" data-post-actions>\s*<button type="button" class="btn post-action" data-print data-bs-toggle="tooltip"[^>]*aria-label="Print this">/);
 has('top row copies the permalink', post, 'data-copy-link="http://127.0.0.1:4100/posts/hello/"');
 has('top row has the system share button', post, 'class="btn post-action" data-native-share data-title="Hello SEO"');
+has('system share button closes the row, after the links', post, /data-share-net[^]*?<\/a>\s*<button type="button" class="btn post-action" data-native-share[^>]*>\s*<i[^>]*><\/i>\s*<\/button>\s*<\/div>/);
 has('top row keeps the network links', post, /<a class="post-action" data-share-net href="https:\/\/twitter\.com\/intent\/tweet\?/);
 has('bottom share bar is kept with "both"', post, '<div class="share-wrapper');
 // "Hello SEO - My Site": `&`, `#` and `+` would cut a mailto subject, so it is fully encoded.

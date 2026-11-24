@@ -47,8 +47,9 @@
   color: var(--btn-share-hover-color);
 }
 
-/* Touch devices: one system share button instead of one icon per network.
-   Decided in CSS so the row is final at first paint; post-tools.js adds
+/* Touch devices also get the system share button, after the network links:
+   it reaches the apps the reader has (WhatsApp, Signal, Mail...). Decided in
+   CSS so the row is final at first paint; post-tools.js adds
    `no-native-share` where the Web Share API is missing. */
 .post-actions .post-action[data-native-share] {
   display: none;
@@ -57,9 +58,5 @@
 @media (pointer: coarse) {
   .post-actions:not(.no-native-share) .post-action[data-native-share] {
     display: inline-flex;
-  }
-
-  .post-actions:not(.no-native-share) .post-action[data-share-net] {
-    display: none;
   }
 }

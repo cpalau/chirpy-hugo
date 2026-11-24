@@ -483,10 +483,11 @@ post.
 Opt-in. The copy button is wired by `post-tools.js` because upstream binds
 `#copy-link` by id and that id belongs to the bottom bar. Every control is
 in its final place at first paint, so the row never causes a layout shift: on
-touch devices (`pointer: coarse`) CSS swaps the network links for the system
-share button, and the script only corrects the rare cases (no Web Share API:
-the links come back; an in-app browser that ignores `window.print()`: the
-print button goes). Both rows build platform URLs with `share-link.html`: a
+touch devices (`pointer: coarse`) CSS adds the system share button after the
+network links, and the script only corrects the rare cases (no Web Share API:
+that button goes; an in-app browser that ignores `window.print()`: the print
+button goes). v1.15.0 hid the network links on touch devices; readers expect
+to see them, so since v1.15.1 they stay. Both rows build platform URLs with `share-link.html`: a
 `mailto:` platform gets a fully encoded subject and no `target="_blank"`;
 web platforms keep the upstream URLs byte for byte. Mastodon needs a web
 component and stays in the bottom bar. The icons use the upstream share bar
