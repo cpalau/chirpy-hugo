@@ -12,6 +12,20 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.15.0] - 2026-11-24
+
+### Added
+
 - `params.post_actions.position` (default `"bottom"`): `"top"` or `"both"`
   add a compact action row on the line of the post dates, visible without
   scrolling: print, copy link and the share links. On touch devices the
