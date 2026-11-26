@@ -148,6 +148,42 @@ has(
   '<link rel="alternate" type="application/atom+xml" href="http://127.0.0.1:4100/feed.xml"',
 );
 
+/* RSS feeds (params.feeds) */
+{
+  const read = (rel) => {
+    const file = path.join(OUT, rel);
+    if (!fs.existsSync(file)) {
+      fail(`missing feed ${rel}`);
+      return '';
+    }
+    return fs.readFileSync(file, 'utf8');
+  };
+  const term = read('tags/alpha/index.xml');
+  has('term feed: title from params.feeds.term_title', term, '<title>alpha · My Site</title>');
+  has('term feed: self link', term, '<atom:link href="http://127.0.0.1:4100/tags/alpha/index.xml" rel="self" type="application/rss+xml" />');
+  has('term feed: lists a post of the term', term, '<title>Hello SEO</title>');
+  has('term feed: keeps hidden posts of the term', term, '<title>Hidden post</title>');
+  expect('term feed: pages are not items', !term.includes('Unlisted page'));
+  expect('term feed: no English "on" title', !/ on My Site</.test(term));
+  const home = read('index.xml');
+  has('home feed: titled with the site title', home, '<title>My Site</title>');
+  has('home feed: lists posts', home, '<title>Hello SEO</title>');
+  expect('home feed: skips hidden posts', !home.includes('Hidden post'));
+  expect('home feed: skips pages', !home.includes('Unlisted page'));
+  has(
+    'term page advertises its feed',
+    page('tags/alpha'),
+    '<link rel="alternate" type="application/rss+xml" href="http://127.0.0.1:4100/tags/alpha/index.xml" title="alpha · My Site" />',
+  );
+  has('taxonomy page within taxonomy_max: one feed per term', page('categories'), 'href="http://127.0.0.1:4100/categories/guides/index.xml"');
+  has('taxonomy page over taxonomy_max: the home feed', page('tags'), 'href="http://127.0.0.1:4100/index.xml" title="My Site"');
+  expect('taxonomy page over taxonomy_max: no per-term feeds', !page('tags').includes('tags/beta/index.xml'));
+  const listed = page('secret');
+  has('front matter feeds: term feed', listed, 'href="http://127.0.0.1:4100/tags/alpha/index.xml" title="alpha · My Site"');
+  has('front matter feeds: home feed', listed, 'href="http://127.0.0.1:4100/index.xml" title="My Site"');
+  expect('a post without feeds advertises no RSS', !page('posts/hello').includes('application/rss+xml'));
+}
+
 /* description cap */
 const description = /<meta name="description" content="([^"]*)"/.exec(page('posts/hello'))?.[1] ?? '';
 expect('description is capped', description.length > 0 && description.length <= 61, `${description.length} chars`);

@@ -1,0 +1,4 @@
+{{- /* Beyond upstream: RSS 2.0 for the home page, used only when the site
+       lists "rss" in `outputs.home`. Replaces Hugo's embedded template, whose
+       title reads "<home title> on <site>" in English. See feeds/rss.html. */ -}}
+{{- partial "feeds/rss.html" . -}}

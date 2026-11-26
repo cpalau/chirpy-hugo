@@ -1,0 +1,3 @@
+{{- /* Beyond upstream: RSS 2.0 for a term, used only when the site lists
+       "rss" in `outputs.term` (the default is HTML only). See feeds/rss.html. */ -}}
+{{- partial "feeds/rss.html" . -}}

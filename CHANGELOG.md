@@ -12,6 +12,15 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+- RSS 2.0 per term and for the home page (`term.rss.xml`, `home.rss.xml`), rendered
+  only when the site lists `rss` in `outputs`. Items are posts only, so a landing
+  page that shares a tag is never a feed entry; the home feed skips hidden posts.
+  The title is `params.feeds.term_title` (default `{site}: {term}`) instead of
+  Hugo's English "<term> on <site>" (B28).
+- `params.feeds.discovery` (off by default): RSS autodiscovery links on term
+  pages, on taxonomy pages (one per term up to `params.feeds.taxonomy_max`, else
+  the home feed) and on pages that list `feeds` in front matter (B29).
+
 ### Changed
 
 ### Deprecated

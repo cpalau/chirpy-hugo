@@ -388,6 +388,8 @@ site is byte-identical.
 | B25 | names for icon-only controls | the TOC button and heading anchors have no accessible name (axe `button-name`, `link-name`) | `params.a11y.control_names` | G4c |
 | B26 | post actions above the fold | the share bar is only at the end of the post | `params.post_actions.position` | G4c |
 | B27 | print support | the printed page carries the sidebar, the panels and, in dark mode, a black background | `params.print.enabled` | G4c |
+| B28 | RSS per term and for the home page | readers want the feed of one tag or category; Hugo's embedded template titles it "<term> on <site>" in English and lists pages as items | `term.rss.xml`/`home.rss.xml`, rendered when `outputs` lists `rss`; `params.feeds.term_title` | G4c |
+| B29 | RSS autodiscovery | a reader that pastes a tag, category or landing page URL finds its feed | `params.feeds.discovery`, front matter `feeds` | G4c |
 
 They are documented in [`SEO.md`](SEO.md#11-beyond-upstream) and
 [`CONFIG.md`](CONFIG.md#121-beyond-upstream-opt-in).

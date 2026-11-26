@@ -1,0 +1,34 @@
+{{- /* Beyond upstream (opt-in `params.feeds.discovery`): RSS autodiscovery
+       links, so a reader that pastes a page URL finds its feed.
+       · a term page advertises its own RSS feed;
+       · a taxonomy page advertises one feed per term, up to
+         `params.feeds.taxonomy_max` terms (default 20); beyond that, the
+         home feed, so a long tag list still offers one;
+       · any page can list feeds in front matter, as page paths whose RSS
+         output is used: `feeds: ["/tags/linux-kernel", "/"]`.
+       Nothing is printed for a page without an RSS output, so the site
+       decides which kinds have feeds through `outputs`.
+       Context: the page. */ -}}
+{{- $links := slice -}}
+{{- if eq .Kind "term" -}}
+  {{- $links = $links | append . -}}
+{{- else if eq .Kind "taxonomy" -}}
+  {{- $max := site.Params.feeds.taxonomy_max | default 20 -}}
+  {{- if le (len .Pages) $max -}}
+    {{- $links = $links | append .Pages -}}
+  {{- else -}}
+    {{- $links = $links | append site.Home -}}
+  {{- end -}}
+{{- end -}}
+{{- range .Params.feeds -}}
+  {{- with site.GetPage . -}}
+    {{- $links = $links | append . -}}
+  {{- else -}}
+    {{- warnf "feeds: %q in %s is not a page" . $.File.Path -}}
+  {{- end -}}
+{{- end -}}
+{{- range $p := $links -}}
+  {{- with $p.OutputFormats.Get "rss" }}
+  <link rel="alternate" type="application/rss+xml" href="{{ .Permalink }}" title="{{ partial "feeds/title.html" $p }}" />
+  {{- end -}}
+{{- end -}}

@@ -388,6 +388,15 @@ rendered HTML stays byte-identical to the original until a site enables one.
 | `params.print.cover` | `"compact"` | the cover on paper: `"compact"` (the whole image, 58 mm high), `"full"` or `"none"` |
 | `params.print.labels.*` | English | `print`, `printed`, `links`, `interactive`, `video`: the texts the print feature adds (parameters, because the translation catalogue is generated from upstream) |
 | `params.search.content_chars` | `0` | cap each `search.json` entry at this many characters, cut at a word boundary (0 keeps the full text, as upstream) |
+| `params.feeds.discovery` | `false` | `<link rel="alternate" type="application/rss+xml">` on term pages, on taxonomy pages (one per term, up to `params.feeds.taxonomy_max`) and on pages that list `feeds` in front matter: page paths whose RSS output is advertised, e.g. `feeds: ["/tags/linux", "/"]` |
+| `params.feeds.term_title` | `"{site}: {term}"` | title of a term RSS feed; `{term}` is the displayed term and `{site}` the site title |
+| `params.feeds.taxonomy_max` | `20` | a taxonomy page with more terms than this advertises the home RSS feed instead of one per term |
+
+The RSS templates (`term.rss.xml`, `home.rss.xml`) need no switch either: Hugo
+only renders them for the kinds the site lists `rss` for in `outputs`, which
+upstream does not. They list posts only (`Type` "posts"); the home feed also
+skips `hidden: true` posts, a term feed keeps them. `services.rss.limit` caps
+the items.
 
 `dir="rtl"` and `hreflang` need no switch: they only render when the site
 declares a language direction or has translations, so a monolingual LTR site is

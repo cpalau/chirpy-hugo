@@ -109,6 +109,9 @@
   {{- if .Site.Params.seo.feed_discovery }}
   <link rel="alternate" type="application/atom+xml" href="{{ "feed.xml" | absURL }}" title="{{ .Site.Title }}" />
   {{- end }}
+  {{- if .Site.Params.feeds.discovery }}
+    {{- partial "feeds/discovery.html" . }}
+  {{- end }}
 
   {{ partialCached "favicons.html" . }}
 

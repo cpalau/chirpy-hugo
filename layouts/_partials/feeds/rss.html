@@ -1,0 +1,47 @@
+{{- /* Beyond upstream (opt-in feeds): an RSS 2.0 channel for the home page or
+       a term. Only posts (Type "posts") are items, so pages that share a tag,
+       such as a series landing page, never show up as new entries. The home
+       feed also skips `hidden: true` posts, like the home page does; a term
+       feed keeps them, because a category of hidden posts (a newsletter) is
+       exactly what its readers subscribe to. `services.rss.limit` caps the
+       items, as in Hugo's embedded template.
+       Context: the page. */ -}}
+{{- $posts := where .Pages "Type" "posts" -}}
+{{- if .IsHome -}}
+  {{- $posts = where (where site.RegularPages "Type" "posts") "Params.hidden" "!=" true -}}
+{{- end -}}
+{{- $limit := site.Config.Services.RSS.Limit -}}
+{{- if ge $limit 1 -}}{{- $posts = first $limit $posts -}}{{- end -}}
+{{- $title := partial "feeds/title.html" . -}}
+{{- $desc := site.Params.description | default "" -}}
+{{- if eq .Kind "term" -}}
+  {{- with site.Params.seo.term_description -}}
+    {{- $desc = replace . "{term}" (partial "display-title.html" $) -}}
+  {{- end -}}
+{{- end -}}
+{{- $rfc := "Mon, 02 Jan 2006 15:04:05 -0700" -}}
+{{- printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ $title }}</title>
+    <link>{{ .Permalink }}</link>
+    <description>{{ $desc }}</description>
+    <generator>Hugo</generator>
+    <language>{{ or site.Language.Locale site.Language.Lang }}</language>
+    {{- with $posts }}
+    <lastBuildDate>{{ (index . 0).Date.Format $rfc | safeHTML }}</lastBuildDate>
+    {{- end }}
+    {{- with .OutputFormats.Get "rss" }}
+    {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType.Type | safeHTML }}
+    {{- end }}
+    {{- range $posts }}
+    <item>
+      <title>{{ .Title }}</title>
+      <link>{{ .Permalink }}</link>
+      <pubDate>{{ .Date.Format $rfc | safeHTML }}</pubDate>
+      <guid>{{ .Permalink }}</guid>
+      <description>{{ .Description | default (.Summary | plainify) }}</description>
+    </item>
+    {{- end }}
+  </channel>
+</rss>

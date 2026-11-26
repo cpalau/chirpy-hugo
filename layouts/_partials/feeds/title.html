@@ -1,0 +1,11 @@
+{{- /* Beyond upstream (opt-in feeds): the title of the RSS feed of a page.
+       Home: the site title. Term: `params.feeds.term_title` with `{term}` and
+       `{site}` replaced; the default "{site}: {term}" avoids Hugo's embedded
+       "<term> on <site>", which is English in every language.
+       Returns a string. */ -}}
+{{- $title := site.Title -}}
+{{- if eq .Kind "term" -}}
+  {{- $tpl := site.Params.feeds.term_title | default "{site}: {term}" -}}
+  {{- $title = replace (replace $tpl "{term}" (partial "display-title.html" .)) "{site}" site.Title -}}
+{{- end -}}
+{{- return $title -}}

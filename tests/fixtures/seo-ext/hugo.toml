@@ -67,10 +67,10 @@ theme = "chirpy-hugo"
   notAlternative = true
 
 [outputs]
-  home = ["HTML", "feed", "search", "swconf", "manifest", "llms"]
+  home = ["HTML", "feed", "search", "swconf", "manifest", "llms", "rss"]
   section = ["HTML"]
   taxonomy = ["HTML"]
-  term = ["HTML"]
+  term = ["HTML", "rss"]
   page = ["HTML"]
 
 [markup.goldmark.renderer]
@@ -167,6 +167,11 @@ defaultContentLanguageInSubdir = false
   term_description = "Everything published about {term}, from the basics to the details."
   term_title = "Posts about {term}"
   title_suffix = false
+
+[params.feeds]
+  discovery = true
+  term_title = "{term} · {site}"
+  taxonomy_max = 2
 
 [params.layout]
   anchor_no_wrap = true

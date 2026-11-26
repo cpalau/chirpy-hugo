@@ -88,6 +88,18 @@ google_site_verification = ""
   # Turn it off to spend the 50-60 characters on the post title instead.
   title_suffix = true
 
+# Beyond-upstream RSS feeds. The RSS templates only render for the kinds the
+# site lists in `outputs` (e.g. `term = ["HTML", "rss"]`); upstream has none.
+[feeds]
+  # <link rel="alternate" type="application/rss+xml"> on term pages, on
+  # taxonomy pages (one per term, up to `taxonomy_max`) and on pages that list
+  # feeds in front matter (`feeds: ["/tags/linux", "/"]`).
+  discovery = false
+  # Title of a term feed; `{term}` is the displayed term, `{site}` the title.
+  term_title = "{site}: {term}"
+  # A taxonomy page with more terms than this advertises the home feed instead.
+  taxonomy_max = 20
+
 # Beyond-upstream accessibility. Off by default for byte parity.
 [a11y]
   # Remove `user-scalable=no` from the viewport so pinch-zoom works (D-24).
