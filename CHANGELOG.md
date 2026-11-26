@@ -12,6 +12,20 @@ follow the template in [`docs/RELEASING.md`](docs/RELEASING.md) §4.2.
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.16.0] - 2026-11-26
+
+### Added
+
 - RSS 2.0 per term and for the home page (`term.rss.xml`, `home.rss.xml`), rendered
   only when the site lists `rss` in `outputs`. Items are posts only, so a landing
   page that shares a tag is never a feed entry; the home feed skips hidden posts.
